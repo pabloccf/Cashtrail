@@ -34,6 +34,11 @@ Aplicación web full-stack para registrar ingresos y gastos, organizarlos por ca
 **Base de datos**
 - PostgreSQL, levantado en local con Docker (`docker-compose.yml` en la raíz)
 
+### Versiones fijadas
+
+- **TypeScript 6 (`~6.0.3`)** en frontend y backend. No subir a TypeScript 7: no es compatible con typescript-eslint. El `~` solo permite parches (6.0.x).
+- **Prisma 7**: es la versión con más documentación disponible. Usa `prisma.config.ts` para la configuración (la URL de la base de datos va ahí, no en `schema.prisma`), el generador `prisma-client` con el cliente generado en `src/generated/prisma` (ignorado en git) y el adaptador `@prisma/adapter-pg` para conectar.
+
 ## Estructura del proyecto
 
 ```
