@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    // Estructura de archivos
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Entorno: Node.js con módulos ESM
+    "module": "nodenext",
+    "target": "es2022",
+    "lib": ["es2022"],
+    "types": ["node"],
+
+    // Salidas
+    "sourceMap": true,
+
+    // Comprobaciones estrictas
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Recomendadas
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}
