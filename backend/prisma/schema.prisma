@@ -6,3 +6,51 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  name         String
+  currency     String   @default("EUR") @db.Char(3)
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  categories   Category[]
+  transactions Transaction[]
+}
+
+model Category {
+  id     String          @id @default(uuid()) @db.Uuid
+  userId String          @db.Uuid
+  name   String
+  color  String // Hex color, e.g. "#22c55e"
+  icon   String // Icon name used by the frontend
+  type   TransactionType
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, type, name])
+}
+
+model Transaction {
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String          @db.Uuid
+  categoryId  String          @db.Uuid
+  amount      Int // In cents, always positive. The sign comes from `type`
+  description String?
+  date        DateTime        @db.Date
+  type        TransactionType
+  createdAt   DateTime        @default(now()) @db.Timestamptz
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([userId, date])
+  @@index([categoryId])
+}
