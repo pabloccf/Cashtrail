@@ -36,8 +36,12 @@ Aplicación web full-stack para registrar ingresos y gastos, organizarlos por ca
 
 ### Versiones fijadas
 
-- **TypeScript 6 (`~6.0.3`)** en frontend y backend. No subir a TypeScript 7: no es compatible con typescript-eslint. El `~` solo permite parches (6.0.x).
-- **Prisma 7**: es la versión con más documentación disponible. Usa `prisma.config.ts` para la configuración (la URL de la base de datos va ahí, no en `schema.prisma`), el generador `prisma-client` con el cliente generado en `src/generated/prisma` (ignorado en git) y el adaptador `@prisma/adapter-pg` para conectar.
+- **TypeScript 6 (`~6.0.3`)** en frontend y backend. No subir a TypeScript 7: aún no es compatible con typescript-eslint. El `~` solo permite parches (6.0.x).
+- **Prisma 7** (`prisma`, `@prisma/client` y `@prisma/adapter-pg`). No actualizar a versiones posteriores: cambian la API de `prisma.config.ts` y casi toda la documentación disponible es de la 7.
+  - La configuración va en `prisma.config.ts` (la URL de la base de datos va ahí, no en `schema.prisma`).
+  - El generador `prisma-client` crea el cliente en `src/generated/prisma` (ignorado en git).
+  - Requiere el adaptador de PostgreSQL (`@prisma/adapter-pg`) al crear el cliente y `"type": "module"` en el `package.json`.
+- Backend con `"module": "nodenext"`: los imports relativos llevan extensión `.js` aunque el archivo sea `.ts`.
 
 ## Estructura del proyecto
 
@@ -63,12 +67,37 @@ Aplicación web full-stack para registrar ingresos y gastos, organizarlos por ca
     └── src/
         ├── routes/        # Definición de rutas de Express
         ├── controllers/   # Reciben la petición y devuelven la respuesta
-        ├── services/      # Lógica de negocio y acceso a la base de datos
+        ├── services/      # Lógica de negocio
+        ├── repositories/  # Acceso a la base de datos con Prisma
+        ├── lib/           # Cliente de Prisma y utilidades compartidas
         ├── middlewares/   # Auth, validación, manejo de errores
         ├── schemas/       # Esquemas de Zod
         ├── jobs/          # Tareas programadas (generación de registros fijos)
         └── index.ts
 ```
+
+## Arquitectura del backend
+
+Monolito con **arquitectura en capas**. No usar microservicios, ni arquitectura hexagonal completa, ni DDD: para el tamaño de este proyecto añadirían complejidad sin beneficio.
+
+Cada petición recorre las capas siempre en este orden, y cada capa solo llama a la siguiente:
+
+```
+Ruta → Middlewares → Controlador → Servicio → Repositorio → Prisma → PostgreSQL
+```
+
+- **Rutas** (`routes/`): asocian cada URL y método HTTP a un controlador y le aplican los middlewares (autenticación, validación). Sin lógica.
+- **Middlewares** (`middlewares/`): autenticación, validación con Zod y manejo centralizado de errores.
+- **Controladores** (`controllers/`): leen los datos de la petición (`params`, `query`, `body`, usuario autenticado), llaman al servicio y devuelven la respuesta con el código HTTP adecuado. No contienen lógica de negocio ni acceden a Prisma.
+- **Servicios** (`services/`): la lógica de negocio y las reglas de la app (comprobar que una categoría pertenece al usuario, calcular totales, generar los registros de gastos fijos...). No saben nada de Express (no reciben `req` ni `res`) ni importan Prisma directamente.
+- **Repositorios** (`repositories/`): la única capa que usa el cliente de Prisma. Funciones pequeñas y con nombres claros (`findByUser`, `create`, `update`, `delete`...). Sin lógica de negocio. Siempre reciben el `userId` para filtrar.
+
+Reglas:
+
+- Un archivo por recurso en cada capa: `transaction.routes.ts`, `transaction.controller.ts`, `transaction.service.ts`, `transaction.repository.ts`.
+- Los errores de negocio se lanzan desde los servicios con una clase propia (por ejemplo `AppError` con mensaje y código HTTP) y los recoge el middleware de errores. Los controladores no usan `try/catch` para formatear errores.
+- El cliente de Prisma se crea una sola vez en `src/lib/prisma.ts` y solo lo importan los repositorios.
+- Si una funcionalidad tiene poca lógica, el servicio puede limitarse a llamar al repositorio. Aun así se mantiene la capa, por coherencia.
 
 ## Comandos
 
@@ -148,7 +177,7 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 - Componentes de React como funciones, en PascalCase, un componente por archivo.
 - Nombres de archivos: componentes en PascalCase (`TransactionCard.tsx`), el resto en camelCase.
 - Validar **siempre** con Zod los datos que llegan al backend.
-- Los controladores no acceden a Prisma directamente: lo hacen a través de los servicios.
+- Respetar el orden de capas descrito en "Arquitectura del backend": solo los repositorios acceden a Prisma.
 - Commits en inglés siguiendo Conventional Commits (`feat:`, `fix:`, `refactor:`...).
 
 ## Seguridad
