@@ -1,0 +1,124 @@
+# Example requests for the VS Code "REST Client" extension.
+# Start the backend first (`npm run dev`) and click "Send Request" above each request.
+# Requests are separated by "###".
+
+@baseUrl = http://localhost:3000/api
+
+# Category ids of the seed user. There is no categories endpoint yet (Phase 3):
+# if you reset the database, copy the new ids from `npx prisma studio`
+@expenseCategoryId = a8c9cd14-a668-4efc-818d-d04d52564b04
+@incomeCategoryId = 244e0997-c41b-429a-99bb-c086e93d4328
+
+### Health check
+GET {{baseUrl}}/health
+
+### List transactions (default: page 1, 20 per page, newest first)
+GET {{baseUrl}}/transactions
+
+### List with filters and pagination
+GET {{baseUrl}}/transactions?type=EXPENSE&from=2026-11-01&to=2026-11-30&category={{expenseCategoryId}}&page=1&pageSize=10
+
+### Create an expense (amount in cents: 12,50 € -> 1250)
+# @name created
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "amount": 1250,
+  "type": "EXPENSE",
+  "categoryId": "{{expenseCategoryId}}",
+  "date": "2026-11-03",
+  "description": "Weekly groceries"
+}
+
+### Create an income
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "amount": 250000,
+  "type": "INCOME",
+  "categoryId": "{{incomeCategoryId}}",
+  "date": "2026-10-31",
+  "description": "October salary"
+}
+
+### Get the transaction created by the "created" request (send that one first)
+GET {{baseUrl}}/transactions/{{created.response.body.id}}
+
+### Update it (PUT replaces every field: omitted description becomes null)
+PUT {{baseUrl}}/transactions/{{created.response.body.id}}
+Content-Type: application/json
+
+{
+  "amount": 1399,
+  "type": "EXPENSE",
+  "categoryId": "{{expenseCategoryId}}",
+  "date": "2026-11-04",
+  "description": "Weekly groceries + bread"
+}
+
+### Delete it (204 No Content)
+DELETE {{baseUrl}}/transactions/{{created.response.body.id}}
+
+
+### ---------- Error cases ----------
+
+### 400: amount with decimals (must be integer cents)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "amount": 12.5,
+  "type": "EXPENSE",
+  "categoryId": "{{expenseCategoryId}}",
+  "date": "2026-11-03"
+}
+
+### 400: negative amount (the sign comes from `type`)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "amount": -500,
+  "type": "EXPENSE",
+  "categoryId": "{{expenseCategoryId}}",
+  "date": "2026-11-03"
+}
+
+### 400: category type (INCOME) does not match transaction type (EXPENSE)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "amount": 1000,
+  "type": "EXPENSE",
+  "categoryId": "{{incomeCategoryId}}",
+  "date": "2026-11-03"
+}
+
+### 400: category that does not exist (or belongs to another user)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "amount": 1000,
+  "type": "EXPENSE",
+  "categoryId": "00000000-0000-4000-8000-000000000000",
+  "date": "2026-11-03"
+}
+
+### 400: id is not a valid UUID
+GET {{baseUrl}}/transactions/not-a-uuid
+
+### 404: valid UUID that does not exist
+GET {{baseUrl}}/transactions/00000000-0000-4000-8000-000000000000
+
+### 400: `from` is after `to`
+GET {{baseUrl}}/transactions?from=2026-12-01&to=2026-11-01
+
+### 400: malformed JSON
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{ "amount": 1250,
