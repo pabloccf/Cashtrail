@@ -7,3 +7,11 @@ export interface Category {
   icon: string
   type: TransactionType
 }
+
+// Body of POST /categories and PUT /categories/:id
+export interface CategoryInput {
+  name: string
+  color: string // "#22c55e"
+  icon: string // Lucide icon name, e.g. "shopping-cart"
+  type: TransactionType
+}

@@ -1,0 +1,123 @@
+import {
+  Baby,
+  Banknote,
+  Beer,
+  Book,
+  Briefcase,
+  Bus,
+  Car,
+  Circle,
+  CircleEllipsis,
+  Coffee,
+  Coins,
+  Droplet,
+  Dumbbell,
+  Film,
+  Flame,
+  Fuel,
+  Gamepad2,
+  Gem,
+  Gift,
+  GraduationCap,
+  HandCoins,
+  Heart,
+  HeartPulse,
+  House,
+  Landmark,
+  Laptop,
+  Music,
+  Package,
+  Palette,
+  PawPrint,
+  PiggyBank,
+  Pill,
+  Plane,
+  Receipt,
+  Repeat,
+  Scissors,
+  Shirt,
+  ShoppingCart,
+  Smartphone,
+  Sparkles,
+  Tag,
+  TrainFront,
+  TrendingUp,
+  Tv,
+  Users,
+  Utensils,
+  Wallet,
+  Wifi,
+  Wrench,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react'
+
+export interface CategoryIconOption {
+  name: string // What is stored in the database (Lucide name in kebab-case)
+  label: string // Spanish text for screen readers and tooltips
+  Icon: LucideIcon
+}
+
+// Icons offered in the category form. Each one is imported by name, so the build only
+// includes these ~50 icons and not the whole library (that is called tree shaking).
+// It includes every icon used by the default categories (backend/src/constants/defaultCategories.ts)
+export const CATEGORY_ICON_OPTIONS: readonly CategoryIconOption[] = [
+  { name: 'home', label: 'Casa', Icon: House },
+  { name: 'shopping-cart', label: 'Carrito', Icon: ShoppingCart },
+  { name: 'utensils', label: 'Cubiertos', Icon: Utensils },
+  { name: 'coffee', label: 'Café', Icon: Coffee },
+  { name: 'beer', label: 'Cerveza', Icon: Beer },
+  { name: 'bus', label: 'Autobús', Icon: Bus },
+  { name: 'train-front', label: 'Tren', Icon: TrainFront },
+  { name: 'car', label: 'Coche', Icon: Car },
+  { name: 'fuel', label: 'Gasolina', Icon: Fuel },
+  { name: 'plane', label: 'Avión', Icon: Plane },
+  { name: 'repeat', label: 'Suscripción', Icon: Repeat },
+  { name: 'smartphone', label: 'Móvil', Icon: Smartphone },
+  { name: 'wifi', label: 'Internet', Icon: Wifi },
+  { name: 'tv', label: 'Televisión', Icon: Tv },
+  { name: 'laptop', label: 'Ordenador', Icon: Laptop },
+  { name: 'zap', label: 'Electricidad', Icon: Zap },
+  { name: 'droplet', label: 'Agua', Icon: Droplet },
+  { name: 'flame', label: 'Gas', Icon: Flame },
+  { name: 'wrench', label: 'Reparaciones', Icon: Wrench },
+  { name: 'gamepad-2', label: 'Videojuegos', Icon: Gamepad2 },
+  { name: 'music', label: 'Música', Icon: Music },
+  { name: 'film', label: 'Cine', Icon: Film },
+  { name: 'palette', label: 'Arte', Icon: Palette },
+  { name: 'dumbbell', label: 'Deporte', Icon: Dumbbell },
+  { name: 'heart-pulse', label: 'Salud', Icon: HeartPulse },
+  { name: 'pill', label: 'Farmacia', Icon: Pill },
+  { name: 'scissors', label: 'Peluquería', Icon: Scissors },
+  { name: 'shirt', label: 'Ropa', Icon: Shirt },
+  { name: 'gem', label: 'Joyas', Icon: Gem },
+  { name: 'gift', label: 'Regalo', Icon: Gift },
+  { name: 'baby', label: 'Bebé', Icon: Baby },
+  { name: 'paw-print', label: 'Mascotas', Icon: PawPrint },
+  { name: 'graduation-cap', label: 'Educación', Icon: GraduationCap },
+  { name: 'book', label: 'Libros', Icon: Book },
+  { name: 'users', label: 'Familia', Icon: Users },
+  { name: 'heart', label: 'Pareja', Icon: Heart },
+  { name: 'package', label: 'Paquetes', Icon: Package },
+  { name: 'receipt', label: 'Recibos', Icon: Receipt },
+  { name: 'landmark', label: 'Impuestos', Icon: Landmark },
+  { name: 'tag', label: 'Etiqueta', Icon: Tag },
+  { name: 'circle-ellipsis', label: 'Otros', Icon: CircleEllipsis },
+  { name: 'briefcase', label: 'Trabajo', Icon: Briefcase },
+  { name: 'sparkles', label: 'Extras', Icon: Sparkles },
+  { name: 'piggy-bank', label: 'Ahorro', Icon: PiggyBank },
+  { name: 'wallet', label: 'Cartera', Icon: Wallet },
+  { name: 'banknote', label: 'Billete', Icon: Banknote },
+  { name: 'coins', label: 'Monedas', Icon: Coins },
+  { name: 'hand-coins', label: 'Préstamo', Icon: HandCoins },
+  { name: 'trending-up', label: 'Inversiones', Icon: TrendingUp },
+]
+
+// A Map and not a plain object: with an object, a name like "constructor" would find
+// Object.prototype.constructor instead of nothing
+const iconsByName = new Map(CATEGORY_ICON_OPTIONS.map((option) => [option.name, option.Icon]))
+
+// An unknown name (e.g. an icon removed from the list) falls back to a plain circle instead of crashing
+export function getCategoryIcon(name: string): LucideIcon {
+  return iconsByName.get(name) ?? Circle
+}

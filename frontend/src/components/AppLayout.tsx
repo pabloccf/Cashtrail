@@ -7,7 +7,10 @@ interface NavItem {
 }
 
 // New sections (dashboard, categories...) are added here as the phases go on
-const navItems: NavItem[] = [{ to: '/transactions', label: 'Transacciones' }]
+const navItems: NavItem[] = [
+  { to: '/transactions', label: 'Transacciones' },
+  { to: '/categories', label: 'Categorías' },
+]
 
 // NavLink passes `isActive`, so the current section can be highlighted
 function navLinkClass({ isActive }: { isActive: boolean }) {
