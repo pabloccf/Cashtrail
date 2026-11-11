@@ -7,9 +7,18 @@ import TransactionCard from '../../components/TransactionCard'
 import TransactionTable from '../../components/TransactionTable'
 import type { Transaction } from '../../types/transaction'
 import { getErrorMessage } from '../../utils/errorMessage'
+import { currentMonth, formatMonth } from '../../utils/month'
 import { loadPageSize, PAGE_SIZE_OPTIONS, parsePageSize, savePageSize, type PageSize } from '../../utils/pageSize'
-import { FILTER_KEYS, hasActiveFilters, parseTransactionFilters } from '../../utils/transactionFilters'
+import {
+  ALL_MONTHS,
+  FILTER_KEYS,
+  hasActiveFilters,
+  parseTransactionFilters,
+  parseTransactionPeriod,
+  periodDateRange,
+} from '../../utils/transactionFilters'
 import DeleteTransactionDialog from './DeleteTransactionDialog'
+import MonthSelector from './MonthSelector'
 import TransactionFilters, { type FilterChanges } from './TransactionFilters'
 import TransactionFormModal from './TransactionFormModal'
 
@@ -31,35 +40,50 @@ function TransactionsPage() {
   const [storedPageSize] = useState(loadPageSize)
   const pageSize = parsePageSize(searchParams.get('pageSize')) ?? storedPageSize
   const filters = parseTransactionFilters(searchParams)
+  const period = parseTransactionPeriod(searchParams, filters)
   const isFiltering = hasActiveFilters(filters)
   const [formState, setFormState] = useState<FormState>(null)
   // The transaction waiting for delete confirmation, or null if the dialog is closed
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
 
-  const { data, isPending, isError, error, refetch, isPlaceholderData } = useTransactions({ ...filters, page, pageSize })
+  const { data, isPending, isError, error, refetch, isPlaceholderData } = useTransactions({
+    ...filters,
+    ...periodDateRange(period, filters),
+    page,
+    pageSize,
+  })
 
+  // Sets each param, or removes it when its value is undefined, and goes back to page 1
+  // (page 3 of the old results may not exist after the change).
   // The updater form `setSearchParams(prev => ...)` starts from the current URL, so it only touches
   // the params it changes. Passing a plain object would replace the whole query string
-  function handleFiltersChange(changes: FilterChanges) {
+  function updateSearchParams(changes: Record<string, string | undefined>) {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       for (const [key, value] of Object.entries(changes)) {
         if (value) next.set(key, value)
         else next.delete(key)
       }
-      // Page 3 of the old results may not exist with the new filters
       next.delete('page')
       return next
     })
   }
 
+  function handleFiltersChange(changes: FilterChanges) {
+    updateSearchParams(changes)
+  }
+
   function handleClearFilters() {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      for (const key of FILTER_KEYS) next.delete(key)
-      next.delete('page')
-      return next
-    })
+    updateSearchParams(Object.fromEntries(FILTER_KEYS.map((key) => [key, undefined])))
+  }
+
+  // The current month is the default, so it is left out of the URL (like page 1)
+  function handleMonthChange(month: string) {
+    updateSearchParams({ month: month === currentMonth() ? undefined : month })
+  }
+
+  function handleClearRange() {
+    updateSearchParams({ from: undefined, to: undefined })
   }
 
   function handlePageChange(newPage: number) {
@@ -73,15 +97,10 @@ function TransactionsPage() {
     window.scrollTo({ top: 0 })
   }
 
+  // Page 3 of 10 and page 3 of 50 show different rows, so it starts over (updateSearchParams does that)
   function handlePageSizeChange(newPageSize: PageSize) {
     savePageSize(newPageSize)
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('pageSize', String(newPageSize))
-      // Page 3 of 10 and page 3 of 50 show different rows, so it starts over
-      next.delete('page')
-      return next
-    })
+    updateSearchParams({ pageSize: String(newPageSize) })
   }
 
   return (
@@ -97,6 +116,8 @@ function TransactionsPage() {
           Nueva transacción
         </button>
       </div>
+
+      <MonthSelector period={period} onMonthChange={handleMonthChange} onClearRange={handleClearRange} />
 
       <TransactionFilters filters={filters} onChange={handleFiltersChange} onClear={handleClearFilters} />
 
@@ -118,13 +139,39 @@ function TransactionsPage() {
         <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
           {isFiltering ? (
             <>
-              <p>No hay transacciones que coincidan con los filtros.</p>
+              <p>
+                No hay transacciones que coincidan con los filtros
+                {period.kind === 'month' && ` en ${formatMonth(period.month).toLowerCase()}`}.
+              </p>
+              <div className="mt-2 flex flex-wrap justify-center gap-x-4">
+                {/* The search only looks inside the chosen month, so offer to look in all of them */}
+                {period.kind === 'month' && (
+                  <button
+                    type="button"
+                    onClick={() => handleMonthChange(ALL_MONTHS)}
+                    className="min-h-11 font-medium text-emerald-700 underline"
+                  >
+                    Buscar en todos los meses
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="min-h-11 font-medium text-emerald-700 underline"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </>
+          ) : period.kind === 'month' && page === 1 ? (
+            <>
+              <p>No hay transacciones en {formatMonth(period.month).toLowerCase()}.</p>
               <button
                 type="button"
-                onClick={handleClearFilters}
+                onClick={() => handleMonthChange(ALL_MONTHS)}
                 className="mt-2 min-h-11 font-medium text-emerald-700 underline"
               >
-                Limpiar filtros
+                Ver todos los meses
               </button>
             </>
           ) : (

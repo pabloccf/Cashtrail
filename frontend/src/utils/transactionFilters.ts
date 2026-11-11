@@ -1,4 +1,5 @@
 import type { TransactionType } from '../types/transaction'
+import { currentMonth, isValidMonth, monthRange } from './month'
 
 // Filters of the transactions list. They live in the URL (?type=EXPENSE&from=...), so reloading,
 // sharing the link or going back keeps them. The names match the query params of GET /transactions
@@ -44,4 +45,31 @@ export function countPanelFilters(filters: TransactionFilters): number {
 
 export function hasActiveFilters(filters: TransactionFilters): boolean {
   return FILTER_KEYS.some((key) => filters[key] !== undefined)
+}
+
+// Which dates the list shows. A "discriminated union": `kind` tells which case it is,
+// and TypeScript only allows `period.month` after checking `period.kind === 'month'`
+export type TransactionPeriod =
+  | { kind: 'month'; month: string } // One calendar month ("YYYY-MM"). The default
+  | { kind: 'all' } // Every month (?month=all)
+  | { kind: 'custom' } // A range typed in the "Desde"/"Hasta" filters, which wins over the month
+
+export const ALL_MONTHS = 'all'
+
+// `month` is not one of the FILTER_KEYS: it is how you move through the list, not a filter,
+// so "Limpiar filtros" keeps the month you are looking at
+export function parseTransactionPeriod(searchParams: URLSearchParams, filters: TransactionFilters): TransactionPeriod {
+  if (filters.from || filters.to) return { kind: 'custom' }
+
+  const month = searchParams.get('month')
+  if (month === ALL_MONTHS) return { kind: 'all' }
+  // No param (or an invalid one) -> the current month
+  return { kind: 'month', month: month && isValidMonth(month) ? month : currentMonth() }
+}
+
+// The `from`/`to` sent to the API: the month's first and last day, the custom range, or nothing
+export function periodDateRange(period: TransactionPeriod, filters: TransactionFilters): Pick<TransactionFilters, 'from' | 'to'> {
+  if (period.kind === 'month') return monthRange(period.month)
+  if (period.kind === 'custom') return { from: filters.from, to: filters.to }
+  return {}
 }

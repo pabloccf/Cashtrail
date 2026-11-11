@@ -230,6 +230,9 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 - `/login`, `/register`
 - `/dashboard`: resumen del mes, gráficos, últimas transacciones, registros pendientes de confirmar, próximos gastos fijos y saldo disponible estimado (saldo actual menos los gastos fijos que quedan este mes)
 - `/transactions`: listado con filtros, búsqueda y paginación. Los registros generados a partir de un fijo se marcan con un icono
+  - Por defecto muestra solo el **mes actual**, con un selector de mes (flechas para ir a meses anteriores o siguientes) y un botón "Ver todo" para quitar el límite. El mes va en la URL (`?month=2026-10` o `?month=all`); el mes actual no se escribe.
+  - Si se elige un rango "Desde/Hasta" en los filtros, este manda sobre el mes ("Rango de fechas personalizado").
+  - La búsqueda y los filtros actúan dentro del mes elegido; si no hay resultados, se ofrece "Buscar en todos los meses".
   - El usuario elige cuántas transacciones ver por página (10, 25 o 50). La elección va en la URL (`?pageSize=`) y se recuerda en `localStorage`.
 - `/recurring`: gestión de gastos e ingresos fijos (crear, editar, activar o desactivar) y total anual en suscripciones
 - `/categories`: gestión de categorías
