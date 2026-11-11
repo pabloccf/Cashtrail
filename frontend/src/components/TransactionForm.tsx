@@ -5,6 +5,7 @@ import { useCategories } from '../hooks/useCategories'
 import type { Transaction, TransactionInput } from '../types/transaction'
 import { centsToInput, parseAmountToCents } from '../utils/money'
 import { toIsoDateOnly, todayIsoDate } from '../utils/date'
+import TransactionTypeToggle from './TransactionTypeToggle'
 
 // The form works with text (what the inputs hold). The amount is converted to cents only on submit
 const transactionFormSchema = z.object({
@@ -47,11 +48,6 @@ const inputClass =
   'focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ' +
   'aria-invalid:border-rose-500'
 
-const typeOptions = [
-  { value: 'EXPENSE', label: 'Gasto', checkedClass: 'peer-checked:bg-rose-600' },
-  { value: 'INCOME', label: 'Ingreso', checkedClass: 'peer-checked:bg-emerald-600' },
-] as const
-
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
   return <p className="mt-1 text-sm text-rose-600">{message}</p>
@@ -91,28 +87,8 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
   return (
     // noValidate: Zod shows the errors instead of the browser's own messages
     <form onSubmit={handleSubmit(submit)} noValidate className="flex flex-col gap-4">
-      <fieldset>
-        <legend className="sr-only">Tipo</legend>
-        <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
-          {typeOptions.map((option) => (
-            <label key={option.value} className="cursor-pointer">
-              {/* A real radio input, visually hidden: the styled span reacts to it with `peer-checked:` */}
-              <input
-                type="radio"
-                value={option.value}
-                className="peer sr-only"
-                // The previous category belongs to the other type, so it is cleared
-                {...register('type', { onChange: () => setValue('categoryId', '') })}
-              />
-              <span
-                className={`flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 ${option.checkedClass}`}
-              >
-                {option.label}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      {/* The previous category belongs to the other type, so it is cleared */}
+      <TransactionTypeToggle registration={register('type', { onChange: () => setValue('categoryId', '') })} />
 
       <div>
         <label htmlFor="amount" className="mb-1 block text-sm font-medium">

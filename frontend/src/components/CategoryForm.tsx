@@ -6,6 +6,7 @@ import type { TransactionType } from '../types/transaction'
 import { CATEGORY_ICON_OPTIONS } from '../utils/categoryIcons'
 import CategoryIcon from './CategoryIcon'
 import TextField from './TextField'
+import TransactionTypeToggle from './TransactionTypeToggle'
 
 // Same palette as the default categories, so the defaults are always shown as selected
 const COLOR_OPTIONS = [
@@ -28,11 +29,6 @@ function getDefaultValues(category: Category | undefined, defaultType: Transacti
   }
   return { type: defaultType, name: '', color: COLOR_OPTIONS[0], icon: 'tag' }
 }
-
-const typeOptions = [
-  { value: 'EXPENSE', label: 'Gasto', checkedClass: 'peer-checked:bg-rose-600' },
-  { value: 'INCOME', label: 'Ingreso', checkedClass: 'peer-checked:bg-emerald-600' },
-] as const
 
 interface CategoryFormProps {
   // Present when editing, missing when creating
@@ -69,22 +65,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
         <span className="truncate font-medium">{name.trim() || 'Nueva categoría'}</span>
       </div>
 
-      <fieldset>
-        <legend className="sr-only">Tipo</legend>
-        <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
-          {typeOptions.map((option) => (
-            <label key={option.value} className="cursor-pointer">
-              {/* Same visually hidden radio + styled span as in TransactionForm */}
-              <input type="radio" value={option.value} className="peer sr-only" {...register('type')} />
-              <span
-                className={`flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 ${option.checkedClass}`}
-              >
-                {option.label}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <TransactionTypeToggle registration={register('type')} />
 
       <TextField label="Nombre" autoComplete="off" maxLength={50} error={errors.name?.message} {...register('name')} />
 
