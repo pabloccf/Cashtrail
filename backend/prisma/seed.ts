@@ -1,10 +1,9 @@
 import 'dotenv/config';
-import bcrypt from 'bcrypt';
 import { prisma } from '../src/lib/prisma.js';
+import { hashPassword } from '../src/lib/password.js';
 import { DEFAULT_CATEGORIES } from '../src/constants/defaultCategories.js';
 
 const DEMO_EMAIL = 'demo@cashtrail.local';
-const BCRYPT_ROUNDS = 10;
 
 async function main() {
   const password = process.env.SEED_USER_PASSWORD;
@@ -12,7 +11,7 @@ async function main() {
     throw new Error('SEED_USER_PASSWORD is not defined');
   }
 
-  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const passwordHash = await hashPassword(password);
 
   // upsert keeps the seed idempotent: running it twice does not duplicate data
   const user = await prisma.user.upsert({
