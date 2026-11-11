@@ -1,10 +1,18 @@
+import { Navigate, Route, Routes } from 'react-router'
+import AppLayout from './components/AppLayout'
+import TransactionsPage from './pages/transactions/TransactionsPage'
+
 function App() {
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <h1 className="text-3xl font-bold text-emerald-600">
-        Cashtrail funciona 🎉
-      </h1>
-    </div>
+    <Routes>
+      {/* Routes nested here are rendered inside the layout's <Outlet /> */}
+      <Route element={<AppLayout />}>
+        <Route path="/transactions" element={<TransactionsPage />} />
+      </Route>
+
+      {/* Until there is a dashboard, any other URL goes to the transactions page */}
+      <Route path="*" element={<Navigate to="/transactions" replace />} />
+    </Routes>
   )
 }
 
