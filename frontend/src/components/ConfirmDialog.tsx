@@ -1,0 +1,86 @@
+import type { ReactNode } from 'react'
+import { useOpenDialog } from '../hooks/useOpenDialog'
+import TrashIcon from './TrashIcon'
+
+interface ConfirmDialogProps {
+  title: string
+  message: ReactNode
+  confirmLabel: string
+  // While the action runs, the buttons are disabled and the dialog cannot be dismissed
+  isConfirming?: boolean
+  error?: string
+  onConfirm: () => void
+  onCancel: () => void
+}
+
+// Pop-up confirmation for destructive actions (delete...). Like Modal, it opens when mounted:
+// the parent shows it with {isOpen && <ConfirmDialog ... />}
+function ConfirmDialog({ title, message, confirmLabel, isConfirming = false, error, onConfirm, onCancel }: ConfirmDialogProps) {
+  const dialogRef = useOpenDialog()
+
+  function dismiss() {
+    if (!isConfirming) onCancel()
+  }
+
+  return (
+    <dialog
+      ref={dialogRef}
+      // `cancel` fires on Esc. preventDefault stops the browser from closing it by itself:
+      // React decides, by unmounting it (and not while the delete request is in progress)
+      onCancel={(event) => {
+        event.preventDefault()
+        dismiss()
+      }}
+      // A click on the dialog element itself (not its content) is a click on the dark backdrop
+      onClick={(event) => {
+        if (event.target === event.currentTarget) dismiss()
+      }}
+      // `starting:` = the styles on the first frame. With `transition` it animates from them:
+      // the dialog fades in and grows slightly, like a pop-up
+      className="m-auto w-[calc(100%-2rem)] max-w-sm scale-100 rounded-2xl bg-white p-0 opacity-100 shadow-xl transition duration-200 ease-out backdrop:bg-slate-900/50 starting:scale-90 starting:opacity-0"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+    >
+      <div className="flex flex-col items-center p-6 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+          <TrashIcon className="size-7" />
+        </div>
+        <h2 id="confirm-title" className="text-lg font-semibold">
+          {title}
+        </h2>
+        <div id="confirm-message" className="mt-2 text-sm text-slate-600">
+          {message}
+        </div>
+
+        {error && (
+          <p className="mt-4 w-full rounded-lg bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+            {error}
+          </p>
+        )}
+
+        <div className="mt-6 grid w-full grid-cols-2 gap-2">
+          {/* First in the DOM and autoFocus: Enter on an accidental opening cancels, it never deletes */}
+          <button
+            type="button"
+            autoFocus
+            onClick={dismiss}
+            disabled={isConfirming}
+            className="min-h-11 rounded-lg border border-slate-300 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isConfirming}
+            className="min-h-11 rounded-lg bg-rose-600 font-medium text-white hover:bg-rose-700 disabled:opacity-60"
+          >
+            {isConfirming ? 'Eliminando…' : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  )
+}
+
+export default ConfirmDialog

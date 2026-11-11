@@ -5,11 +5,12 @@ import TransactionAmount from './TransactionAmount'
 
 interface TransactionTableProps {
   transactions: Transaction[]
-  onSelect: (transaction: Transaction) => void
+  onEdit: (transaction: Transaction) => void
+  onDelete: (transaction: Transaction) => void
 }
 
 // Desktop view of the transactions
-function TransactionTable({ transactions, onSelect }: TransactionTableProps) {
+function TransactionTable({ transactions, onEdit, onDelete }: TransactionTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <table className="w-full text-left text-sm">
@@ -39,14 +40,21 @@ function TransactionTable({ transactions, onSelect }: TransactionTableProps) {
               <td className="whitespace-nowrap px-4 py-3 text-right">
                 <TransactionAmount amount={transaction.amount} type={transaction.type} />
               </td>
-              {/* A real button instead of a clickable <tr>: it can be reached with the keyboard */}
-              <td className="px-2 py-1 text-right">
+              {/* Real buttons instead of a clickable <tr>: they can be reached with the keyboard */}
+              <td className="whitespace-nowrap px-2 py-1 text-right">
                 <button
                   type="button"
-                  onClick={() => onSelect(transaction)}
+                  onClick={() => onEdit(transaction)}
                   className="min-h-11 rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50"
                 >
                   Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(transaction)}
+                  className="min-h-11 rounded-lg px-3 font-medium text-rose-600 hover:bg-rose-50"
+                >
+                  Eliminar
                 </button>
               </td>
             </tr>

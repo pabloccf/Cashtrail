@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { useOpenDialog } from '../hooks/useOpenDialog'
 
 interface ModalProps {
   title: string
@@ -6,17 +7,10 @@ interface ModalProps {
   children: ReactNode
 }
 
-// Uses the native <dialog> element: showModal() puts it above everything, blocks the page behind it,
-// keeps the keyboard focus inside and closes with Esc, with no extra code.
+// Uses the native <dialog> element (see useOpenDialog).
 // It opens when it is mounted: the parent shows it with {isOpen && <Modal ... />}
 function Modal({ title, onClose, children }: ModalProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    // The `open` check matters in development: StrictMode runs effects twice
-    if (dialog && !dialog.open) dialog.showModal()
-  }, [])
+  const dialogRef = useOpenDialog()
 
   return (
     <dialog
@@ -27,7 +21,8 @@ function Modal({ title, onClose, children }: ModalProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl bg-white p-0 shadow-xl backdrop:bg-slate-900/40"
+      // Same pop-up animation as ConfirmDialog: fades in and grows slightly when it opens
+      className="m-auto w-[calc(100%-2rem)] max-w-lg scale-100 rounded-2xl bg-white p-0 opacity-100 shadow-xl transition duration-200 ease-out backdrop:bg-slate-900/40 starting:scale-95 starting:opacity-0"
       aria-labelledby="modal-title"
     >
       <div className="p-5">

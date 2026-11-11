@@ -6,6 +6,7 @@ import TransactionCard from '../../components/TransactionCard'
 import TransactionTable from '../../components/TransactionTable'
 import type { Transaction } from '../../types/transaction'
 import { getErrorMessage } from '../../utils/errorMessage'
+import DeleteTransactionDialog from './DeleteTransactionDialog'
 import TransactionFormModal from './TransactionFormModal'
 
 // ?page=abc, ?page=-3 or no param -> page 1
@@ -22,6 +23,8 @@ function TransactionsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const page = parsePage(searchParams.get('page'))
   const [formState, setFormState] = useState<FormState>(null)
+  // The transaction waiting for delete confirmation, or null if the dialog is closed
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
 
   const { data, isPending, isError, error, refetch, isPlaceholderData } = useTransactions({ page })
 
@@ -69,14 +72,14 @@ function TransactionsPage() {
           <ul className="flex flex-col gap-2 md:hidden">
             {data.data.map((transaction) => (
               <li key={transaction.id}>
-                <TransactionCard transaction={transaction} onSelect={setFormState} />
+                <TransactionCard transaction={transaction} onEdit={setFormState} onDelete={setTransactionToDelete} />
               </li>
             ))}
           </ul>
 
           {/* Desktop: table */}
           <div className="hidden md:block">
-            <TransactionTable transactions={data.data} onSelect={setFormState} />
+            <TransactionTable transactions={data.data} onEdit={setFormState} onDelete={setTransactionToDelete} />
           </div>
 
           <Pagination
@@ -103,6 +106,10 @@ function TransactionsPage() {
           transaction={formState === 'new' ? undefined : formState}
           onClose={() => setFormState(null)}
         />
+      )}
+
+      {transactionToDelete && (
+        <DeleteTransactionDialog transaction={transactionToDelete} onClose={() => setTransactionToDelete(null)} />
       )}
     </section>
   )
