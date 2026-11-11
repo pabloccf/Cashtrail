@@ -332,7 +332,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 
 ## Hoja de ruta
 
-- [x] **Fase 1:** estructura del proyecto y CRUD de transacciones sin login (en curso)
+- [x] **Fase 1:** estructura del proyecto y CRUD de transacciones sin login
   - [x] Estructura del proyecto, Docker con Postgres, esquema de Prisma (User, Category y Transaction), primera migración, cliente de Prisma y seed con un usuario de prueba y categorías
   - [x] Backend: CRUD de transacciones (rutas, controladores, servicios, repositorios, validación con Zod y middleware de errores) usando temporalmente el usuario del seed
   - [x] Frontend: proxy de Vite, React Router, TanStack Query y página `/transactions` con lista y formulario
