@@ -1,16 +1,29 @@
 import { Navigate, Route, Routes } from 'react-router'
 import AppLayout from './components/AppLayout'
+import GuestRoute from './components/GuestRoute'
+import ProtectedRoute from './components/ProtectedRoute'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
 import TransactionsPage from './pages/transactions/TransactionsPage'
 
 function App() {
   return (
     <Routes>
-      {/* Routes nested here are rendered inside the layout's <Outlet /> */}
-      <Route element={<AppLayout />}>
-        <Route path="/transactions" element={<TransactionsPage />} />
+      {/* Only for users who are NOT logged in */}
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Route>
 
-      {/* Until there is a dashboard, any other URL goes to the transactions page */}
+      {/* Only for logged-in users. Routes nested in AppLayout are rendered inside its <Outlet /> */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/transactions" element={<TransactionsPage />} />
+        </Route>
+      </Route>
+
+      {/* Until there is a dashboard, any other URL goes to the transactions page
+          (ProtectedRoute sends it to /login if there is no session) */}
       <Route path="*" element={<Navigate to="/transactions" replace />} />
     </Routes>
   )
