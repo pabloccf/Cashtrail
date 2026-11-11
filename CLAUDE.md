@@ -133,7 +133,7 @@ Las categorías pertenecen a cada usuario (o a un espacio compartido, ver "Gasto
 
 - Al **registrarse**, la app crea automáticamente un conjunto de categorías por defecto para ese usuario. A partir de ahí son suyas: puede editarlas (nombre, color, icono), borrarlas y crear otras nuevas.
 - La lista vive en `src/constants/defaultCategories.ts` y es la única fuente: la usan tanto el registro como el seed de desarrollo, sin duplicarla.
-- El registro crea el usuario y sus categorías dentro de una transacción de base de datos (`prisma.$transaction`), para que nunca quede un usuario sin categorías si algo falla.
+- El registro crea el usuario y sus categorías de forma **atómica** (un *nested write* de Prisma, que se ejecuta en una sola transacción de base de datos), para que nunca quede un usuario sin categorías si algo falla.
 - Lista inicial:
   - Gastos: Vivienda, Supermercado, Restaurantes, Transporte, Coche, Suscripciones, Ocio, Salud, Ropa, Regalos, Otros.
   - Ingresos: Nómina, Extras, Otros ingresos.

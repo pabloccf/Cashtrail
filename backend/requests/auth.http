@@ -1,0 +1,62 @@
+# Example requests for the VS Code "REST Client" extension.
+# REST Client stores the cookies it receives, so after "Login" the session cookie
+# is sent automatically in the following requests (also in transactions.http).
+
+@baseUrl = http://localhost:3000/api
+
+### Register (creates the user, its default categories and starts a session)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test user",
+  "email": "test@example.com",
+  "password": "change-me-123"
+}
+
+### Login with the seed user (password: SEED_USER_PASSWORD from your .env)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@cashtrail.local",
+  "password": "your-seed-password"
+}
+
+### Current user (401 if there is no valid session)
+GET {{baseUrl}}/auth/me
+
+### Logout (204, deletes the cookie)
+POST {{baseUrl}}/auth/logout
+
+
+### ---------- Error cases ----------
+
+### 401: wrong password (same message as an unknown email)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@cashtrail.local",
+  "password": "wrong-password"
+}
+
+### 409: email already registered (send "Register" first)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test user",
+  "email": "test@example.com",
+  "password": "change-me-123"
+}
+
+### 400: password shorter than 8 characters and invalid email
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test user",
+  "email": "not-an-email",
+  "password": "short"
+}

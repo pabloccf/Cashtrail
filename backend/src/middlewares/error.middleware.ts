@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
 import { ZodError, z } from 'zod';
 import { AppError } from '../lib/appError.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 export const notFoundHandler: RequestHandler = (req, _res, next) => {
   next(new AppError(404, `Route not found: ${req.method} ${req.originalUrl}`));
@@ -21,6 +22,13 @@ export const errorHandler: ErrorRequestHandler = (err: unknown, _req, res, _next
   // Safety net: a Zod `parse` that ran outside the validate middleware
   if (err instanceof ZodError) {
     res.status(400).json({ error: { message: 'Invalid request data', details: z.flattenError(err) } });
+    return;
+  }
+
+  // Unique constraint violated (P2002). Services check duplicates first, but two requests at the
+  // same time can both pass that check: the database constraint is the final guarantee
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    res.status(409).json({ error: { message: 'A record with these values already exists' } });
     return;
   }
 

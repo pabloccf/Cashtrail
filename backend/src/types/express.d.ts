@@ -2,8 +2,7 @@
 declare global {
   namespace Express {
     interface Request {
-      // Set by the currentUser middleware (auth middleware from Phase 2 on).
-      // Only read it in routes that use that middleware
+      // Set by the requireAuth middleware. Only read it in routes that use that middleware
       userId: string;
     }
   }

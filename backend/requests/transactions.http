@@ -1,6 +1,7 @@
 # Example requests for the VS Code "REST Client" extension.
 # Start the backend first (`npm run dev`) and click "Send Request" above each request.
 # Requests are separated by "###".
+# Every request needs a session: send "Login" in auth.http first.
 
 @baseUrl = http://localhost:3000/api
 
