@@ -1,0 +1,76 @@
+# Example requests for the VS Code "REST Client" extension.
+# Every request needs a session: send "Login" in auth.http first.
+
+@baseUrl = http://localhost:3000/api
+
+### List categories (expenses first, then income, alphabetical)
+GET {{baseUrl}}/categories
+
+### Create a category
+# @name created
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "Mascotas",
+  "color": "#D97706",
+  "icon": "paw-print",
+  "type": "EXPENSE"
+}
+
+### Update it (PUT replaces every field). The color is stored lowercased
+PUT {{baseUrl}}/categories/{{created.response.body.id}}
+Content-Type: application/json
+
+{
+  "name": "Mascota",
+  "color": "#b45309",
+  "icon": "paw-print",
+  "type": "EXPENSE"
+}
+
+### Delete it (204 No Content, it has no transactions)
+DELETE {{baseUrl}}/categories/{{created.response.body.id}}
+
+
+### ---------- Error cases ----------
+
+### 409: duplicated name for the same type (case-insensitive: "ocio" = "Ocio")
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "ocio",
+  "color": "#ec4899",
+  "icon": "gamepad-2",
+  "type": "EXPENSE"
+}
+
+### 201: the same name is allowed for the other type (delete it afterwards)
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "Ocio",
+  "color": "#ec4899",
+  "icon": "gamepad-2",
+  "type": "INCOME"
+}
+
+### 400: invalid color and icon
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "Bad",
+  "color": "red",
+  "icon": "Shopping Cart",
+  "type": "EXPENSE"
+}
+
+### 409: delete a category with transactions. Copy the id of a used category from "List categories"
+# details: { "transactions": N }
+DELETE {{baseUrl}}/categories/PASTE-A-USED-CATEGORY-ID
+
+### 404: valid UUID that does not exist (or belongs to another user)
+DELETE {{baseUrl}}/categories/00000000-0000-4000-8000-000000000000

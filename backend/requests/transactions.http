@@ -5,8 +5,8 @@
 
 @baseUrl = http://localhost:3000/api
 
-# Category ids of the seed user. There is no categories endpoint yet (Phase 3):
-# if you reset the database, copy the new ids from `npx prisma studio`
+# Category ids of the seed user. If you reset the database,
+# copy the new ids from "List categories" in categories.http
 @expenseCategoryId = a8c9cd14-a668-4efc-818d-d04d52564b04
 @incomeCategoryId = 244e0997-c41b-429a-99bb-c086e93d4328
 

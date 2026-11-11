@@ -32,6 +32,13 @@ export const errorHandler: ErrorRequestHandler = (err: unknown, _req, res, _next
     return;
   }
 
+  // Foreign key violated (P2003): e.g. deleting a category that a transaction just started using.
+  // Services check usages first; as with P2002, this covers two requests at the same time
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+    res.status(409).json({ error: { message: 'This record is in use by other records' } });
+    return;
+  }
+
   if (isJsonParseError(err)) {
     res.status(400).json({ error: { message: 'Malformed JSON in request body' } });
     return;
