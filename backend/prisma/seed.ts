@@ -1,22 +1,10 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import { prisma } from '../src/lib/prisma.js';
-import type { TransactionType } from '../src/generated/prisma/client.js';
+import { DEFAULT_CATEGORIES } from '../src/constants/defaultCategories.js';
 
 const DEMO_EMAIL = 'demo@cashtrail.local';
 const BCRYPT_ROUNDS = 10;
-
-const categories: { name: string; color: string; icon: string; type: TransactionType }[] = [
-  { name: 'Alimentación', color: '#22c55e', icon: 'shopping-cart', type: 'EXPENSE' },
-  { name: 'Vivienda', color: '#3b82f6', icon: 'home', type: 'EXPENSE' },
-  { name: 'Transporte', color: '#f59e0b', icon: 'car', type: 'EXPENSE' },
-  { name: 'Ocio', color: '#ec4899', icon: 'gamepad-2', type: 'EXPENSE' },
-  { name: 'Salud', color: '#ef4444', icon: 'heart-pulse', type: 'EXPENSE' },
-  { name: 'Suscripciones', color: '#8b5cf6', icon: 'repeat', type: 'EXPENSE' },
-  { name: 'Nómina', color: '#10b981', icon: 'briefcase', type: 'INCOME' },
-  { name: 'Freelance', color: '#06b6d4', icon: 'laptop', type: 'INCOME' },
-  { name: 'Otros ingresos', color: '#84cc16', icon: 'piggy-bank', type: 'INCOME' },
-];
 
 async function main() {
   const password = process.env.SEED_USER_PASSWORD;
@@ -33,7 +21,7 @@ async function main() {
     create: { email: DEMO_EMAIL, name: 'Demo', passwordHash },
   });
 
-  for (const category of categories) {
+  for (const category of DEFAULT_CATEGORIES) {
     await prisma.category.upsert({
       where: { userId_type_name: { userId: user.id, type: category.type, name: category.name } },
       update: { color: category.color, icon: category.icon },
@@ -41,7 +29,7 @@ async function main() {
     });
   }
 
-  console.log(`Seeded user ${user.email} with ${categories.length} categories`);
+  console.log(`Seeded user ${user.email} with ${DEFAULT_CATEGORIES.length} categories`);
 }
 
 main()
