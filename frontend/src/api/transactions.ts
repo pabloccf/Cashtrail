@@ -1,13 +1,17 @@
 import { apiClient } from './client'
 import type { PaginatedResponse, Transaction, TransactionInput } from '../types/transaction'
+import type { TransactionFilters } from '../utils/transactionFilters'
 
-export interface TransactionListParams {
+export interface TransactionListParams extends TransactionFilters {
   page: number
 }
 
 export function getTransactions(params: TransactionListParams) {
-  // URLSearchParams encodes the values safely (spaces, accents...). Filters will be added here in Phase 3
-  const query = new URLSearchParams({ page: String(params.page) })
+  // URLSearchParams encodes the values safely (spaces, accents, "&"...). Missing filters are not sent
+  const query = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) query.set(key, String(value))
+  }
   return apiClient.get<PaginatedResponse<Transaction>>(`/transactions?${query}`)
 }
 
