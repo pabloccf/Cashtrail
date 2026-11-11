@@ -336,7 +336,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
   - [x] Estructura del proyecto, Docker con Postgres, esquema de Prisma (User, Category y Transaction), primera migración, cliente de Prisma y seed con un usuario de prueba y categorías
   - [x] Backend: CRUD de transacciones (rutas, controladores, servicios, repositorios, validación con Zod y middleware de errores) usando temporalmente el usuario del seed
   - [x] Frontend: proxy de Vite, React Router, TanStack Query y página `/transactions` con lista y formulario
-- [ ] **Fase 2:** autenticación y protección de rutas. El registro crea las categorías por defecto del usuario: crear `src/constants/defaultCategories.ts` con la lista de "Categorías por defecto" y adaptar el seed existente para que use esa misma lista.
+- [x] **Fase 2:** autenticación y protección de rutas. El registro crea las categorías por defecto del usuario: crear `src/constants/defaultCategories.ts` con la lista de "Categorías por defecto" y adaptar el seed existente para que use esa misma lista.
 - [ ] **Fase 3:** categorías, filtros y paginación
 - [ ] **Fase 4:** gastos e ingresos fijos: modelo, CRUD, lógica de generación, endpoint `/jobs/recurring` y confirmación de pendientes
 - [ ] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
