@@ -1,19 +1,15 @@
 import type { TransactionCategory } from '../types/transaction'
+import CategoryIcon from './CategoryIcon'
 
 interface CategoryBadgeProps {
   category: TransactionCategory
 }
 
-// Colored dot + name. The color comes from the database, so it goes in `style`:
-// Tailwind only generates classes it can see in the code at build time
+// Small category icon + name, used in the transaction lists
 function CategoryBadge({ category }: CategoryBadgeProps) {
   return (
     <span className="inline-flex items-center gap-2 text-sm text-slate-600">
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{ backgroundColor: category.color }}
-        aria-hidden="true"
-      />
+      <CategoryIcon icon={category.icon} color={category.color} size="sm" />
       {category.name}
     </span>
   )
