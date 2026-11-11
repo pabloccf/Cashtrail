@@ -1,9 +1,11 @@
 import { apiClient } from './client'
 import type { PaginatedResponse, Transaction, TransactionInput } from '../types/transaction'
+import type { PageSize } from '../utils/pageSize'
 import type { TransactionFilters } from '../utils/transactionFilters'
 
 export interface TransactionListParams extends TransactionFilters {
   page: number
+  pageSize: PageSize
 }
 
 export function getTransactions(params: TransactionListParams) {

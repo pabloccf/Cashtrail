@@ -13,7 +13,8 @@
 ### Health check
 GET {{baseUrl}}/health
 
-### List transactions (default: page 1, 20 per page, newest first)
+### List transactions (default: page 1, 25 per page, newest first)
+# pageSize only accepts 10, 25 or 50
 GET {{baseUrl}}/transactions
 
 ### List with filters and pagination

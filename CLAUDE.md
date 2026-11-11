@@ -202,7 +202,7 @@ Todas las rutas empiezan por `/api`. Todas salvo las de registro y login requier
 
 - `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
 - `GET|POST /transactions`, `PUT|DELETE /transactions/:id`
-  - `GET` admite filtros: `from`, `to`, `category`, `type`, `status`, `q` (búsqueda en la descripción, sin distinguir mayúsculas), `page`
+  - `GET` admite filtros: `from`, `to`, `category`, `type`, `status`, `q` (búsqueda en la descripción, sin distinguir mayúsculas), `page` y `pageSize` (solo 10, 25 o 50; por defecto 25)
 - `PATCH /transactions/:id/confirm`: confirma un registro pendiente (opcionalmente con un importe ajustado)
 - `GET|POST /recurring`, `PUT|DELETE /recurring/:id`, `PATCH /recurring/:id/toggle` (activar o desactivar)
 - `GET /recurring/upcoming?days=30`: próximos gastos e ingresos fijos
@@ -230,6 +230,7 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 - `/login`, `/register`
 - `/dashboard`: resumen del mes, gráficos, últimas transacciones, registros pendientes de confirmar, próximos gastos fijos y saldo disponible estimado (saldo actual menos los gastos fijos que quedan este mes)
 - `/transactions`: listado con filtros, búsqueda y paginación. Los registros generados a partir de un fijo se marcan con un icono
+  - El usuario elige cuántas transacciones ver por página (10, 25 o 50). La elección va en la URL (`?pageSize=`) y se recuerda en `localStorage`.
 - `/recurring`: gestión de gastos e ingresos fijos (crear, editar, activar o desactivar) y total anual en suscripciones
 - `/categories`: gestión de categorías
 - `/budgets`: presupuestos mensuales con barra de progreso

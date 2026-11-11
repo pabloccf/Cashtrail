@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useTransactions } from '../../hooks/useTransactions'
+import PageSizeSelect from '../../components/PageSizeSelect'
 import Pagination from '../../components/Pagination'
 import TransactionCard from '../../components/TransactionCard'
 import TransactionTable from '../../components/TransactionTable'
 import type { Transaction } from '../../types/transaction'
 import { getErrorMessage } from '../../utils/errorMessage'
+import { loadPageSize, PAGE_SIZE_OPTIONS, parsePageSize, savePageSize, type PageSize } from '../../utils/pageSize'
 import { FILTER_KEYS, hasActiveFilters, parseTransactionFilters } from '../../utils/transactionFilters'
 import DeleteTransactionDialog from './DeleteTransactionDialog'
 import TransactionFilters, { type FilterChanges } from './TransactionFilters'
@@ -24,13 +26,17 @@ function TransactionsPage() {
   // The page lives in the URL, so reloading or going back keeps it
   const [searchParams, setSearchParams] = useSearchParams()
   const page = parsePage(searchParams.get('page'))
+  // The function (not its result) is passed to useState, so localStorage is read only on the first render.
+  // The URL wins over the remembered size, so a shared link shows the same page to everyone
+  const [storedPageSize] = useState(loadPageSize)
+  const pageSize = parsePageSize(searchParams.get('pageSize')) ?? storedPageSize
   const filters = parseTransactionFilters(searchParams)
   const isFiltering = hasActiveFilters(filters)
   const [formState, setFormState] = useState<FormState>(null)
   // The transaction waiting for delete confirmation, or null if the dialog is closed
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
 
-  const { data, isPending, isError, error, refetch, isPlaceholderData } = useTransactions({ ...filters, page })
+  const { data, isPending, isError, error, refetch, isPlaceholderData } = useTransactions({ ...filters, page, pageSize })
 
   // The updater form `setSearchParams(prev => ...)` starts from the current URL, so it only touches
   // the params it changes. Passing a plain object would replace the whole query string
@@ -65,6 +71,17 @@ function TransactionsPage() {
       return next
     })
     window.scrollTo({ top: 0 })
+  }
+
+  function handlePageSizeChange(newPageSize: PageSize) {
+    savePageSize(newPageSize)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('pageSize', String(newPageSize))
+      // Page 3 of 10 and page 3 of 50 show different rows, so it starts over
+      next.delete('page')
+      return next
+    })
   }
 
   return (
@@ -131,11 +148,20 @@ function TransactionsPage() {
             <TransactionTable transactions={data.data} onEdit={setFormState} onDelete={setTransactionToDelete} />
           </div>
 
-          <Pagination
-            page={data.pagination.page}
-            totalPages={data.pagination.totalPages}
-            onPageChange={handlePageChange}
-          />
+          {/* Mobile: pagination above the size selector. Desktop: both in one row */}
+          <div className="flex flex-col-reverse gap-3 md:flex-row md:items-center md:justify-between">
+            {/* With fewer rows than the smallest option, changing the size would change nothing */}
+            {data.pagination.total > PAGE_SIZE_OPTIONS[0] && (
+              <PageSizeSelect value={pageSize} onChange={handlePageSizeChange} />
+            )}
+            <div className="md:ml-auto md:w-96">
+              <Pagination
+                page={data.pagination.page}
+                totalPages={data.pagination.totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          </div>
         </div>
       )}
 
