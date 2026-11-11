@@ -26,6 +26,13 @@ export const listTransactionsQuerySchema = z
     to: z.iso.date().optional(),
     category: z.uuid().optional(),
     type: transactionTypeSchema.optional(),
+    // Text search in the description. "?q=" or "?q=   " (empty after trim) means no search
+    q: z
+      .string()
+      .trim()
+      .max(100)
+      .optional()
+      .transform((value) => value || undefined),
     // Query string values always arrive as text, so they are coerced to numbers
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),

@@ -19,6 +19,9 @@ GET {{baseUrl}}/transactions
 ### List with filters and pagination
 GET {{baseUrl}}/transactions?type=EXPENSE&from=2026-11-01&to=2026-11-30&category={{expenseCategoryId}}&page=1&pageSize=10
 
+### Search in the description (case-insensitive, matches anywhere: "groc" finds "Weekly groceries")
+GET {{baseUrl}}/transactions?q=GROC
+
 ### Create an expense (amount in cents: 12,50 € -> 1250)
 # @name created
 POST {{baseUrl}}/transactions

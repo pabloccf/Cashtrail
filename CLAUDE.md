@@ -202,7 +202,7 @@ Todas las rutas empiezan por `/api`. Todas salvo las de registro y login requier
 
 - `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
 - `GET|POST /transactions`, `PUT|DELETE /transactions/:id`
-  - `GET` admite filtros: `from`, `to`, `category`, `type`, `status`, `page`
+  - `GET` admite filtros: `from`, `to`, `category`, `type`, `status`, `q` (búsqueda en la descripción, sin distinguir mayúsculas), `page`
 - `PATCH /transactions/:id/confirm`: confirma un registro pendiente (opcionalmente con un importe ajustado)
 - `GET|POST /recurring`, `PUT|DELETE /recurring/:id`, `PATCH /recurring/:id/toggle` (activar o desactivar)
 - `GET /recurring/upcoming?days=30`: próximos gastos e ingresos fijos

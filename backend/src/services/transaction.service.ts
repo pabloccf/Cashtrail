@@ -41,6 +41,7 @@ export async function list(userId: string, query: ListTransactionsQuery) {
       to: query.to ? toDate(query.to) : undefined,
       categoryId: query.category,
       type: query.type,
+      search: query.q,
     },
     { skip: (page - 1) * pageSize, take: pageSize },
   );

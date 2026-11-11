@@ -12,6 +12,7 @@ export interface TransactionFilters {
   to?: Date;
   categoryId?: string;
   type?: TransactionType;
+  search?: string;
 }
 
 export interface Pagination {
@@ -27,6 +28,12 @@ export interface TransactionData {
   description: string | null;
 }
 
+// Prisma turns `contains` into ILIKE '%text%' without escaping the LIKE wildcards, so a search
+// for "_" (any character) or "%" (any text) would match everything. A backslash makes them literal
+function escapeLikeWildcards(text: string): string {
+  return text.replace(/[\\%_]/g, '\\$&');
+}
+
 export async function findManyByUser(userId: string, filters: TransactionFilters, pagination: Pagination) {
   // Prisma ignores conditions whose value is `undefined`, so missing filters do not filter
   const where: Prisma.TransactionWhereInput = {
@@ -34,6 +41,11 @@ export async function findManyByUser(userId: string, filters: TransactionFilters
     categoryId: filters.categoryId,
     type: filters.type,
     date: { gte: filters.from, lte: filters.to },
+    // ILIKE '%search%' in PostgreSQL: matches anywhere in the text, ignoring upper/lower case.
+    // Transactions without a description (null) never match
+    description: filters.search
+      ? { contains: escapeLikeWildcards(filters.search), mode: 'insensitive' }
+      : undefined,
   };
 
   // Both queries run in a single database transaction, so the total matches the page
