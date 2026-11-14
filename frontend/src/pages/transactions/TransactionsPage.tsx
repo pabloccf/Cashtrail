@@ -17,8 +17,10 @@ import {
   parseTransactionPeriod,
   periodDateRange,
 } from '../../utils/transactionFilters'
+import ConfirmTransactionModal from './ConfirmTransactionModal'
 import DeleteTransactionDialog from './DeleteTransactionDialog'
 import MonthSelector from './MonthSelector'
+import PendingBanner from './PendingBanner'
 import TransactionFilters, { type FilterChanges } from './TransactionFilters'
 import TransactionFormModal from './TransactionFormModal'
 
@@ -45,6 +47,8 @@ function TransactionsPage() {
   const [formState, setFormState] = useState<FormState>(null)
   // The transaction waiting for delete confirmation, or null if the dialog is closed
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null)
+  // The pending record being confirmed, or null if the modal is closed
+  const [transactionToConfirm, setTransactionToConfirm] = useState<Transaction | null>(null)
 
   const { data, isPending, isError, error, refetch, isPlaceholderData } = useTransactions({
     ...filters,
@@ -82,6 +86,11 @@ function TransactionsPage() {
     updateSearchParams({ month: month === currentMonth() ? undefined : month })
   }
 
+  // Pending records can be in any month, so the month limit is removed too
+  function handleShowPending() {
+    updateSearchParams({ status: 'PENDING', month: ALL_MONTHS })
+  }
+
   function handleClearRange() {
     updateSearchParams({ from: undefined, to: undefined })
   }
@@ -116,6 +125,9 @@ function TransactionsPage() {
           Nueva transacción
         </button>
       </div>
+
+      {/* Hidden while the list already shows only the pending ones */}
+      {filters.status !== 'PENDING' && <PendingBanner onShowPending={handleShowPending} />}
 
       <MonthSelector period={period} onMonthChange={handleMonthChange} onClearRange={handleClearRange} />
 
@@ -185,14 +197,24 @@ function TransactionsPage() {
           <ul className="flex flex-col gap-2 md:hidden">
             {data.data.map((transaction) => (
               <li key={transaction.id}>
-                <TransactionCard transaction={transaction} onEdit={setFormState} onDelete={setTransactionToDelete} />
+                <TransactionCard
+                  transaction={transaction}
+                  onEdit={setFormState}
+                  onConfirm={setTransactionToConfirm}
+                  onDelete={setTransactionToDelete}
+                />
               </li>
             ))}
           </ul>
 
           {/* Desktop: table */}
           <div className="hidden md:block">
-            <TransactionTable transactions={data.data} onEdit={setFormState} onDelete={setTransactionToDelete} />
+            <TransactionTable
+              transactions={data.data}
+              onEdit={setFormState}
+              onConfirm={setTransactionToConfirm}
+              onDelete={setTransactionToDelete}
+            />
           </div>
 
           {/* Mobile: pagination above the size selector. Desktop: both in one row */}
@@ -228,6 +250,10 @@ function TransactionsPage() {
           transaction={formState === 'new' ? undefined : formState}
           onClose={() => setFormState(null)}
         />
+      )}
+
+      {transactionToConfirm && (
+        <ConfirmTransactionModal transaction={transactionToConfirm} onClose={() => setTransactionToConfirm(null)} />
       )}
 
       {transactionToDelete && (

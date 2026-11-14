@@ -1,4 +1,4 @@
-import type { TransactionType } from '../types/transaction'
+import type { TransactionStatus, TransactionType } from '../types/transaction'
 import { currentMonth, isValidMonth, monthRange } from './month'
 
 // Filters of the transactions list. They live in the URL (?type=EXPENSE&from=...), so reloading,
@@ -6,12 +6,13 @@ import { currentMonth, isValidMonth, monthRange } from './month'
 export interface TransactionFilters {
   q?: string
   type?: TransactionType
+  status?: TransactionStatus
   category?: string
   from?: string // "YYYY-MM-DD"
   to?: string // "YYYY-MM-DD"
 }
 
-export const FILTER_KEYS = ['q', 'type', 'category', 'from', 'to'] as const satisfies readonly (keyof TransactionFilters)[]
+export const FILTER_KEYS = ['q', 'type', 'status', 'category', 'from', 'to'] as const satisfies readonly (keyof TransactionFilters)[]
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -20,6 +21,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 // (which would answer 400 and leave the page in an error state)
 export function parseTransactionFilters(searchParams: URLSearchParams): TransactionFilters {
   const type = searchParams.get('type')
+  const status = searchParams.get('status')
   const category = searchParams.get('category')
   const from = searchParams.get('from')
   const to = searchParams.get('to')
@@ -32,6 +34,7 @@ export function parseTransactionFilters(searchParams: URLSearchParams): Transact
   return {
     q: searchParams.get('q')?.trim() || undefined,
     type: type === 'EXPENSE' || type === 'INCOME' ? type : undefined,
+    status: status === 'CONFIRMED' || status === 'PENDING' ? status : undefined,
     category: category && UUID.test(category) ? category : undefined,
     from: validFrom,
     to: isRangeReversed ? undefined : validTo,
@@ -40,7 +43,7 @@ export function parseTransactionFilters(searchParams: URLSearchParams): Transact
 
 // The search box is not counted: it is always visible, unlike the filters panel on mobile
 export function countPanelFilters(filters: TransactionFilters): number {
-  return [filters.type, filters.category, filters.from, filters.to].filter(Boolean).length
+  return [filters.type, filters.status, filters.category, filters.from, filters.to].filter(Boolean).length
 }
 
 export function hasActiveFilters(filters: TransactionFilters): boolean {

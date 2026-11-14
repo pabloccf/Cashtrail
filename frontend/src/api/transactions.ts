@@ -25,6 +25,11 @@ export function updateTransaction(id: string, input: TransactionInput) {
   return apiClient.put<Transaction>(`/transactions/${id}`, input)
 }
 
+// `amount` adjusts the amount when confirming. Without it, the request has no body and the amount is kept
+export function confirmTransaction(id: string, amount?: number) {
+  return apiClient.patch<Transaction>(`/transactions/${id}/confirm`, amount === undefined ? undefined : { amount })
+}
+
 export function deleteTransaction(id: string) {
   return apiClient.delete(`/transactions/${id}`)
 }

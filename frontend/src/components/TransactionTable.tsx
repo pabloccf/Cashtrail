@@ -2,15 +2,17 @@ import type { Transaction } from '../types/transaction'
 import { formatDate, toIsoDateOnly } from '../utils/date'
 import CategoryBadge from './CategoryBadge'
 import TransactionAmount from './TransactionAmount'
+import TransactionMarkers from './TransactionMarkers'
 
 interface TransactionTableProps {
   transactions: Transaction[]
   onEdit: (transaction: Transaction) => void
+  onConfirm: (transaction: Transaction) => void
   onDelete: (transaction: Transaction) => void
 }
 
 // Desktop view of the transactions
-function TransactionTable({ transactions, onEdit, onDelete }: TransactionTableProps) {
+function TransactionTable({ transactions, onEdit, onConfirm, onDelete }: TransactionTableProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <table className="w-full text-left text-sm">
@@ -32,7 +34,10 @@ function TransactionTable({ transactions, onEdit, onDelete }: TransactionTablePr
                 <time dateTime={toIsoDateOnly(transaction.date)}>{formatDate(transaction.date)}</time>
               </td>
               <td className="px-4 py-3">
-                {transaction.description || <span className="text-slate-400">Sin descripción</span>}
+                <span className="flex items-center gap-2">
+                  {transaction.description || <span className="text-slate-400">Sin descripción</span>}
+                  <TransactionMarkers transaction={transaction} />
+                </span>
               </td>
               <td className="px-4 py-3">
                 <CategoryBadge category={transaction.category} />
@@ -42,6 +47,15 @@ function TransactionTable({ transactions, onEdit, onDelete }: TransactionTablePr
               </td>
               {/* Real buttons instead of a clickable <tr>: they can be reached with the keyboard */}
               <td className="whitespace-nowrap px-2 py-1 text-right">
+                {transaction.status === 'PENDING' && (
+                  <button
+                    type="button"
+                    onClick={() => onConfirm(transaction)}
+                    className="min-h-11 rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50"
+                  >
+                    Confirmar
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => onEdit(transaction)}

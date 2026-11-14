@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createTransaction, deleteTransaction, updateTransaction } from '../api/transactions'
+import { confirmTransaction, createTransaction, deleteTransaction, updateTransaction } from '../api/transactions'
 import type { TransactionInput } from '../types/transaction'
 
 // After any change, every cached list (all pages) is marked as stale and the visible one is refetched.
@@ -21,6 +21,14 @@ export function useUpdateTransaction() {
   const invalidate = useInvalidateTransactions()
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: TransactionInput }) => updateTransaction(id, input),
+    onSuccess: invalidate,
+  })
+}
+
+export function useConfirmTransaction() {
+  const invalidate = useInvalidateTransactions()
+  return useMutation({
+    mutationFn: ({ id, amount }: { id: string; amount?: number }) => confirmTransaction(id, amount),
     onSuccess: invalidate,
   })
 }

@@ -78,7 +78,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
 
       <div
         id={panelId}
-        className={`${isPanelOpen ? 'grid' : 'hidden'} gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 md:grid md:grid-cols-4`}
+        className={`${isPanelOpen ? 'grid' : 'hidden'} gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 md:grid md:grid-cols-3 lg:grid-cols-5`}
       >
         <div>
           <label htmlFor={`${id}-type`} className={labelClass}>
@@ -93,6 +93,22 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
             <option value="">Todos</option>
             <option value="EXPENSE">Gastos</option>
             <option value="INCOME">Ingresos</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor={`${id}-status`} className={labelClass}>
+            Estado
+          </label>
+          <select
+            id={`${id}-status`}
+            className={selectClass}
+            value={filters.status ?? ''}
+            onChange={(event) => onChange({ status: event.target.value || undefined })}
+          >
+            <option value="">Todos</option>
+            <option value="CONFIRMED">Confirmados</option>
+            <option value="PENDING">Pendientes</option>
           </select>
         </div>
 
@@ -158,7 +174,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
           <button
             type="button"
             onClick={onClear}
-            className="min-h-11 justify-self-start rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50 sm:col-span-2 md:col-span-4"
+            className="min-h-11 justify-self-start rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50 sm:col-span-2 md:col-span-3 lg:col-span-5"
           >
             Limpiar filtros
           </button>
