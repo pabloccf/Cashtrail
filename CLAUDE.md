@@ -342,7 +342,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
   - [x] Frontend: proxy de Vite, React Router, TanStack Query y página `/transactions` con lista y formulario
 - [x] **Fase 2:** autenticación y protección de rutas. El registro crea las categorías por defecto del usuario: crear `src/constants/defaultCategories.ts` con la lista de "Categorías por defecto" y adaptar el seed existente para que use esa misma lista.
 - [x] **Fase 3:** categorías, filtros y paginación
-- [ ] **Fase 4:** gastos e ingresos fijos: modelo, CRUD, lógica de generación, endpoint `/jobs/recurring` y confirmación de pendientes
+- [x] **Fase 4:** gastos e ingresos fijos: modelo, CRUD, lógica de generación, endpoint `/jobs/recurring` y confirmación de pendientes
 - [ ] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
 - [ ] **Fase 6:** presupuestos y exportar a CSV
 - [ ] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
