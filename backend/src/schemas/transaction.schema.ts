@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TransactionType } from '../generated/prisma/enums.js';
+import { TransactionStatus, TransactionType } from '../generated/prisma/enums.js';
 
 // Upper limit of a PostgreSQL `integer` column (amount is stored in cents)
 export const MAX_AMOUNT_CENTS = 2_147_483_647;
@@ -31,6 +31,7 @@ export const listTransactionsQuerySchema = z
     to: z.iso.date().optional(),
     category: z.uuid().optional(),
     type: transactionTypeSchema.optional(),
+    status: z.enum(TransactionStatus).optional(),
     // Text search in the description. "?q=" or "?q=   " (empty after trim) means no search
     q: z
       .string()
@@ -49,6 +50,16 @@ export const listTransactionsQuerySchema = z
     path: ['to'],
   });
 
+// Body of PATCH /transactions/:id/confirm. `amount` adjusts the amount when confirming (the electricity
+// bill was not exactly the estimate). Without a body, Express 5 leaves `req.body` undefined, and
+// `.default({})` turns that into an empty object: "confirm with the same amount"
+export const confirmTransactionBodySchema = z
+  .object({
+    amount: z.number().int().positive().max(MAX_AMOUNT_CENTS).optional(),
+  })
+  .default({});
+
 export type TransactionIdParams = z.infer<typeof transactionIdParamsSchema>;
 export type TransactionInput = z.infer<typeof transactionBodySchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
+export type ConfirmTransactionInput = z.infer<typeof confirmTransactionBodySchema>;

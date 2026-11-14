@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import type { TransactionType } from '../generated/prisma/enums.js';
+import type { TransactionStatus, TransactionType } from '../generated/prisma/enums.js';
 
 // Category fields the frontend needs to show each transaction (name, color, icon)
 const transactionInclude = {
@@ -12,6 +12,7 @@ export interface TransactionFilters {
   to?: Date;
   categoryId?: string;
   type?: TransactionType;
+  status?: TransactionStatus;
   search?: string;
 }
 
@@ -40,6 +41,7 @@ export async function findManyByUser(userId: string, filters: TransactionFilters
     userId,
     categoryId: filters.categoryId,
     type: filters.type,
+    status: filters.status,
     date: { gte: filters.from, lte: filters.to },
     // ILIKE '%search%' in PostgreSQL: matches anywhere in the text, ignoring upper/lower case.
     // Transactions without a description (null) never match
@@ -74,6 +76,15 @@ export function create(userId: string, data: TransactionData) {
 
 export function update(userId: string, id: string, data: TransactionData) {
   return prisma.transaction.update({ where: { id, userId }, data, include: transactionInclude });
+}
+
+// `amount` undefined keeps the current amount: Prisma ignores fields whose value is `undefined`
+export function confirm(userId: string, id: string, amount?: number) {
+  return prisma.transaction.update({
+    where: { id, userId },
+    data: { status: 'CONFIRMED', amount },
+    include: transactionInclude,
+  });
 }
 
 // Named `remove` because `delete` is a reserved word and cannot be a function name

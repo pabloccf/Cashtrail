@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 import * as transactionService from '../services/transaction.service.js';
 import type {
+  ConfirmTransactionInput,
   ListTransactionsQuery,
   TransactionIdParams,
   TransactionInput,
@@ -27,6 +28,10 @@ export const create: RequestHandler<NoParams, unknown, TransactionInput> = async
 
 export const update: RequestHandler<TransactionIdParams, unknown, TransactionInput> = async (req, res) => {
   res.json(await transactionService.update(req.userId, req.params.id, req.body));
+};
+
+export const confirm: RequestHandler<TransactionIdParams, unknown, ConfirmTransactionInput> = async (req, res) => {
+  res.json(await transactionService.confirm(req.userId, req.params.id, req.body));
 };
 
 export const remove: RequestHandler<TransactionIdParams> = async (req, res) => {
