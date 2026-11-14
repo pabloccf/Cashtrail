@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 import { authRouter } from './auth.routes.js';
 import { categoryRouter } from './category.routes.js';
+import { jobRouter } from './job.routes.js';
 import { recurringRouter } from './recurring.routes.js';
 import { transactionRouter } from './transaction.routes.js';
 
@@ -14,6 +15,9 @@ apiRouter.get('/health', (_req, res) => {
 
 // Public: each auth route decides on its own whether it needs a session
 apiRouter.use('/auth', authRouter);
+
+// Not for users: protected by the x-cron-secret header instead of the session
+apiRouter.use('/jobs', jobRouter);
 
 // Everything below requires a logged-in user
 apiRouter.use('/transactions', requireAuth, transactionRouter);

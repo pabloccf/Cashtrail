@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import type { Frequency, RecurringMode, TransactionType } from '../generated/prisma/enums.js';
+import type { Frequency, RecurringMode, TransactionStatus, TransactionType } from '../generated/prisma/enums.js';
 
 // Category fields the frontend needs to show each recurring transaction (name, color, icon)
 const recurringInclude = {
@@ -18,6 +18,16 @@ export interface RecurringData {
   startDate: Date;
   endDate: Date | null;
   mode: RecurringMode;
+}
+
+// A record the job creates from a recurring transaction
+export interface GeneratedRecordData {
+  categoryId: string;
+  amount: number;
+  type: TransactionType;
+  description: string;
+  date: Date;
+  status: TransactionStatus;
 }
 
 export interface RecurringActiveData {
@@ -60,4 +70,41 @@ export async function removeWithPendingRecords(userId: string, id: string) {
     prisma.transaction.deleteMany({ where: { userId, recurringTransactionId: id, status: 'PENDING' } }),
     prisma.recurringTransaction.delete({ where: { id, userId } }),
   ]);
+}
+
+// --- Used by the generation job (src/jobs/generateRecurring.ts) ---
+// These two functions are the exception to "always filter by userId": the job runs for every user
+// at once. It is safe because each record is created with the userId of its own recurring transaction
+
+// Active recurring transactions that have days left to process up to `today`
+export function findDueForGeneration(today: Date) {
+  return prisma.recurringTransaction.findMany({
+    where: {
+      active: true,
+      startDate: { lte: today },
+      OR: [{ lastGeneratedAt: null }, { lastGeneratedAt: { lt: today } }],
+    },
+  });
+}
+
+// Creates the records and moves `lastGeneratedAt` forward in a single database transaction, so
+// they never get out of step. `skipDuplicates` (ON CONFLICT DO NOTHING) silently skips any record
+// that already exists thanks to the unique (recurringTransactionId, date): if two runs overlap,
+// nothing is duplicated. Returns how many records were really created
+export async function saveGeneratedRecords(
+  recurring: { id: string; userId: string },
+  records: GeneratedRecordData[],
+  processedUntil: Date,
+): Promise<number> {
+  const [created] = await prisma.$transaction([
+    prisma.transaction.createMany({
+      data: records.map((record) => ({ ...record, userId: recurring.userId, recurringTransactionId: recurring.id })),
+      skipDuplicates: true,
+    }),
+    prisma.recurringTransaction.update({
+      where: { id: recurring.id, userId: recurring.userId },
+      data: { lastGeneratedAt: processedUntil },
+    }),
+  ]);
+  return created.count;
 }
