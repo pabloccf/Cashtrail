@@ -73,11 +73,11 @@ const frequencyOptions = [
 ] as const
 
 const modeOptions = [
-  { value: 'AUTO', label: 'Automático', description: 'Se apunta solo. Para importes fijos, como Spotify o un préstamo.' },
+  { value: 'AUTO', label: 'Automático', description: 'Se apunta solo. Para importes fijos.' },
   {
     value: 'CONFIRM',
     label: 'Pedir confirmación',
-    description: 'Se apunta como pendiente y lo confirmas o ajustas. Para importes que varían, como la luz.',
+    description: 'Se apunta como pendiente y lo confirmas o ajustas. Para importes que varían.',
   },
 ] as const
 
