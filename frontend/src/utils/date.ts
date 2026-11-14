@@ -1,10 +1,15 @@
-// "2026-11-04T00:00:00.000Z" -> "04-11-2026" (day-month-year, as in Spain).
-// The backend stores calendar days at 00:00 UTC, so the first 10 characters are already the right day.
-// Reading them from the text avoids `new Date()`: with the browser's time zone, a user in America
-// would see the 3rd for a transaction made on the 4th
+// The backend stores calendar days at 00:00 UTC. Formatting in UTC keeps the same day everywhere:
+// with the browser's time zone, a user in America would see "3 nov" for a transaction made on the 4th
+const dateFormatter = new Intl.DateTimeFormat('es-ES', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+// "2026-11-04T00:00:00.000Z" -> "4 nov 2026"
 export function formatDate(isoDate: string): string {
-  const [year, month, day] = isoDate.slice(0, 10).split('-')
-  return `${day}-${month}-${year}`
+  return dateFormatter.format(new Date(isoDate))
 }
 
 // "2026-11-04T00:00:00.000Z" -> "2026-11-04", the format of <input type="date"> and of the API
