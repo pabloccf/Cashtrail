@@ -72,5 +72,7 @@ export const apiClient = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, data: unknown) => request<T>('POST', path, data),
   put: <T>(path: string, data: unknown) => request<T>('PUT', path, data),
+  // `data` is optional: some PATCH actions need no body (e.g. toggling a recurring transaction)
+  patch: <T>(path: string, data?: unknown) => request<T>('PATCH', path, data),
   delete: (path: string) => request<void>('DELETE', path),
 }

@@ -9,6 +9,7 @@ interface NavItem {
 // New sections (dashboard, categories...) are added here as the phases go on
 const navItems: NavItem[] = [
   { to: '/transactions', label: 'Transacciones' },
+  { to: '/recurring', label: 'Fijos' },
   { to: '/categories', label: 'Categorías' },
 ]
 

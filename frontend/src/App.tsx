@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import CategoriesPage from './pages/categories/CategoriesPage'
+import RecurringPage from './pages/recurring/RecurringPage'
 import TransactionsPage from './pages/transactions/TransactionsPage'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/recurring" element={<RecurringPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
         </Route>
       </Route>
