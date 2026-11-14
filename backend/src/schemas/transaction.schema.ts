@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { TransactionType } from '../generated/prisma/enums.js';
 
 // Upper limit of a PostgreSQL `integer` column (amount is stored in cents)
-const MAX_AMOUNT_CENTS = 2_147_483_647;
+export const MAX_AMOUNT_CENTS = 2_147_483_647;
 
 // Page sizes the frontend offers. Any other value is rejected, so nobody can ask for
 // ?pageSize=100000 by editing the URL. Keep in sync with PAGE_SIZE_OPTIONS in the frontend

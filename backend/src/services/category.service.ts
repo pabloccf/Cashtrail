@@ -1,4 +1,5 @@
 import { AppError } from '../lib/appError.js';
+import type { TransactionType } from '../generated/prisma/enums.js';
 import * as categoryRepository from '../repositories/category.repository.js';
 import type { CategoryInput } from '../schemas/category.schema.js';
 
@@ -13,6 +14,19 @@ async function assertNameAvailable(userId: string, input: CategoryInput, exclude
   const existing = await categoryRepository.findByName(userId, input.type, input.name);
   if (existing && existing.id !== excludeId) {
     throw new AppError(409, `A category named "${existing.name}" already exists for this type`);
+  }
+}
+
+// Used by the services of transactions and recurring transactions before saving: the category must
+// belong to the user and have the same type (expense/income) as the record. 400 (not 404) because
+// the problem is in the body of the request, not in the URL
+export async function assertUsableCategory(userId: string, categoryId: string, type: TransactionType) {
+  const category = await categoryRepository.findById(userId, categoryId);
+  if (!category) {
+    throw new AppError(400, 'Category not found');
+  }
+  if (category.type !== type) {
+    throw new AppError(400, `Category type (${category.type}) does not match record type (${type})`);
   }
 }
 

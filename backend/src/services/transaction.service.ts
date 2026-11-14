@@ -1,13 +1,8 @@
 import { AppError } from '../lib/appError.js';
-import type { TransactionType } from '../generated/prisma/enums.js';
-import * as categoryRepository from '../repositories/category.repository.js';
+import { toDate } from '../lib/date.js';
 import * as transactionRepository from '../repositories/transaction.repository.js';
+import { assertUsableCategory } from './category.service.js';
 import type { ListTransactionsQuery, TransactionInput } from '../schemas/transaction.schema.js';
-
-// "2026-11-04" -> Date at 00:00 UTC. The column is a DATE, so the time part is discarded
-function toDate(isoDate: string): Date {
-  return new Date(`${isoDate}T00:00:00.000Z`);
-}
 
 function toTransactionData(input: TransactionInput): transactionRepository.TransactionData {
   return {
@@ -18,17 +13,6 @@ function toTransactionData(input: TransactionInput): transactionRepository.Trans
     // An empty description is stored as null
     description: input.description || null,
   };
-}
-
-// The category must belong to the user and have the same type (expense/income) as the transaction
-async function assertValidCategory(userId: string, categoryId: string, type: TransactionType) {
-  const category = await categoryRepository.findById(userId, categoryId);
-  if (!category) {
-    throw new AppError(400, 'Category not found');
-  }
-  if (category.type !== type) {
-    throw new AppError(400, `Category type (${category.type}) does not match transaction type (${type})`);
-  }
 }
 
 export async function list(userId: string, query: ListTransactionsQuery) {
@@ -62,13 +46,13 @@ export async function getById(userId: string, id: string) {
 }
 
 export async function create(userId: string, input: TransactionInput) {
-  await assertValidCategory(userId, input.categoryId, input.type);
+  await assertUsableCategory(userId, input.categoryId, input.type);
   return transactionRepository.create(userId, toTransactionData(input));
 }
 
 export async function update(userId: string, id: string, input: TransactionInput) {
   await getById(userId, id);
-  await assertValidCategory(userId, input.categoryId, input.type);
+  await assertUsableCategory(userId, input.categoryId, input.type);
   return transactionRepository.update(userId, id, toTransactionData(input));
 }
 
