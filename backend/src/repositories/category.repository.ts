@@ -41,13 +41,16 @@ export function findByName(userId: string, type: TransactionType, name: string) 
 }
 
 // How many records use the category. `_count` counts the relations in the same query.
-// Recurring transactions (Phase 4) and budgets (Phase 6) will be added here
+// Budgets (Phase 6) will be added here
 export async function countUsages(userId: string, id: string) {
   const category = await prisma.category.findFirst({
     where: { id, userId },
-    select: { _count: { select: { transactions: true } } },
+    select: { _count: { select: { transactions: true, recurringTransactions: true } } },
   });
-  return { transactions: category?._count.transactions ?? 0 };
+  return {
+    transactions: category?._count.transactions ?? 0,
+    recurringTransactions: category?._count.recurringTransactions ?? 0,
+  };
 }
 
 export function create(userId: string, data: CategoryData) {

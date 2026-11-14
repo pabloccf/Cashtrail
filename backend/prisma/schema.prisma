@@ -12,6 +12,23 @@ enum TransactionType {
   INCOME
 }
 
+// PENDING records come from CONFIRM-mode recurring transactions and do not count in totals until confirmed
+enum TransactionStatus {
+  CONFIRMED
+  PENDING
+}
+
+enum Frequency {
+  MONTHLY
+  YEARLY
+}
+
+// AUTO: records are created as CONFIRMED. CONFIRM: records are created as PENDING
+enum RecurringMode {
+  AUTO
+  CONFIRM
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
@@ -20,8 +37,9 @@ model User {
   currency     String   @default("EUR") @db.Char(3)
   createdAt    DateTime @default(now()) @db.Timestamptz
 
-  categories   Category[]
-  transactions Transaction[]
+  categories            Category[]
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
 }
 
 model Category {
@@ -32,25 +50,62 @@ model Category {
   icon   String // Icon name used by the frontend
   type   TransactionType
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
 
   @@unique([userId, type, name])
 }
 
 model Transaction {
-  id          String          @id @default(uuid()) @db.Uuid
-  userId      String          @db.Uuid
-  categoryId  String          @db.Uuid
-  amount      Int // In cents, always positive. The sign comes from `type`
-  description String?
-  date        DateTime        @db.Date
-  type        TransactionType
-  createdAt   DateTime        @default(now()) @db.Timestamptz
+  id                     String            @id @default(uuid()) @db.Uuid
+  userId                 String            @db.Uuid
+  categoryId             String            @db.Uuid
+  // Set when the record was generated from a recurring transaction. Null for manual records
+  recurringTransactionId String?           @db.Uuid
+  amount                 Int // In cents, always positive. The sign comes from `type`
+  description            String?
+  date                   DateTime          @db.Date
+  type                   TransactionType
+  status                 TransactionStatus @default(CONFIRMED)
+  createdAt              DateTime          @default(now()) @db.Timestamptz
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category             Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  // Deleting the recurring transaction keeps its records in the history, just unlinked
+  recurringTransaction RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id], onDelete: SetNull)
 
+  // A recurring transaction generates at most one record per day, so running the job twice
+  // never duplicates anything. Manual records (null) never collide: in PostgreSQL NULLs are all distinct
+  @@unique([recurringTransactionId, date])
   @@index([userId, date])
+  @@index([categoryId])
+}
+
+// Template from which the daily job creates records (Spotify, car loan, salary...).
+// It only creates entries in the app: it never pays or charges anything
+model RecurringTransaction {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @db.Uuid
+  categoryId      String          @db.Uuid
+  amount          Int // In cents, always positive. The sign comes from `type`
+  description     String
+  type            TransactionType
+  frequency       Frequency
+  dayOfMonth      Int // 1-31. If the month is shorter, the last day of the month is used
+  monthOfYear     Int? // 1-12. Only for YEARLY, null for MONTHLY
+  startDate       DateTime        @db.Date
+  endDate         DateTime?       @db.Date // Null means it never ends
+  mode            RecurringMode
+  active          Boolean         @default(true)
+  // Last day the job has already processed. Null until the first run
+  lastGeneratedAt DateTime?       @db.Date
+  createdAt       DateTime        @default(now()) @db.Timestamptz
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  transactions Transaction[]
+
+  @@index([userId])
   @@index([categoryId])
 }
