@@ -44,6 +44,14 @@ export function findManyByUser(userId: string) {
   });
 }
 
+// Only the active ones: paused recurring transactions generate nothing, so they never come up next
+export function findActiveByUser(userId: string) {
+  return prisma.recurringTransaction.findMany({
+    where: { userId, active: true },
+    include: recurringInclude,
+  });
+}
+
 // findFirst (not findUnique) because it filters by id AND userId:
 // a recurring transaction of another user is simply not found
 export function findById(userId: string, id: string) {

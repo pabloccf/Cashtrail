@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
 import * as recurringService from '../services/recurring.service.js';
-import type { RecurringIdParams, RecurringInput } from '../schemas/recurring.schema.js';
+import type { RecurringIdParams, RecurringInput, UpcomingQuery } from '../schemas/recurring.schema.js';
 
 // The RequestHandler generics are <params, response body, request body, query>.
 // They are only a promise to TypeScript: the validate middleware on each route makes them true
@@ -8,6 +8,12 @@ type NoParams = Record<string, string>;
 
 export const list: RequestHandler = async (req, res) => {
   res.json(await recurringService.list(req.userId));
+};
+
+export const upcoming: RequestHandler = async (req, res) => {
+  // Safe cast: validate() already replaced `req.query` with the parsed query
+  const { days } = req.query as unknown as UpcomingQuery;
+  res.json(await recurringService.getUpcoming(req.userId, days));
 };
 
 export const create: RequestHandler<NoParams, unknown, RecurringInput> = async (req, res) => {

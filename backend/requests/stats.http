@@ -5,8 +5,14 @@
 
 @baseUrl = http://localhost:3000/api
 
-### Summary of a month: income, expense and balance
+### Summary of a month: income, expense and balance, plus the estimated balance.
+# remainingRecurring = PENDING records of the month + recurring occurrences not generated yet
+# (from today to the end of the month). estimatedBalance = balance + remaining income - remaining expense
 GET {{baseUrl}}/stats/summary?month=2026-11
+
+### Upcoming recurring income and expenses, from today to 30 days from now (days: 1-365, default 30).
+# Only active ones, and only what the daily job has not generated yet
+GET {{baseUrl}}/recurring/upcoming?days=30
 
 ### Expenses by category (type defaults to EXPENSE), highest first
 GET {{baseUrl}}/stats/by-category?month=2026-11

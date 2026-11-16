@@ -39,5 +39,12 @@ export const recurringBodySchema = z
     path: ['endDate'],
   });
 
+// GET /recurring/upcoming?days=30. Query string values arrive as text, so they are coerced to numbers.
+// Up to a year: further than that the list would only repeat the same recurring transactions
+export const upcomingQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(365).default(30),
+});
+
 export type RecurringIdParams = z.infer<typeof recurringIdParamsSchema>;
 export type RecurringInput = z.infer<typeof recurringBodySchema>;
+export type UpcomingQuery = z.infer<typeof upcomingQuerySchema>;

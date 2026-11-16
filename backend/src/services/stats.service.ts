@@ -1,18 +1,68 @@
+import type { TransactionStatus, TransactionType } from '../generated/prisma/enums.js';
+import { todayUtc } from '../lib/date.js';
 import { monthRange, shiftMonth, toMonthString } from '../lib/month.js';
 import * as categoryRepository from '../repositories/category.repository.js';
 import * as statsRepository from '../repositories/stats.repository.js';
 import type { ByCategoryQuery, MonthlyQuery, SummaryQuery } from '../schemas/stats.schema.js';
+import * as recurringService from './recurring.service.js';
+
+interface Totals {
+  income: number; // In cents
+  expense: number; // In cents
+}
 
 // Income and expense totals in cents, from the rows of sumByType. A missing type means 0
-async function getTotals(userId: string, range: statsRepository.DateRange) {
-  const rows = await statsRepository.sumByType(userId, range);
-  const totalOf = (type: string) => rows.find((row) => row.type === type)?._sum.amount ?? 0;
+async function getTotals(
+  userId: string,
+  range: statsRepository.DateRange,
+  status: TransactionStatus = 'CONFIRMED',
+): Promise<Totals> {
+  const rows = await statsRepository.sumByType(userId, range, status);
+  const totalOf = (type: TransactionType) => rows.find((row) => row.type === type)?._sum.amount ?? 0;
   return { income: totalOf('INCOME'), expense: totalOf('EXPENSE') };
 }
 
+// Recurring income and expenses of the month that are not in the balance yet:
+// - PENDING records (already generated, waiting for the user to confirm them)
+// - occurrences the job has not generated yet, from today to the end of the month
+// Nothing of a past month: its occurrences are already generated (and pending ones are counted above)
+async function getRemainingRecurring(userId: string, range: statsRepository.DateRange): Promise<Totals> {
+  const today = todayUtc();
+  const from = range.from > today ? range.from : today;
+
+  const [pending, upcoming] = await Promise.all([
+    getTotals(userId, range, 'PENDING'),
+    recurringService.getUpcomingInRange(userId, from, range.to),
+  ]);
+
+  const remaining = { ...pending };
+  for (const occurrence of upcoming) {
+    if (occurrence.type === 'INCOME') {
+      remaining.income += occurrence.amount;
+    } else {
+      remaining.expense += occurrence.amount;
+    }
+  }
+  return remaining;
+}
+
+// The month's balance, plus how it is expected to end once the remaining recurring income and
+// expenses arrive. Just an estimate: one-off expenses still to come are unknown
 export async function getSummary(userId: string, { month }: SummaryQuery) {
-  const { income, expense } = await getTotals(userId, monthRange(month));
-  return { month, income, expense, balance: income - expense };
+  const range = monthRange(month);
+  const [totals, remainingRecurring] = await Promise.all([
+    getTotals(userId, range),
+    getRemainingRecurring(userId, range),
+  ]);
+
+  const balance = totals.income - totals.expense;
+  return {
+    month,
+    ...totals,
+    balance,
+    remainingRecurring,
+    estimatedBalance: balance + remainingRecurring.income - remainingRecurring.expense,
+  };
 }
 
 // [{ category: { id, name, color, icon }, total }], highest total first

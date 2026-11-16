@@ -1,6 +1,8 @@
 import { generateForRecurring } from '../jobs/generateRecurring.js';
 import { AppError } from '../lib/appError.js';
 import { addDays, toDate, todayUtc } from '../lib/date.js';
+import { getOccurrenceDates } from '../lib/recurrence.js';
+import type { RecurringMode, TransactionType } from '../generated/prisma/enums.js';
 import * as recurringRepository from '../repositories/recurring.repository.js';
 import type { RecurringInput } from '../schemas/recurring.schema.js';
 import { assertUsableCategory } from './category.service.js';
@@ -22,6 +24,52 @@ function toRecurringData(input: RecurringInput): recurringRepository.RecurringDa
 
 export function list(userId: string) {
   return recurringRepository.findManyByUser(userId);
+}
+
+// A future occurrence of a recurring transaction: a record the job has not created yet
+export interface UpcomingOccurrence {
+  recurringTransactionId: string;
+  date: Date;
+  amount: number; // In cents
+  type: TransactionType;
+  description: string;
+  mode: RecurringMode;
+  category: { id: string; name: string; color: string; icon: string };
+}
+
+// Occurrences of the active recurring transactions between `from` and `to` (both included) that the
+// job has NOT generated yet, oldest first. Each one starts the day after its `lastGeneratedAt`, so:
+// - something already generated (a PENDING or CONFIRMED record) never shows up twice
+// - today's occurrence still shows up if the daily job has not run yet
+// Used by GET /recurring/upcoming and by the estimated balance of /stats/summary
+export async function getUpcomingInRange(userId: string, from: Date, to: Date): Promise<UpcomingOccurrence[]> {
+  const recurringList = await recurringRepository.findActiveByUser(userId);
+
+  const occurrences = recurringList.flatMap((recurring) => {
+    const firstNotGenerated = recurring.lastGeneratedAt ? addDays(recurring.lastGeneratedAt, 1) : recurring.startDate;
+    const start = firstNotGenerated > from ? firstNotGenerated : from;
+    // getOccurrenceDates already ignores the days before startDate and after endDate
+    return getOccurrenceDates(recurring, start, to).map((date) => ({
+      recurringTransactionId: recurring.id,
+      date,
+      amount: recurring.amount,
+      type: recurring.type,
+      description: recurring.description,
+      mode: recurring.mode,
+      category: recurring.category,
+    }));
+  });
+
+  // Dates are compared by their milliseconds. Same day: alphabetically, so the order is stable
+  return occurrences.sort(
+    (a, b) => a.date.getTime() - b.date.getTime() || a.description.localeCompare(b.description),
+  );
+}
+
+// From today to `days` days from now, both included
+export function getUpcoming(userId: string, days: number) {
+  const today = todayUtc();
+  return getUpcomingInRange(userId, today, addDays(today, days));
 }
 
 // Another user's recurring transaction gives the same 404 as one that does not exist

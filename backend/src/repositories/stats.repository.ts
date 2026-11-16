@@ -1,23 +1,24 @@
 import { prisma } from '../lib/prisma.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import type { TransactionType } from '../generated/prisma/enums.js';
+import type { TransactionStatus, TransactionType } from '../generated/prisma/enums.js';
 
 export interface DateRange {
   from: Date;
   to: Date;
 }
 
-// Every stat only counts CONFIRMED records: PENDING ones do not count until the user confirms them
-function confirmedInRange(userId: string, range: DateRange): Prisma.TransactionWhereInput {
-  return { userId, status: 'CONFIRMED', date: { gte: range.from, lte: range.to } };
+// Every stat only counts CONFIRMED records: PENDING ones do not count until the user confirms them.
+// The only exception is the estimated balance, which asks for PENDING ones explicitly
+function inRange(userId: string, range: DateRange, status: TransactionStatus = 'CONFIRMED'): Prisma.TransactionWhereInput {
+  return { userId, status, date: { gte: range.from, lte: range.to } };
 }
 
 // One row per type: [{ type: 'INCOME', _sum: { amount: 250000 } }, ...]. A type without
 // records has no row at all. SQL: SELECT type, SUM(amount) ... GROUP BY type
-export function sumByType(userId: string, range: DateRange) {
+export function sumByType(userId: string, range: DateRange, status: TransactionStatus = 'CONFIRMED') {
   return prisma.transaction.groupBy({
     by: ['type'],
-    where: confirmedInRange(userId, range),
+    where: inRange(userId, range, status),
     _sum: { amount: true },
   });
 }
@@ -27,7 +28,7 @@ export function sumByType(userId: string, range: DateRange) {
 export function sumByCategory(userId: string, type: TransactionType, range: DateRange) {
   return prisma.transaction.groupBy({
     by: ['categoryId'],
-    where: { ...confirmedInRange(userId, range), type },
+    where: { ...inRange(userId, range), type },
     _sum: { amount: true },
     orderBy: { _sum: { amount: 'desc' } },
   });
@@ -38,7 +39,7 @@ export function sumByCategory(userId: string, type: TransactionType, range: Date
 export function sumByDateAndType(userId: string, range: DateRange) {
   return prisma.transaction.groupBy({
     by: ['date', 'type'],
-    where: confirmedInRange(userId, range),
+    where: inRange(userId, range),
     _sum: { amount: true },
   });
 }
