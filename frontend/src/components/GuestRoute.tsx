@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router'
 import { useCurrentUser } from '../hooks/useAuth'
 import FullPageMessage from './FullPageMessage'
 
-const DEFAULT_PRIVATE_PATH = '/transactions'
+const DEFAULT_PRIVATE_PATH = '/dashboard'
 
 // `location.state` is typed as unknown: check its shape before trusting it
 function getRedirectPath(state: unknown): string {

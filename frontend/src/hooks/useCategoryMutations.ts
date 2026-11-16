@@ -14,12 +14,13 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: CategoryInput }) => updateCategory(id, input),
-    // Each transaction carries a copy of its category (name, color, icon), so the cached
-    // transaction lists are outdated too after renaming or recoloring a category
+    // Each transaction (and each "by category" stat) carries a copy of its category (name, color,
+    // icon), so the cached lists and stats are outdated too after renaming or recoloring a category
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ['categories'] }),
         queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['stats'] }),
       ]),
   })
 }

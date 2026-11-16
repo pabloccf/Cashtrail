@@ -2,17 +2,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createRecurring, deleteRecurring, toggleRecurring, updateRecurring } from '../api/recurring'
 import type { RecurringInput } from '../types/recurring'
 
-// Some changes to a recurring transaction also create or delete records in the backend, so the
-// cached transaction lists must be refetched too. Returning the promise keeps the mutation
-// "pending" until the lists are up to date
+// Every change to a recurring transaction changes the stats (the estimated balance counts the
+// recurring income and expenses still to come). Some also create or delete records in the backend,
+// so the cached transaction lists must be refetched too. Returning the promise keeps the mutation
+// "pending" until everything is up to date
 function useInvalidate() {
   const queryClient = useQueryClient()
   return {
-    recurring: () => queryClient.invalidateQueries({ queryKey: ['recurring'] }),
+    recurring: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['recurring'] }),
+        queryClient.invalidateQueries({ queryKey: ['stats'] }),
+      ]),
     recurringAndTransactions: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ['recurring'] }),
         queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+        queryClient.invalidateQueries({ queryKey: ['stats'] }),
       ]),
   }
 }
@@ -26,7 +32,7 @@ export function useCreateRecurring() {
   })
 }
 
-// Editing only affects future records, so no transaction changes
+// Editing only affects future records, so no transaction changes (the stats do: see useInvalidate)
 export function useUpdateRecurring() {
   const invalidate = useInvalidate()
   return useMutation({

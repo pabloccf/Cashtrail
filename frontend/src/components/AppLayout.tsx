@@ -1,24 +1,35 @@
+import { ArrowLeftRight, LayoutDashboard, Repeat, Tags, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { useCurrentUser, useLogout } from '../hooks/useAuth'
 
 interface NavItem {
   to: string
   label: string
+  icon: LucideIcon
 }
 
-// New sections (dashboard, categories...) are added here as the phases go on
+// New sections (budgets, settings...) are added here as the phases go on
 const navItems: NavItem[] = [
-  { to: '/transactions', label: 'Transacciones' },
-  { to: '/recurring', label: 'Fijos' },
-  { to: '/categories', label: 'Categorías' },
+  { to: '/dashboard', label: 'Inicio', icon: LayoutDashboard },
+  { to: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
+  { to: '/recurring', label: 'Fijos', icon: Repeat },
+  { to: '/categories', label: 'Categorías', icon: Tags },
 ]
 
 // NavLink passes `isActive`, so the current section can be highlighted
-function navLinkClass({ isActive }: { isActive: boolean }) {
-  const base = 'flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-medium md:justify-start'
-  return isActive
-    ? `${base} bg-emerald-50 text-emerald-700`
-    : `${base} text-slate-600 hover:bg-slate-100`
+function activeClass(isActive: boolean) {
+  return isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100'
+}
+
+// Desktop sidebar: icon and label in a row
+function sidebarLinkClass({ isActive }: { isActive: boolean }) {
+  return `flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium ${activeClass(isActive)}`
+}
+
+// Mobile bottom bar: icon with a small label under it, so four sections fit in a narrow screen.
+// min-w-0 lets each item shrink below the width of its label instead of overflowing the bar
+function bottomLinkClass({ isActive }: { isActive: boolean }) {
+  return `flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[11px] font-medium ${activeClass(isActive)}`
 }
 
 function AppLayout() {
@@ -44,7 +55,8 @@ function AppLayout() {
         <p className="mb-6 px-3 text-xl font-bold text-emerald-600">Cashtrail</p>
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={navLinkClass}>
+            <NavLink key={item.to} to={item.to} className={sidebarLinkClass}>
+              <item.icon className="size-5 shrink-0" aria-hidden="true" />
               {item.label}
             </NavLink>
           ))}
@@ -70,8 +82,9 @@ function AppLayout() {
       {/* Mobile: bottom bar */}
       <nav className="fixed inset-x-0 bottom-0 flex gap-1 border-t border-slate-200 bg-white p-2 md:hidden">
         {navItems.map((item) => (
-          <NavLink key={item.to} to={item.to} className={(state) => `flex-1 ${navLinkClass(state)}`}>
-            {item.label}
+          <NavLink key={item.to} to={item.to} className={bottomLinkClass}>
+            <item.icon className="size-5 shrink-0" aria-hidden="true" />
+            <span className="max-w-full truncate">{item.label}</span>
           </NavLink>
         ))}
       </nav>
