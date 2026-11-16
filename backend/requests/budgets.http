@@ -1,0 +1,74 @@
+# Example requests for the VS Code "REST Client" extension.
+# Every request needs a session: send "Login" in auth.http first.
+# Replace the category ids with ids of your own EXPENSE categories (GET /categories).
+
+@baseUrl = http://localhost:3000/api
+@categoryId = 00000000-0000-0000-0000-000000000000
+
+### Budgets of a month, each with what has been spent in its category (CONFIRMED expenses only)
+GET {{baseUrl}}/budgets?month=2026-11
+
+### Create a budget (amount in cents: 300,00 €)
+# @name created
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "categoryId": "{{categoryId}}",
+  "amount": 30000,
+  "month": "2026-11"
+}
+
+### Change its amount (only the amount can change)
+PUT {{baseUrl}}/budgets/{{created.response.body.id}}
+Content-Type: application/json
+
+{
+  "amount": 35000
+}
+
+### Delete it (204 No Content)
+DELETE {{baseUrl}}/budgets/{{created.response.body.id}}
+
+### Copy the budgets of the previous month (2026-10) into 2026-11.
+# Categories that already have a budget in 2026-11 keep theirs. Returns { "copied": N }
+POST {{baseUrl}}/budgets/copy
+Content-Type: application/json
+
+{
+  "month": "2026-11"
+}
+
+
+### ---------- Error cases ----------
+
+### 400: `month` is required
+GET {{baseUrl}}/budgets
+
+### 400: an INCOME category cannot have a budget (use the id of one of your income categories)
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "categoryId": "{{categoryId}}",
+  "amount": 1000,
+  "month": "2026-11"
+}
+
+### 409: send "Create a budget" twice. One budget per category and month
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "categoryId": "{{categoryId}}",
+  "amount": 1000,
+  "month": "2026-11"
+}
+
+### 404: a budget that does not exist (or belongs to another user)
+PUT {{baseUrl}}/budgets/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "amount": 1000
+}

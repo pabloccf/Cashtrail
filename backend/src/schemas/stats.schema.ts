@@ -2,8 +2,9 @@ import { z } from 'zod';
 import { TransactionType } from '../generated/prisma/enums.js';
 
 // "YYYY-MM". Required on every stats route: the backend works in UTC and the user does not, so
-// "the current month" is decided by the frontend (in the user's time zone) and always sent
-const monthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Expected a month as YYYY-MM');
+// "the current month" is decided by the frontend (in the user's time zone) and always sent.
+// Also used by the budget schemas
+export const monthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Expected a month as YYYY-MM');
 
 // Limit of months the monthly chart can ask for, so nobody requests ?months=10000
 const MAX_MONTHS = 24;

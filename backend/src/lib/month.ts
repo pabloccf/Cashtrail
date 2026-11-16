@@ -9,6 +9,17 @@ function splitMonth(month: string): { year: number; monthIndex: number } {
   };
 }
 
+// "2026-11" -> { year: 2026, month: 11 }, the way budgets store it (month 1-12, not 0-based)
+export function toYearMonth(month: string): { year: number; month: number } {
+  const { year, monthIndex } = splitMonth(month);
+  return { year, month: monthIndex + 1 };
+}
+
+// (2026, 11) -> "2026-11". The opposite of toYearMonth
+export function fromYearMonth(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, '0')}`;
+}
+
 // Date -> "2026-11". Works for any day of the month
 export function toMonthString(date: Date): string {
   return date.toISOString().slice(0, 7);

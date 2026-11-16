@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 import { authRouter } from './auth.routes.js';
+import { budgetRouter } from './budget.routes.js';
 import { categoryRouter } from './category.routes.js';
 import { jobRouter } from './job.routes.js';
 import { recurringRouter } from './recurring.routes.js';
@@ -25,3 +26,4 @@ apiRouter.use('/transactions', requireAuth, transactionRouter);
 apiRouter.use('/categories', requireAuth, categoryRouter);
 apiRouter.use('/recurring', requireAuth, recurringRouter);
 apiRouter.use('/stats', requireAuth, statsRouter);
+apiRouter.use('/budgets', requireAuth, budgetRouter);
