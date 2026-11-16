@@ -1,11 +1,12 @@
 import { ApiError } from '../api/client'
 import { getErrorMessage } from './errorMessage'
 
-// `details` of the backend 409 when a category is in use: { transactions: N, recurringTransactions: N }.
-// Budgets will be added in Phase 6
+// `details` of the backend 409 when a category is in use:
+// { transactions: N, recurringTransactions: N, budgets: N }
 interface CategoryUsages {
   transactions: number
   recurringTransactions: number
+  budgets: number
 }
 
 // `details` is `unknown` (it comes from the network), so its shape is checked before using it
@@ -18,9 +19,15 @@ function getCategoryUsages(error: unknown): CategoryUsages | null {
     'transactions' in details &&
     typeof details.transactions === 'number' &&
     'recurringTransactions' in details &&
-    typeof details.recurringTransactions === 'number'
+    typeof details.recurringTransactions === 'number' &&
+    'budgets' in details &&
+    typeof details.budgets === 'number'
   ) {
-    return { transactions: details.transactions, recurringTransactions: details.recurringTransactions }
+    return {
+      transactions: details.transactions,
+      recurringTransactions: details.recurringTransactions,
+      budgets: details.budgets,
+    }
   }
   return null
 }
@@ -29,7 +36,7 @@ function pluralize(count: number, singular: string, plural: string): string {
   return count === 1 ? `1 ${singular}` : `${count} ${plural}`
 }
 
-// "3 transacciones y 1 gasto o ingreso fijo". Counts at 0 are left out
+// "3 transacciones, 1 gasto o ingreso fijo y 2 presupuestos". Counts at 0 are left out
 function formatUsages(usages: CategoryUsages): string {
   const parts: string[] = []
   if (usages.transactions > 0) {
@@ -38,7 +45,12 @@ function formatUsages(usages: CategoryUsages): string {
   if (usages.recurringTransactions > 0) {
     parts.push(pluralize(usages.recurringTransactions, 'gasto o ingreso fijo', 'gastos o ingresos fijos'))
   }
-  return parts.join(' y ')
+  if (usages.budgets > 0) {
+    parts.push(pluralize(usages.budgets, 'presupuesto', 'presupuestos'))
+  }
+  // Commas between items and " y " before the last one: "a, b y c"
+  if (parts.length <= 1) return parts.join('')
+  return `${parts.slice(0, -1).join(', ')} y ${parts[parts.length - 1]}`
 }
 
 // A 409 on save is either a type change of a category in use (comes with usage counts)

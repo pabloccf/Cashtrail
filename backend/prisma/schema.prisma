@@ -40,6 +40,7 @@ model User {
   categories            Category[]
   transactions          Transaction[]
   recurringTransactions RecurringTransaction[]
+  budgets               Budget[]
 }
 
 model Category {
@@ -53,6 +54,7 @@ model Category {
   user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions          Transaction[]
   recurringTransactions RecurringTransaction[]
+  budgets               Budget[]
 
   @@unique([userId, type, name])
 }
@@ -107,5 +109,25 @@ model RecurringTransaction {
   transactions Transaction[]
 
   @@index([userId])
+  @@index([categoryId])
+}
+
+// Monthly spending limit for one expense category. Only a reference to compare against:
+// it never blocks or changes any record
+model Budget {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  categoryId String   @db.Uuid
+  amount     Int // In cents, always positive
+  month      Int // 1-12
+  year       Int
+  createdAt  DateTime @default(now()) @db.Timestamptz
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict: a category with budgets cannot be deleted (the service answers 409 before reaching this)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  // One budget per category and month. It also serves as the index for "budgets of a month of a user"
+  @@unique([userId, categoryId, month, year])
   @@index([categoryId])
 }
