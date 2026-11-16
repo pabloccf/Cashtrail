@@ -346,6 +346,14 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 - [x] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
 - [ ] **Fase 6:** presupuestos y exportar a CSV
 - [ ] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
+- [ ] **Fase 7.5:** registro e inicio de sesión con Google (OAuth 2.0 / OpenID Connect con PKCE). Microsoft, opcional y más adelante. Se descartan Apple (de pago y usa `form_post`, incompatible con la cookie `sameSite: "lax"`), Facebook y X. Dividirla en pasos al planificarla:
+  - Modelo `AuthAccount` (userId, provider, providerAccountId; único por provider + providerAccountId) y `passwordHash` opcional en `User`.
+  - Flujo en el backend: `GET /auth/google` y `GET /auth/google/callback`, con `state` y PKCE en una cookie temporal. Al terminar se crea la misma cookie JWT que en el login normal. El alta con Google crea las categorías por defecto de forma atómica.
+  - Identificar siempre por `providerAccountId`. No vincular automáticamente con una cuenta existente por email, salvo que el proveedor lo marque como verificado. La vinculación manual se hace desde `/settings` con la sesión iniciada.
+  - El callback va al dominio de Vercel (pasando por el rewrite), no al de Render, para que la cookie funcione en Safari.
+  - Frontend: botón "Continuar con Google" en `/login` y `/register`. En `/settings`, mostrar los métodos vinculados y permitir crear una contraseña a quien no la tenga.
+  - Configuración: app en Google Cloud con las redirect URIs de local y de producción. Variables nuevas `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y `APP_URL` en `.env`, `.env.example` y Render.
+  - Librería propuesta: Arctic (pedir confirmación antes de instalarla).
 - [ ] **Fase 8:** gastos compartidos: espacios compartidos, invitaciones, gastos con reparto y cuenta común, balance y saldos, categorías y gastos fijos compartidos, dashboard compartido y presupuestos compartidos. Dividirla en subfases al planificarla.
 
 Ideas para después: importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro, PWA, categorización automática con IA.
