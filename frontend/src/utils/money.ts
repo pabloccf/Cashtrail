@@ -36,3 +36,16 @@ export function centsToInput(cents: number): string {
   const rest = String(cents % 100).padStart(2, '0')
   return `${euros},${rest}`
 }
+
+const compactFormatter = new Intl.NumberFormat('es-ES', {
+  style: 'currency',
+  currency: 'EUR',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+
+// 125000 -> "1,3 mil €". Only for chart axes, where the exact amount would not fit; the
+// tooltip and the table always show the exact one with formatMoney
+export function formatMoneyCompact(cents: number): string {
+  return compactFormatter.format(cents / 100)
+}

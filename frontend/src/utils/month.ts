@@ -45,3 +45,12 @@ export function formatMonth(month: string): string {
   const text = monthFormatter.format(new Date(Date.UTC(year, monthNumber - 1, 1)))
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
+
+const shortMonthFormatter = new Intl.DateTimeFormat('es-ES', { month: 'short', timeZone: 'UTC' })
+
+// "2026-11" -> "nov", for chart axes where the full name does not fit. Some browsers add a dot ("nov."),
+// so it is removed
+export function formatShortMonth(month: string): string {
+  const { year, month: monthNumber } = splitMonth(month)
+  return shortMonthFormatter.format(new Date(Date.UTC(year, monthNumber - 1, 1))).replace('.', '')
+}

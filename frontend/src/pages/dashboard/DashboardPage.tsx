@@ -4,6 +4,8 @@ import SummaryCards from '../../components/SummaryCards'
 import { useStatsSummary } from '../../hooks/useStats'
 import { getErrorMessage } from '../../utils/errorMessage'
 import { currentMonth, isValidMonth } from '../../utils/month'
+import CategorySection from './CategorySection'
+import MonthlySection from './MonthlySection'
 
 // Summary of a month. The month goes in the URL (?month=2026-10), like in the transactions page,
 // so a reload or the back button keeps it. The current month is the default and is not written
@@ -38,6 +40,13 @@ function DashboardPage() {
       ) : (
         <SummaryCards summary={summary} />
       )}
+
+      {/* Each chart loads on its own: one failing or loading does not hide the others.
+          Stacked on mobile, side by side on large screens */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <CategorySection month={month} />
+        <MonthlySection month={month} />
+      </div>
     </section>
   )
 }
