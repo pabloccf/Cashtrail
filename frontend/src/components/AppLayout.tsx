@@ -1,4 +1,4 @@
-import { ArrowLeftRight, LayoutDashboard, Repeat, Tags, type LucideIcon } from 'lucide-react'
+import { ArrowLeftRight, LayoutDashboard, PiggyBank, Repeat, Tags, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { useCurrentUser, useLogout } from '../hooks/useAuth'
 
@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { to: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
   { to: '/recurring', label: 'Fijos', icon: Repeat },
   { to: '/categories', label: 'Categorías', icon: Tags },
+  { to: '/budgets', label: 'Presupuestos', icon: PiggyBank },
 ]
 
 // NavLink passes `isActive`, so the current section can be highlighted
@@ -26,7 +27,7 @@ function sidebarLinkClass({ isActive }: { isActive: boolean }) {
   return `flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium ${activeClass(isActive)}`
 }
 
-// Mobile bottom bar: icon with a small label under it, so four sections fit in a narrow screen.
+// Mobile bottom bar: icon with a small label under it, so five sections fit in a narrow screen.
 // min-w-0 lets each item shrink below the width of its label instead of overflowing the bar
 function bottomLinkClass({ isActive }: { isActive: boolean }) {
   return `flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[11px] font-medium ${activeClass(isActive)}`

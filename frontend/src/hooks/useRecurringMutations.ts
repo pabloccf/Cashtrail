@@ -4,8 +4,8 @@ import type { RecurringInput } from '../types/recurring'
 
 // Every change to a recurring transaction changes the stats (the estimated balance counts the
 // recurring income and expenses still to come). Some also create or delete records in the backend,
-// so the cached transaction lists must be refetched too. Returning the promise keeps the mutation
-// "pending" until everything is up to date
+// so the cached transaction lists (and the budgets, whose spent comes from them) must be refetched
+// too. Returning the promise keeps the mutation "pending" until everything is up to date
 function useInvalidate() {
   const queryClient = useQueryClient()
   return {
@@ -19,6 +19,7 @@ function useInvalidate() {
         queryClient.invalidateQueries({ queryKey: ['recurring'] }),
         queryClient.invalidateQueries({ queryKey: ['transactions'] }),
         queryClient.invalidateQueries({ queryKey: ['stats'] }),
+        queryClient.invalidateQueries({ queryKey: ['budgets'] }),
       ]),
   }
 }

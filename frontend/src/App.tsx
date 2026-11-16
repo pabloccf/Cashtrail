@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router'
 import AppLayout from './components/AppLayout'
 import GuestRoute from './components/GuestRoute'
 import ProtectedRoute from './components/ProtectedRoute'
+import BudgetsPage from './pages/budgets/BudgetsPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import CategoriesPage from './pages/categories/CategoriesPage'
@@ -25,6 +26,7 @@ function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/recurring" element={<RecurringPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/budgets" element={<BudgetsPage />} />
         </Route>
       </Route>
 
