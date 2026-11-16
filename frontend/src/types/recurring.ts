@@ -37,3 +37,15 @@ export interface RecurringInput {
   endDate: string | null // "YYYY-MM-DD"
   mode: RecurringMode
 }
+
+// One item of GET /recurring/upcoming: a future record of a recurring transaction that the
+// daily job has not created yet
+export interface UpcomingOccurrence {
+  recurringTransactionId: string
+  date: string // "2026-11-20T00:00:00.000Z"
+  amount: number // In cents
+  type: TransactionType
+  description: string
+  mode: RecurringMode
+  category: TransactionCategory
+}

@@ -1,5 +1,5 @@
 import CategoryBarChart from '../../components/CategoryBarChart'
-import ChartCard from '../../components/ChartCard'
+import SectionCard from '../../components/SectionCard'
 import { useStatsByCategory } from '../../hooks/useStats'
 import { formatMonth } from '../../utils/month'
 import SectionError from './SectionError'
@@ -13,7 +13,7 @@ function CategorySection({ month }: CategorySectionProps) {
   const { data, isPending, isError, error, refetch } = useStatsByCategory(month, 'EXPENSE')
 
   return (
-    <ChartCard title="Gastos por categoría">
+    <SectionCard title="Gastos por categoría">
       {isPending ? (
         <p className="text-sm text-slate-500">Cargando…</p>
       ) : isError ? (
@@ -27,7 +27,7 @@ function CategorySection({ month }: CategorySectionProps) {
       ) : (
         <CategoryBarChart items={data} />
       )}
-    </ChartCard>
+    </SectionCard>
   )
 }
 

@@ -1,8 +1,13 @@
 import { apiClient } from './client'
-import type { RecurringInput, RecurringTransaction } from '../types/recurring'
+import type { RecurringInput, RecurringTransaction, UpcomingOccurrence } from '../types/recurring'
 
 export function getRecurring() {
   return apiClient.get<RecurringTransaction[]>('/recurring')
+}
+
+// From today to `days` days from now, oldest first
+export function getUpcomingRecurring(days: number) {
+  return apiClient.get<UpcomingOccurrence[]>(`/recurring/upcoming?days=${days}`)
 }
 
 export function createRecurring(input: RecurringInput) {

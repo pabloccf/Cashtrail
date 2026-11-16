@@ -12,6 +12,13 @@ export function formatDate(isoDate: string): string {
   return dateFormatter.format(new Date(isoDate))
 }
 
+const dayMonthFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+
+// "2026-11-04T00:00:00.000Z" -> "4 nov". For short lists where the year is obvious
+export function formatDayMonth(isoDate: string): string {
+  return dayMonthFormatter.format(new Date(isoDate))
+}
+
 // "2026-11-04T00:00:00.000Z" -> "2026-11-04", the format of <input type="date"> and of the API
 export function toIsoDateOnly(isoDate: string): string {
   return isoDate.slice(0, 10)

@@ -1,13 +1,13 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import CategoryBadge from '../../components/CategoryBadge'
-import Modal from '../../components/Modal'
-import { useConfirmTransaction } from '../../hooks/useTransactionMutations'
-import type { Transaction } from '../../types/transaction'
-import { formatDate } from '../../utils/date'
-import { getErrorMessage } from '../../utils/errorMessage'
-import { centsToInput, parseAmountToCents } from '../../utils/money'
+import CategoryBadge from './CategoryBadge'
+import Modal from './Modal'
+import { useConfirmTransaction } from '../hooks/useTransactionMutations'
+import type { Transaction } from '../types/transaction'
+import { formatDate } from '../utils/date'
+import { getErrorMessage } from '../utils/errorMessage'
+import { centsToInput, parseAmountToCents } from '../utils/money'
 
 const confirmFormSchema = z.object({
   amount: z.string().refine((value) => {

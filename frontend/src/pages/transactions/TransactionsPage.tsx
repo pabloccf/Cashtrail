@@ -17,7 +17,7 @@ import {
   parseTransactionPeriod,
   periodDateRange,
 } from '../../utils/transactionFilters'
-import ConfirmTransactionModal from './ConfirmTransactionModal'
+import ConfirmTransactionModal from '../../components/ConfirmTransactionModal'
 import DeleteTransactionDialog from './DeleteTransactionDialog'
 import MonthSelector from './MonthSelector'
 import PendingBanner from './PendingBanner'

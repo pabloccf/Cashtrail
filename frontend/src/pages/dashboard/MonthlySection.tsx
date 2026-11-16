@@ -1,4 +1,4 @@
-import ChartCard from '../../components/ChartCard'
+import SectionCard from '../../components/SectionCard'
 import MonthlyBarChart from '../../components/MonthlyBarChart'
 import { useStatsMonthly } from '../../hooks/useStats'
 import SectionError from './SectionError'
@@ -15,7 +15,7 @@ function MonthlySection({ month }: MonthlySectionProps) {
   const { data, isPending, isError, error, refetch } = useStatsMonthly(month, MONTHS)
 
   return (
-    <ChartCard title={`Ingresos y gastos · últimos ${MONTHS} meses`}>
+    <SectionCard title={`Ingresos y gastos · últimos ${MONTHS} meses`}>
       {isPending ? (
         <p className="text-sm text-slate-500">Cargando…</p>
       ) : isError ? (
@@ -26,7 +26,7 @@ function MonthlySection({ month }: MonthlySectionProps) {
       ) : (
         <MonthlyBarChart data={data} />
       )}
-    </ChartCard>
+    </SectionCard>
   )
 }
 
