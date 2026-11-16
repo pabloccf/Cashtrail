@@ -23,6 +23,9 @@ GET {{baseUrl}}/transactions?type=EXPENSE&from=2026-11-01&to=2026-11-30&category
 ### Search in the description (case-insensitive, matches anywhere: "groc" finds "Weekly groceries")
 GET {{baseUrl}}/transactions?q=GROC
 
+### Export to CSV (same filters as the list, no pagination). Without filters: every transaction
+GET {{baseUrl}}/transactions/export?from=2026-11-01&to=2026-11-30
+
 ### Create an expense (amount in cents: 12,50 € -> 1250)
 # @name created
 POST {{baseUrl}}/transactions

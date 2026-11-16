@@ -3,6 +3,7 @@ import * as transactionController from '../controllers/transaction.controller.js
 import { validate } from '../middlewares/validate.middleware.js';
 import {
   confirmTransactionBodySchema,
+  exportTransactionsQuerySchema,
   listTransactionsQuerySchema,
   transactionBodySchema,
   transactionIdParamsSchema,
@@ -11,6 +12,9 @@ import {
 export const transactionRouter = Router();
 
 transactionRouter.get('/', validate({ query: listTransactionsQuerySchema }), transactionController.list);
+
+// Declared before '/:id': Express checks routes in order, and '/:id' would take "export" as an id
+transactionRouter.get('/export', validate({ query: exportTransactionsQuerySchema }), transactionController.exportCsv);
 
 transactionRouter.get('/:id', validate({ params: transactionIdParamsSchema }), transactionController.getById);
 

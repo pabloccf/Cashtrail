@@ -35,9 +35,9 @@ function escapeLikeWildcards(text: string): string {
   return text.replace(/[\\%_]/g, '\\$&');
 }
 
-export async function findManyByUser(userId: string, filters: TransactionFilters, pagination: Pagination) {
-  // Prisma ignores conditions whose value is `undefined`, so missing filters do not filter
-  const where: Prisma.TransactionWhereInput = {
+// Prisma ignores conditions whose value is `undefined`, so missing filters do not filter
+function buildWhere(userId: string, filters: TransactionFilters): Prisma.TransactionWhereInput {
+  return {
     userId,
     categoryId: filters.categoryId,
     type: filters.type,
@@ -49,6 +49,10 @@ export async function findManyByUser(userId: string, filters: TransactionFilters
       ? { contains: escapeLikeWildcards(filters.search), mode: 'insensitive' }
       : undefined,
   };
+}
+
+export async function findManyByUser(userId: string, filters: TransactionFilters, pagination: Pagination) {
+  const where = buildWhere(userId, filters);
 
   // Both queries run in a single database transaction, so the total matches the page
   const [items, total] = await prisma.$transaction([
@@ -64,6 +68,23 @@ export async function findManyByUser(userId: string, filters: TransactionFilters
   ]);
 
   return { items, total };
+}
+
+// Every match, oldest first (the natural order in a spreadsheet), with only the columns of the CSV.
+// No pagination: a personal history is a few thousand rows at most, small enough for one query
+export function findAllForExport(userId: string, filters: TransactionFilters) {
+  return prisma.transaction.findMany({
+    where: buildWhere(userId, filters),
+    select: {
+      date: true,
+      type: true,
+      amount: true,
+      description: true,
+      status: true,
+      category: { select: { name: true } },
+    },
+    orderBy: [{ date: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
+  });
 }
 
 export function findById(userId: string, id: string) {

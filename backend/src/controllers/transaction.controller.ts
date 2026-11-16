@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 import * as transactionService from '../services/transaction.service.js';
 import type {
   ConfirmTransactionInput,
+  ExportTransactionsQuery,
   ListTransactionsQuery,
   TransactionIdParams,
   TransactionInput,
@@ -16,6 +17,26 @@ export const list: RequestHandler = async (req, res) => {
   // The cast is safe because validate() already replaced it with the parsed query
   const query = req.query as unknown as ListTransactionsQuery;
   res.json(await transactionService.list(req.userId, query));
+};
+
+// "cashtrail-2026-11-01_2026-11-30.csv", "cashtrail-todo.csv"... The name of the downloaded file
+// is an HTTP detail, so it is decided here and not in the service
+function exportFilename({ from, to }: ExportTransactionsQuery): string {
+  if (!from && !to) return 'cashtrail-todo.csv';
+  return `cashtrail-${from ?? 'inicio'}_${to ?? 'hoy'}.csv`;
+}
+
+export const exportCsv: RequestHandler = async (req, res) => {
+  // Safe cast: validate() already replaced `req.query` with the parsed query
+  const query = req.query as unknown as ExportTransactionsQuery;
+  const csv = await transactionService.exportCsv(req.userId, query);
+
+  // attachment() sets Content-Disposition: attachment; filename="...", so the browser downloads
+  // the file instead of showing it. `no-store`: the file has personal data, it is never cached
+  res.attachment(exportFilename(query));
+  res.type('text/csv; charset=utf-8');
+  res.set('Cache-Control', 'no-store');
+  res.send(csv);
 };
 
 export const getById: RequestHandler<TransactionIdParams> = async (req, res) => {

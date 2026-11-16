@@ -25,30 +25,40 @@ export const transactionBodySchema = z.object({
   description: z.string().trim().max(255).optional(),
 });
 
-export const listTransactionsQuerySchema = z
-  .object({
-    from: z.iso.date().optional(),
-    to: z.iso.date().optional(),
-    category: z.uuid().optional(),
-    type: transactionTypeSchema.optional(),
-    status: z.enum(TransactionStatus).optional(),
-    // Text search in the description. "?q=" or "?q=   " (empty after trim) means no search
-    q: z
-      .string()
-      .trim()
-      .max(100)
-      .optional()
-      .transform((value) => value || undefined),
+// Filters shared by the list and the CSV export, so both always accept the same ones
+const transactionFiltersSchema = z.object({
+  from: z.iso.date().optional(),
+  to: z.iso.date().optional(),
+  category: z.uuid().optional(),
+  type: transactionTypeSchema.optional(),
+  status: z.enum(TransactionStatus).optional(),
+  // Text search in the description. "?q=" or "?q=   " (empty after trim) means no search
+  q: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .transform((value) => value || undefined),
+});
+
+// "YYYY-MM-DD" strings sort the same way as the dates they represent
+function isValidRange(query: { from?: string; to?: string }): boolean {
+  return !query.from || !query.to || query.from <= query.to;
+}
+const invalidRangeError = { message: '`from` must be earlier than or equal to `to`', path: ['to'] };
+
+// In Zod 4 a schema with .refine() cannot be extended, so the refine goes after .extend()
+export const listTransactionsQuerySchema = transactionFiltersSchema
+  .extend({
     // Query string values always arrive as text, so they are coerced to numbers
     page: z.coerce.number().int().min(1).default(1),
     // First turns the text into a number, then checks it is one of the allowed values
     pageSize: z.coerce.number().pipe(z.literal(PAGE_SIZE_OPTIONS)).default(DEFAULT_PAGE_SIZE),
   })
-  // "YYYY-MM-DD" strings sort the same way as the dates they represent
-  .refine((query) => !query.from || !query.to || query.from <= query.to, {
-    message: '`from` must be earlier than or equal to `to`',
-    path: ['to'],
-  });
+  .refine(isValidRange, invalidRangeError);
+
+// GET /transactions/export: the same filters, without pagination (the file has every match)
+export const exportTransactionsQuerySchema = transactionFiltersSchema.refine(isValidRange, invalidRangeError);
 
 // Body of PATCH /transactions/:id/confirm. `amount` adjusts the amount when confirming (the electricity
 // bill was not exactly the estimate). Without a body, Express 5 leaves `req.body` undefined, and
@@ -62,4 +72,5 @@ export const confirmTransactionBodySchema = z
 export type TransactionIdParams = z.infer<typeof transactionIdParamsSchema>;
 export type TransactionInput = z.infer<typeof transactionBodySchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
+export type ExportTransactionsQuery = z.infer<typeof exportTransactionsQuerySchema>;
 export type ConfirmTransactionInput = z.infer<typeof confirmTransactionBodySchema>;
