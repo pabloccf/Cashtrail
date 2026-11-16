@@ -1,0 +1,33 @@
+# Example requests for the VS Code "REST Client" extension.
+# Every request needs a session: send "Login" in auth.http first.
+# Tip: `npm run seed:sample` creates a user with ~6 months of data (see prisma/seedSample.ts).
+# Amounts are in cents and only CONFIRMED records count (PENDING ones are left out).
+
+@baseUrl = http://localhost:3000/api
+
+### Summary of a month: income, expense and balance
+GET {{baseUrl}}/stats/summary?month=2026-11
+
+### Expenses by category (type defaults to EXPENSE), highest first
+GET {{baseUrl}}/stats/by-category?month=2026-11
+
+### Income by category
+GET {{baseUrl}}/stats/by-category?month=2026-11&type=INCOME
+
+### Income and expense of the last 6 months, ending at `month` (months defaults to 6)
+GET {{baseUrl}}/stats/monthly?month=2026-11
+
+### Last 12 months (from 1 to 24)
+GET {{baseUrl}}/stats/monthly?month=2026-11&months=12
+
+
+### ---------- Error cases ----------
+
+### 400: `month` is required (the frontend decides the current month in the user's time zone)
+GET {{baseUrl}}/stats/summary
+
+### 400: month 13 does not exist
+GET {{baseUrl}}/stats/summary?month=2026-13
+
+### 400: more than 24 months
+GET {{baseUrl}}/stats/monthly?month=2026-11&months=99

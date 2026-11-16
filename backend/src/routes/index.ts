@@ -4,6 +4,7 @@ import { authRouter } from './auth.routes.js';
 import { categoryRouter } from './category.routes.js';
 import { jobRouter } from './job.routes.js';
 import { recurringRouter } from './recurring.routes.js';
+import { statsRouter } from './stats.routes.js';
 import { transactionRouter } from './transaction.routes.js';
 
 // Groups every API route. Mounted under /api in src/index.ts
@@ -23,3 +24,4 @@ apiRouter.use('/jobs', jobRouter);
 apiRouter.use('/transactions', requireAuth, transactionRouter);
 apiRouter.use('/categories', requireAuth, categoryRouter);
 apiRouter.use('/recurring', requireAuth, recurringRouter);
+apiRouter.use('/stats', requireAuth, statsRouter);
