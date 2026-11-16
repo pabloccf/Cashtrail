@@ -343,7 +343,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 - [x] **Fase 2:** autenticación y protección de rutas. El registro crea las categorías por defecto del usuario: crear `src/constants/defaultCategories.ts` con la lista de "Categorías por defecto" y adaptar el seed existente para que use esa misma lista.
 - [x] **Fase 3:** categorías, filtros y paginación
 - [x] **Fase 4:** gastos e ingresos fijos: modelo, CRUD, lógica de generación, endpoint `/jobs/recurring` y confirmación de pendientes
-- [ ] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
+- [x] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
 - [ ] **Fase 6:** presupuestos y exportar a CSV
 - [ ] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
 - [ ] **Fase 8:** gastos compartidos: espacios compartidos, invitaciones, gastos con reparto y cuenta común, balance y saldos, categorías y gastos fijos compartidos, dashboard compartido y presupuestos compartidos. Dividirla en subfases al planificarla.
