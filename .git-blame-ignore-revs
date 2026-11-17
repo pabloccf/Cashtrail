@@ -1,0 +1,5 @@
+# Commits that only reformat code. `git blame` skips them and shows who really wrote each line.
+# GitHub reads this file by itself; locally run once: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: format codebase with Prettier
+c17d4cd76e5117dd9b02921641b4f85c8b62bfe2
