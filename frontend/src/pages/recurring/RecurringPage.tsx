@@ -75,7 +75,7 @@ function RecurringPage() {
                   <button
                     type="button"
                     onClick={() => setFormState({ kind: 'new', type: section.type })}
-                    className="min-h-11 rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50"
+                    className="min-h-11 rounded-lg px-3 font-medium text-brand-700 hover:bg-brand-50"
                   >
                     + Añadir
                   </button>

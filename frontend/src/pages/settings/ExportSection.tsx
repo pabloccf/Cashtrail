@@ -68,7 +68,7 @@ function ExportSection() {
                 onChange={() => setRange(option.value)}
                 className="peer sr-only"
               />
-              <span className="flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-2 text-center text-sm font-medium text-slate-600 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-800 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500">
+              <span className="flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-2 text-center text-sm font-medium text-slate-600 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-800 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">
                 {option.label}
               </span>
             </label>
@@ -87,7 +87,7 @@ function ExportSection() {
           type="button"
           onClick={handleExport}
           disabled={exportMutation.isPending}
-          className="flex min-h-11 items-center gap-2 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="flex min-h-11 items-center gap-2 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
           <Download className="size-5" aria-hidden="true" />
           {exportMutation.isPending ? 'Exportando…' : 'Exportar'}

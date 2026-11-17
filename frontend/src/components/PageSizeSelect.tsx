@@ -22,7 +22,7 @@ function PageSizeSelect({ value, onChange }: PageSizeSelectProps) {
         id={id}
         value={value}
         onChange={(event) => handleChange(event.target.value)}
-        className="min-h-11 rounded-lg border border-slate-300 bg-white px-3 text-base text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+        className="min-h-11 rounded-lg border border-slate-300 bg-white px-3 text-base text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
       >
         {PAGE_SIZE_OPTIONS.map((size) => (
           <option key={size} value={size}>

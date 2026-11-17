@@ -25,7 +25,7 @@ const bottomBarItems = navItems.filter((item) => item.inBottomBar)
 
 // NavLink passes `isActive`, so the current section can be highlighted
 function activeClass(isActive: boolean) {
-  return isActive ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-100'
+  return isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'
 }
 
 // Desktop sidebar: icon and label in a row
@@ -61,7 +61,7 @@ function AppLayout() {
     <div className="min-h-screen bg-slate-50 text-slate-900 md:flex">
       {/* Desktop: sidebar */}
       <aside className="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-white p-4 md:flex">
-        <p className="mb-6 px-3 text-xl font-bold text-emerald-600">Cashtrail</p>
+        <p className="mb-6 px-3 text-xl font-bold text-brand-600">Cashtrail</p>
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={sidebarLinkClass}>
@@ -79,7 +79,7 @@ function AppLayout() {
 
       {/* Mobile: top bar with the logo, the settings icon and the logout button */}
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-1 md:hidden">
-        <p className="text-lg font-bold text-emerald-600">Cashtrail</p>
+        <p className="text-lg font-bold text-brand-600">Cashtrail</p>
         <div className="flex items-center gap-1">
           <NavLink
             to="/settings"

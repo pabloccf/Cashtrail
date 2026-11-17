@@ -23,7 +23,7 @@ function TransactionTypeToggle({ registration }: TransactionTypeToggleProps) {
                 Both radios share the same registration: React Hook Form groups them by `name` */}
             <input type="radio" value={option.value} className="peer sr-only" {...registration} />
             <span
-              className={`flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 ${option.checkedClass}`}
+              className={`flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 ${option.checkedClass}`}
             >
               {option.label}
             </span>

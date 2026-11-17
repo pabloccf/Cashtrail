@@ -20,7 +20,7 @@ interface TransactionFiltersProps {
 
 const selectClass =
   'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30'
+  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
 
 const labelClass = 'mb-1 block text-sm font-medium text-slate-600'
 
@@ -71,7 +71,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
           <SlidersHorizontal className="size-5" aria-hidden="true" />
           Filtros
           {panelFilterCount > 0 && (
-            <span className="rounded-full bg-emerald-600 px-2 text-xs text-white">{panelFilterCount}</span>
+            <span className="rounded-full bg-brand-600 px-2 text-xs text-white">{panelFilterCount}</span>
           )}
         </button>
       </div>
@@ -174,7 +174,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
           <button
             type="button"
             onClick={onClear}
-            className="min-h-11 justify-self-start rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50 sm:col-span-2 md:col-span-3 lg:col-span-5"
+            className="min-h-11 justify-self-start rounded-lg px-3 font-medium text-brand-700 hover:bg-brand-50 sm:col-span-2 md:col-span-3 lg:col-span-5"
           >
             Limpiar filtros
           </button>

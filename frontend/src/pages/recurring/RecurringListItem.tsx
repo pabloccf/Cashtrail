@@ -64,7 +64,7 @@ function RecurringListItem({ recurring, isToggling, onEdit, onToggle, onDelete }
           className="group flex min-h-11 w-12 items-center justify-center rounded-lg disabled:opacity-60"
         >
           <span
-            className={`relative h-6 w-10 rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-emerald-500 ${active ? 'bg-emerald-600' : 'bg-slate-300'}`}
+            className={`relative h-6 w-10 rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-brand-500 ${active ? 'bg-brand-600' : 'bg-slate-300'}`}
           >
             <span
               className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform ${active ? 'translate-x-4' : ''}`}

@@ -120,7 +120,7 @@ function TransactionsPage() {
         <button
           type="button"
           onClick={() => setFormState('new')}
-          className="hidden min-h-11 rounded-lg bg-emerald-600 px-4 font-medium text-white hover:bg-emerald-700 md:block"
+          className="hidden min-h-11 rounded-lg bg-brand-600 px-4 font-medium text-white hover:bg-brand-700 md:block"
         >
           Nueva transacción
         </button>
@@ -161,7 +161,7 @@ function TransactionsPage() {
                   <button
                     type="button"
                     onClick={() => handleMonthChange(ALL_MONTHS)}
-                    className="min-h-11 font-medium text-emerald-700 underline"
+                    className="min-h-11 font-medium text-brand-700 underline"
                   >
                     Buscar en todos los meses
                   </button>
@@ -169,7 +169,7 @@ function TransactionsPage() {
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="min-h-11 font-medium text-emerald-700 underline"
+                  className="min-h-11 font-medium text-brand-700 underline"
                 >
                   Limpiar filtros
                 </button>
@@ -181,7 +181,7 @@ function TransactionsPage() {
               <button
                 type="button"
                 onClick={() => handleMonthChange(ALL_MONTHS)}
-                className="mt-2 min-h-11 font-medium text-emerald-700 underline"
+                className="mt-2 min-h-11 font-medium text-brand-700 underline"
               >
                 Ver todos los meses
               </button>
@@ -238,7 +238,7 @@ function TransactionsPage() {
       <button
         type="button"
         onClick={() => setFormState('new')}
-        className="fixed right-4 bottom-20 flex size-14 items-center justify-center rounded-full bg-emerald-600 text-3xl text-white shadow-lg active:bg-emerald-700 md:hidden"
+        className="fixed right-4 bottom-20 flex size-14 items-center justify-center rounded-full bg-brand-600 text-3xl text-white shadow-lg active:bg-brand-700 md:hidden"
         aria-label="Nueva transacción"
       >
         +

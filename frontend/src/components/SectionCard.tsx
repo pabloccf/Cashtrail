@@ -19,7 +19,7 @@ function SectionCard({ title, link, children }: SectionCardProps) {
           // Negative margin: the 44px touch area grows around the text without moving the title
           <Link
             to={link.to}
-            className="-my-2 flex min-h-11 shrink-0 items-center rounded-lg px-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            className="-my-2 flex min-h-11 shrink-0 items-center rounded-lg px-2 text-sm font-medium text-brand-700 hover:bg-brand-50"
           >
             {link.label}
           </Link>

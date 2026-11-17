@@ -77,7 +77,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
               <input type="radio" value={option} className="peer sr-only" aria-label={option} {...register('color')} />
               {/* The ring shows which color is selected (and which one has keyboard focus) */}
               <span
-                className="size-8 rounded-full ring-offset-2 peer-checked:ring-2 peer-checked:ring-slate-900 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500"
+                className="size-8 rounded-full ring-offset-2 peer-checked:ring-2 peer-checked:ring-slate-900 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500"
                 style={{ backgroundColor: option }}
               />
             </label>
@@ -95,7 +95,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
               aria-label="Otro color"
             />
             <span
-              className={`flex size-8 items-center justify-center rounded-full border-2 border-dashed border-slate-300 text-lg text-slate-500 ring-offset-2 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 ${isCustomColor ? 'ring-2 ring-slate-900' : ''}`}
+              className={`flex size-8 items-center justify-center rounded-full border-2 border-dashed border-slate-300 text-lg text-slate-500 ring-offset-2 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 ${isCustomColor ? 'ring-2 ring-slate-900' : ''}`}
               style={isCustomColor ? { backgroundColor: color, borderStyle: 'none' } : undefined}
             >
               {isCustomColor ? '' : '+'}
@@ -112,7 +112,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
           {CATEGORY_ICON_OPTIONS.map(({ name: iconName, label, Icon }) => (
             <label key={iconName} className="cursor-pointer" title={label}>
               <input type="radio" value={iconName} className="peer sr-only" aria-label={label} {...register('icon')} />
-              <span className="flex size-11 items-center justify-center rounded-lg text-slate-600 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500 hover:bg-slate-100 peer-checked:hover:bg-slate-900">
+              <span className="flex size-11 items-center justify-center rounded-lg text-slate-600 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 hover:bg-slate-100 peer-checked:hover:bg-slate-900">
                 <Icon className="size-5" aria-hidden="true" />
               </span>
             </label>
@@ -138,7 +138,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
         <button
           type="submit"
           disabled={isSubmitting}
-          className="min-h-11 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
           {isSubmitting ? 'Guardando…' : 'Guardar'}
         </button>

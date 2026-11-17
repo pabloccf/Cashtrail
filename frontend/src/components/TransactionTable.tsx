@@ -51,7 +51,7 @@ function TransactionTable({ transactions, onEdit, onConfirm, onDelete }: Transac
                   <button
                     type="button"
                     onClick={() => onConfirm(transaction)}
-                    className="min-h-11 rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50"
+                    className="min-h-11 rounded-lg px-3 font-medium text-brand-700 hover:bg-brand-50"
                   >
                     Confirmar
                   </button>
@@ -59,7 +59,7 @@ function TransactionTable({ transactions, onEdit, onConfirm, onDelete }: Transac
                 <button
                   type="button"
                   onClick={() => onEdit(transaction)}
-                  className="min-h-11 rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50"
+                  className="min-h-11 rounded-lg px-3 font-medium text-brand-700 hover:bg-brand-50"
                 >
                   Editar
                 </button>

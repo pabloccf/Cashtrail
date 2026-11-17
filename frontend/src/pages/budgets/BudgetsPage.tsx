@@ -47,7 +47,7 @@ function BudgetsPage() {
       type="button"
       onClick={() => setFormState({ kind: 'new' })}
       disabled={!canAdd}
-      className="min-h-11 rounded-lg px-3 font-medium text-emerald-700 hover:bg-emerald-50 disabled:text-slate-400 disabled:hover:bg-transparent"
+      className="min-h-11 rounded-lg px-3 font-medium text-brand-700 hover:bg-brand-50 disabled:text-slate-400 disabled:hover:bg-transparent"
     >
       + Añadir
     </button>
@@ -80,7 +80,7 @@ function BudgetsPage() {
             type="button"
             onClick={() => copyMutation.mutate(month)}
             disabled={copyMutation.isPending}
-            className="min-h-11 rounded-lg bg-emerald-600 px-4 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+            className="min-h-11 rounded-lg bg-brand-600 px-4 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           >
             {copyMutation.isPending ? 'Copiando…' : `Copiar los de ${formatMonth(shiftMonth(month, -1)).toLowerCase()}`}
           </button>

@@ -11,7 +11,7 @@ interface MonthSelectorProps {
 }
 
 const textButtonClass =
-  'min-h-11 shrink-0 rounded-lg px-3 text-sm font-medium text-emerald-700 hover:bg-emerald-50'
+  'min-h-11 shrink-0 rounded-lg px-3 text-sm font-medium text-brand-700 hover:bg-brand-50'
 
 // The month arrows plus the two other ways of looking at the list: every month or a custom range
 function MonthSelector({ period, onMonthChange, onClearRange }: MonthSelectorProps) {

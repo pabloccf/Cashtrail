@@ -40,7 +40,7 @@ function LoginPage() {
       footer={
         <>
           ¿No tienes cuenta?{' '}
-          <Link to="/register" className="font-medium text-emerald-700 underline">
+          <Link to="/register" className="font-medium text-brand-700 underline">
             Regístrate
           </Link>
         </>
@@ -66,7 +66,7 @@ function LoginPage() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="min-h-11 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
           {loginMutation.isPending ? 'Entrando…' : 'Entrar'}
         </button>

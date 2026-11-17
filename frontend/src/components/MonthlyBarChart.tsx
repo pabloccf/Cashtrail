@@ -96,7 +96,7 @@ function MonthlyBarChart({ data }: MonthlyBarChartProps) {
 
       {/* The same numbers as a table, for screen readers and for reading the exact amounts */}
       <details className="text-sm">
-        <summary className="min-h-11 cursor-pointer content-center font-medium text-emerald-700">Ver como tabla</summary>
+        <summary className="min-h-11 cursor-pointer content-center font-medium text-brand-700">Ver como tabla</summary>
         <table className="mt-2 w-full text-left tabular-nums">
           <thead className="text-slate-500">
             <tr>

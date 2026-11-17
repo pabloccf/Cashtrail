@@ -17,7 +17,7 @@ function ProtectedRoute() {
     return (
       <FullPageMessage>
         <p>{getErrorMessage(error)}</p>
-        <button type="button" className="min-h-11 font-medium text-emerald-700 underline" onClick={() => refetch()}>
+        <button type="button" className="min-h-11 font-medium text-brand-700 underline" onClick={() => refetch()}>
           Reintentar
         </button>
       </FullPageMessage>

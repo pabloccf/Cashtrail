@@ -43,7 +43,7 @@ function TransactionCard({ transaction, onEdit, onConfirm, onDelete }: Transacti
         <button
           type="button"
           onClick={() => onConfirm(transaction)}
-          className="flex w-12 shrink-0 items-center justify-center border-l border-slate-100 text-emerald-600 active:bg-emerald-50"
+          className="flex w-12 shrink-0 items-center justify-center border-l border-slate-100 text-brand-600 active:bg-brand-50"
           aria-label="Confirmar registro"
         >
           <Check className="size-5" aria-hidden="true" />

@@ -19,7 +19,7 @@ function TextField({ label, error, ...inputProps }: TextFieldProps) {
       </label>
       <input
         id={id}
-        className="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none aria-invalid:border-rose-500"
+        className="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none aria-invalid:border-rose-500"
         aria-invalid={error ? true : undefined}
         // Screen readers read the error when the input gets focus
         aria-describedby={error ? errorId : undefined}

@@ -36,7 +36,7 @@ interface BudgetFormProps {
 
 const inputClass =
   'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ' +
+  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ' +
   'aria-invalid:border-rose-500'
 
 function FieldError({ message }: { message?: string }) {
@@ -134,7 +134,7 @@ function BudgetForm({ budget, availableCategories, isSubmitting, submitError, on
         <button
           type="submit"
           disabled={isSubmitting}
-          className="min-h-11 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
           {isSubmitting ? 'Guardando…' : 'Guardar'}
         </button>

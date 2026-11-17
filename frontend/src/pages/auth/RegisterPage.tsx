@@ -57,7 +57,7 @@ function RegisterPage() {
       footer={
         <>
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-medium text-emerald-700 underline">
+          <Link to="/login" className="font-medium text-brand-700 underline">
             Inicia sesión
           </Link>
         </>
@@ -91,7 +91,7 @@ function RegisterPage() {
         <button
           type="submit"
           disabled={registerMutation.isPending}
-          className="min-h-11 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
           {registerMutation.isPending ? 'Creando cuenta…' : 'Crear cuenta'}
         </button>

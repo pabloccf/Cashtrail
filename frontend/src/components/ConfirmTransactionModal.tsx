@@ -66,7 +66,7 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
             type="text"
             inputMode="decimal"
             autoComplete="off"
-            className="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 focus:outline-none aria-invalid:border-rose-500"
+            className="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none aria-invalid:border-rose-500"
             aria-invalid={errors.amount ? true : undefined}
             aria-describedby="confirm-amount-hint"
             {...register('amount')}
@@ -97,7 +97,7 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
           <button
             type="submit"
             disabled={confirmMutation.isPending}
-            className="min-h-11 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+            className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           >
             {confirmMutation.isPending ? 'Confirmando…' : 'Confirmar'}
           </button>

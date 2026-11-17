@@ -32,7 +32,7 @@ function CompactTransactionList({ transactions, onConfirm }: CompactTransactionL
               <button
                 type="button"
                 onClick={() => onConfirm(transaction)}
-                className="min-h-11 rounded-lg bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700"
+                className="min-h-11 rounded-lg bg-brand-600 px-3 text-sm font-medium text-white hover:bg-brand-700"
               >
                 Confirmar
               </button>

@@ -95,7 +95,7 @@ interface RecurringFormProps {
 
 const inputClass =
   'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ' +
+  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ' +
   'aria-invalid:border-rose-500'
 
 function FieldError({ message }: { message?: string }) {
@@ -242,7 +242,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
                 className="peer sr-only"
                 {...register('frequency', { onChange: clampDay })}
               />
-              <span className="flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-500">
+              <span className="flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">
                 {option.label}
               </span>
             </label>
@@ -328,9 +328,9 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
             // has-checked: styles the card when the radio inside it is selected
             <label
               key={option.value}
-              className="flex cursor-pointer gap-3 rounded-lg border border-slate-300 p-3 has-checked:border-emerald-500 has-checked:bg-emerald-50 has-focus-visible:ring-2 has-focus-visible:ring-emerald-500"
+              className="flex cursor-pointer gap-3 rounded-lg border border-slate-300 p-3 has-checked:border-brand-500 has-checked:bg-brand-50 has-focus-visible:ring-2 has-focus-visible:ring-brand-500"
             >
-              <input type="radio" value={option.value} className="mt-1 accent-emerald-600" {...register('mode')} />
+              <input type="radio" value={option.value} className="mt-1 accent-brand-600" {...register('mode')} />
               <span>
                 <span className="block font-medium">{option.label}</span>
                 <span className="block text-sm text-slate-600">{option.description}</span>
@@ -357,7 +357,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
         <button
           type="submit"
           disabled={isSubmitting}
-          className="min-h-11 rounded-lg bg-emerald-600 px-5 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
           {isSubmitting ? 'Guardando…' : 'Guardar'}
         </button>
