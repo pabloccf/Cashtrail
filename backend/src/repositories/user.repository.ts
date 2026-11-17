@@ -24,6 +24,15 @@ export function findPublicById(userId: string) {
   return prisma.user.findUnique({ where: { id: userId }, select: publicUserSelect });
 }
 
+export interface ProfileData {
+  name: string;
+  currency: string;
+}
+
+export function updateProfile(userId: string, data: ProfileData) {
+  return prisma.user.update({ where: { id: userId }, data, select: publicUserSelect });
+}
+
 interface NewUserData {
   email: string;
   name: string;

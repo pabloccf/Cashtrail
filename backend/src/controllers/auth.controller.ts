@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 import * as authService from '../services/auth.service.js';
 import { clearSessionCookie, setSessionCookie } from '../lib/sessionCookie.js';
-import type { LoginInput, RegisterInput } from '../schemas/auth.schema.js';
+import type { LoginInput, RegisterInput, UpdateProfileInput } from '../schemas/auth.schema.js';
 
 type NoParams = Record<string, string>;
 
@@ -27,4 +27,8 @@ export const logout: RequestHandler = (_req, res) => {
 
 export const me: RequestHandler = async (req, res) => {
   res.json(await authService.getCurrentUser(req.userId));
+};
+
+export const updateMe: RequestHandler<NoParams, unknown, UpdateProfileInput> = async (req, res) => {
+  res.json(await authService.updateProfile(req.userId, req.body));
 };

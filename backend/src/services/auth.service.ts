@@ -3,7 +3,7 @@ import { signSessionToken } from '../lib/jwt.js';
 import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from '../lib/password.js';
 import { DEFAULT_CATEGORIES } from '../constants/defaultCategories.js';
 import * as userRepository from '../repositories/user.repository.js';
-import type { LoginInput, RegisterInput } from '../schemas/auth.schema.js';
+import type { LoginInput, RegisterInput, UpdateProfileInput } from '../schemas/auth.schema.js';
 
 export async function register(input: RegisterInput) {
   if (await userRepository.existsByEmail(input.email)) {
@@ -42,4 +42,11 @@ export async function getCurrentUser(userId: string) {
     throw new AppError(401, 'Not authenticated');
   }
   return user;
+}
+
+// Changing the currency only changes how amounts are shown: they are stored in cents and never converted
+export async function updateProfile(userId: string, input: UpdateProfileInput) {
+  // Same check as getCurrentUser: without it, a deleted user would make Prisma's update fail with a 500
+  await getCurrentUser(userId);
+  return userRepository.updateProfile(userId, input);
 }

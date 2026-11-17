@@ -26,6 +26,15 @@ Content-Type: application/json
 ### Current user (401 if there is no valid session)
 GET {{baseUrl}}/auth/me
 
+### Update the profile (name and currency). The currency only changes how amounts are shown
+PUT {{baseUrl}}/auth/me
+Content-Type: application/json
+
+{
+  "name": "Demo",
+  "currency": "EUR"
+}
+
 ### Logout (204, deletes the cookie)
 POST {{baseUrl}}/auth/logout
 
@@ -39,6 +48,15 @@ Content-Type: application/json
 {
   "email": "demo@cashtrail.local",
   "password": "wrong-password"
+}
+
+### 400: currency not supported (only EUR, USD, GBP and CHF)
+PUT {{baseUrl}}/auth/me
+Content-Type: application/json
+
+{
+  "name": "Demo",
+  "currency": "JPY"
 }
 
 ### 409: email already registered (send "Register" first)
