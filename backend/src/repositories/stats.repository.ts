@@ -9,7 +9,11 @@ export interface DateRange {
 
 // Every stat only counts CONFIRMED records: PENDING ones do not count until the user confirms them.
 // The only exception is the estimated balance, which asks for PENDING ones explicitly
-function inRange(userId: string, range: DateRange, status: TransactionStatus = 'CONFIRMED'): Prisma.TransactionWhereInput {
+function inRange(
+  userId: string,
+  range: DateRange,
+  status: TransactionStatus = 'CONFIRMED',
+): Prisma.TransactionWhereInput {
   return { userId, status, date: { gte: range.from, lte: range.to } };
 }
 

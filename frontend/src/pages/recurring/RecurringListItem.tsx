@@ -15,7 +15,9 @@ interface RecurringListItemProps {
 }
 
 function Tag({ children, className }: { children: string; className: string }) {
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${className}`}>{children}</span>
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${className}`}>{children}</span>
+  )
 }
 
 // Same structure as CategoryListItem: tapping the row edits, the trash icon deletes.

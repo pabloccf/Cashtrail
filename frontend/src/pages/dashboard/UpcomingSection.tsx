@@ -24,7 +24,9 @@ function UpcomingSection() {
         <>
           <UpcomingList items={data.slice(0, VISIBLE)} />
           {data.length > VISIBLE && (
-            <p className="text-xs text-slate-500">Y {data.length - VISIBLE} más en los próximos {DAYS} días.</p>
+            <p className="text-xs text-slate-500">
+              Y {data.length - VISIBLE} más en los próximos {DAYS} días.
+            </p>
           )}
         </>
       )}

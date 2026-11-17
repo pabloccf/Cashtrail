@@ -31,7 +31,10 @@ function BudgetProgressBar({ spent, amount, label }: BudgetProgressBarProps) {
       className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"
     >
       {/* The width depends on data, so it goes in `style` (same reason as the category colors) */}
-      <div className={`h-full rounded-full transition-[width] ${barColors[level]}`} style={{ width: `${barPercent}%` }} />
+      <div
+        className={`h-full rounded-full transition-[width] ${barColors[level]}`}
+        style={{ width: `${barPercent}%` }}
+      />
     </div>
   )
 }

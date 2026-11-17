@@ -2,7 +2,12 @@ import { AppError } from '../lib/appError.js';
 import { fromYearMonth, monthRange, shiftMonth, toYearMonth } from '../lib/month.js';
 import * as budgetRepository from '../repositories/budget.repository.js';
 import * as statsRepository from '../repositories/stats.repository.js';
-import type { CopyBudgetsInput, CreateBudgetInput, ListBudgetsQuery, UpdateBudgetInput } from '../schemas/budget.schema.js';
+import type {
+  CopyBudgetsInput,
+  CreateBudgetInput,
+  ListBudgetsQuery,
+  UpdateBudgetInput,
+} from '../schemas/budget.schema.js';
 import { assertUsableCategory } from './category.service.js';
 
 type BudgetRow = NonNullable<Awaited<ReturnType<typeof budgetRepository.findById>>>;

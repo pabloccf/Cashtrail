@@ -48,9 +48,19 @@ function LoginPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit((values) => loginMutation.mutate(values))} noValidate className="flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit((values) => loginMutation.mutate(values))}
+        noValidate
+        className="flex flex-col gap-4"
+      >
         {/* autoComplete lets the browser and password managers fill in the right fields */}
-        <TextField label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register('email')}
+        />
         <TextField
           label="Contraseña"
           type="password"

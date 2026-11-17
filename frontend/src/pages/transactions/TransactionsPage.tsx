@@ -163,7 +163,10 @@ function TransactionsPage() {
             </Button>
           </EmptyState>
         ) : period.kind === 'month' && page === 1 ? (
-          <EmptyState icon={ArrowLeftRight} title={`No hay transacciones en ${formatMonth(period.month).toLowerCase()}`}>
+          <EmptyState
+            icon={ArrowLeftRight}
+            title={`No hay transacciones en ${formatMonth(period.month).toLowerCase()}`}
+          >
             <Button size="sm" onClick={() => setFormState('new')}>
               <Plus className="size-4" aria-hidden="true" />
               Nueva transacción

@@ -12,7 +12,14 @@ export interface TransactionFilters {
   to?: string // "YYYY-MM-DD"
 }
 
-export const FILTER_KEYS = ['q', 'type', 'status', 'category', 'from', 'to'] as const satisfies readonly (keyof TransactionFilters)[]
+export const FILTER_KEYS = [
+  'q',
+  'type',
+  'status',
+  'category',
+  'from',
+  'to',
+] as const satisfies readonly (keyof TransactionFilters)[]
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -71,7 +78,10 @@ export function parseTransactionPeriod(searchParams: URLSearchParams, filters: T
 }
 
 // The `from`/`to` sent to the API: the month's first and last day, the custom range, or nothing
-export function periodDateRange(period: TransactionPeriod, filters: TransactionFilters): Pick<TransactionFilters, 'from' | 'to'> {
+export function periodDateRange(
+  period: TransactionPeriod,
+  filters: TransactionFilters,
+): Pick<TransactionFilters, 'from' | 'to'> {
   if (period.kind === 'month') return monthRange(period.month)
   if (period.kind === 'custom') return { from: filters.from, to: filters.to }
   return {}

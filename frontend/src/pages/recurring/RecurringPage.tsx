@@ -34,10 +34,7 @@ const sections: { type: TransactionType; title: string; emptyText: string; empty
 ]
 
 // Same pattern as CategoriesPage: null is closed, `kind` tells creating from editing
-type FormState =
-  | null
-  | { kind: 'new'; type: TransactionType }
-  | { kind: 'edit'; recurring: RecurringTransaction }
+type FormState = null | { kind: 'new'; type: TransactionType } | { kind: 'edit'; recurring: RecurringTransaction }
 
 function RecurringPage() {
   const { data: recurringList, isPending, isError, error, refetch } = useRecurring()
@@ -64,7 +61,11 @@ function RecurringPage() {
       {isPending ? (
         <ListSkeleton label="Cargando fijos…" />
       ) : isError ? (
-        <ErrorState message="No se han podido cargar los gastos e ingresos fijos." error={error} onRetry={() => refetch()} />
+        <ErrorState
+          message="No se han podido cargar los gastos e ingresos fijos."
+          error={error}
+          onRetry={() => refetch()}
+        />
       ) : (
         <>
           {recurringList.some((recurring) => recurring.active) && (
@@ -99,7 +100,11 @@ function RecurringPage() {
 
                 {sectionItems.length === 0 ? (
                   <EmptyState icon={Repeat} title={section.emptyText} description={section.emptyHint}>
-                    <Button variant="secondary" size="sm" onClick={() => setFormState({ kind: 'new', type: section.type })}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setFormState({ kind: 'new', type: section.type })}
+                    >
                       <Plus className="size-4" aria-hidden="true" />
                       {section.addLabel}
                     </Button>

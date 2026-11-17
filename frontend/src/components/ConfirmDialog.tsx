@@ -17,7 +17,15 @@ interface ConfirmDialogProps {
 
 // Pop-up confirmation for destructive actions (delete...). Like Modal, it opens when mounted:
 // the parent shows it with {isOpen && <ConfirmDialog ... />}
-function ConfirmDialog({ title, message, confirmLabel, isConfirming = false, error, onConfirm, onCancel }: ConfirmDialogProps) {
+function ConfirmDialog({
+  title,
+  message,
+  confirmLabel,
+  isConfirming = false,
+  error,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
   const dialogRef = useOpenDialog()
 
   function dismiss() {

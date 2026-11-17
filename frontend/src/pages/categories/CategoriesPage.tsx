@@ -18,10 +18,7 @@ const sections: { type: TransactionType; title: string }[] = [
 
 // null: closed. `kind` tells creating from editing (a "discriminated union": TypeScript
 // knows that `category` exists only when kind is 'edit')
-type FormState =
-  | null
-  | { kind: 'new'; type: TransactionType }
-  | { kind: 'edit'; category: Category }
+type FormState = null | { kind: 'new'; type: TransactionType } | { kind: 'edit'; category: Category }
 
 function CategoriesPage() {
   const { data: categories, isPending, isError, error, refetch } = useCategories()
@@ -63,7 +60,11 @@ function CategoriesPage() {
 
               {sectionCategories.length === 0 ? (
                 <EmptyState icon={Tags} title={`No tienes categorías de ${section.title.toLowerCase()}`}>
-                  <Button variant="secondary" size="sm" onClick={() => setFormState({ kind: 'new', type: section.type })}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setFormState({ kind: 'new', type: section.type })}
+                  >
                     <Plus className="size-4" aria-hidden="true" />
                     Crear categoría
                   </Button>

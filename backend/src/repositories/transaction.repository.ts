@@ -45,9 +45,7 @@ function buildWhere(userId: string, filters: TransactionFilters): Prisma.Transac
     date: { gte: filters.from, lte: filters.to },
     // ILIKE '%search%' in PostgreSQL: matches anywhere in the text, ignoring upper/lower case.
     // Transactions without a description (null) never match
-    description: filters.search
-      ? { contains: escapeLikeWildcards(filters.search), mode: 'insensitive' }
-      : undefined,
+    description: filters.search ? { contains: escapeLikeWildcards(filters.search), mode: 'insensitive' } : undefined,
   };
 }
 

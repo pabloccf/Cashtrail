@@ -12,8 +12,22 @@ import { fieldErrorClass, labelClass } from '../utils/formStyles'
 
 // Same palette as the default categories, so the defaults are always shown as selected
 const COLOR_OPTIONS = [
-  '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4',
-  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#f43f5e', '#64748b', '#94a3b8',
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#84cc16',
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#ec4899',
+  '#f43f5e',
+  '#64748b',
+  '#94a3b8',
 ]
 
 const categoryFormSchema = z.object({
@@ -85,10 +99,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
             </label>
           ))}
           {/* Any other color with the browser's native color picker */}
-          <label
-            className="relative flex size-11 cursor-pointer items-center justify-center"
-            title="Otro color"
-          >
+          <label className="relative flex size-11 cursor-pointer items-center justify-center" title="Otro color">
             <input
               type="color"
               value={color}

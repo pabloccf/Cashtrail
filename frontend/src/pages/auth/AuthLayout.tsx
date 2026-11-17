@@ -39,7 +39,10 @@ function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
           <ul className="mt-10 flex flex-col gap-6">
             {features.map((feature) => (
               <li key={feature.title} className="flex gap-4">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20" aria-hidden="true">
+                <span
+                  className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20"
+                  aria-hidden="true"
+                >
                   <feature.icon className="size-5" />
                 </span>
                 <div>

@@ -17,7 +17,10 @@ interface CardProps extends HTMLAttributes<HTMLElement> {
 // Like in Button, `className` is for layout (flex, gap...), not for colors or padding
 function Card({ as: Tag = 'div', padding = 'md', className = '', ...props }: CardProps) {
   return (
-    <Tag className={`rounded-2xl bg-white shadow-card ring-1 ring-slate-900/5 ${paddingClasses[padding]} ${className}`} {...props} />
+    <Tag
+      className={`rounded-2xl bg-white shadow-card ring-1 ring-slate-900/5 ${paddingClasses[padding]} ${className}`}
+      {...props}
+    />
   )
 }
 

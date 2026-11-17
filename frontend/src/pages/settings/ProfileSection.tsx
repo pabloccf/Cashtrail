@@ -58,7 +58,13 @@ function ProfileSection({ user }: ProfileSectionProps) {
       </h2>
 
       <form onSubmit={handleSubmit(submit)} noValidate className="flex flex-col gap-4">
-        <TextField label="Nombre" autoComplete="name" maxLength={50} error={errors.name?.message} {...register('name')} />
+        <TextField
+          label="Nombre"
+          autoComplete="name"
+          maxLength={50}
+          error={errors.name?.message}
+          {...register('name')}
+        />
 
         {/* The email cannot be changed here (it would need the current password), so it is only shown */}
         <div>
@@ -70,11 +76,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
           <label htmlFor="currency" className={labelClass}>
             Moneda
           </label>
-          <select
-            id="currency"
-            className={selectClass}
-            {...register('currency')}
-          >
+          <select id="currency" className={selectClass} {...register('currency')}>
             {SUPPORTED_CURRENCIES.map((currency) => (
               <option key={currency} value={currency}>
                 {CURRENCY_LABELS[currency]}

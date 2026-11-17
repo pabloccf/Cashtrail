@@ -126,9 +126,7 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
             </option>
           ))}
         </select>
-        {categoriesQuery.isError && (
-          <p className={fieldErrorClass}>No se han podido cargar las categorías.</p>
-        )}
+        {categoriesQuery.isError && <p className={fieldErrorClass}>No se han podido cargar las categorías.</p>}
         <FieldError message={errors.categoryId?.message} />
       </div>
 

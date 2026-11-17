@@ -61,9 +61,7 @@ export async function getUpcomingInRange(userId: string, from: Date, to: Date): 
   });
 
   // Dates are compared by their milliseconds. Same day: alphabetically, so the order is stable
-  return occurrences.sort(
-    (a, b) => a.date.getTime() - b.date.getTime() || a.description.localeCompare(b.description),
-  );
+  return occurrences.sort((a, b) => a.date.getTime() - b.date.getTime() || a.description.localeCompare(b.description));
 }
 
 // From today to `days` days from now, both included

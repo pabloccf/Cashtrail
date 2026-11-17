@@ -10,8 +10,7 @@ interface MonthNavigatorProps {
   children?: ReactNode
 }
 
-const arrowClass =
-  'flex size-11 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100'
+const arrowClass = 'flex size-11 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100'
 
 // "‹ Noviembre de 2026 ›". Only moves between months: what to do with the month is up to each page
 function MonthNavigator({ month, onMonthChange, children }: MonthNavigatorProps) {

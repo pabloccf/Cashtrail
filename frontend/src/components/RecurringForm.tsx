@@ -21,7 +21,11 @@ const recurringFormSchema = z
       return cents !== null && cents > 0
     }, 'Introduce un importe válido, por ejemplo 12,50'),
     categoryId: z.string().min(1, 'Elige una categoría'),
-    description: z.string().trim().min(1, 'Escribe una descripción, por ejemplo "Spotify"').max(255, 'Máximo 255 caracteres'),
+    description: z
+      .string()
+      .trim()
+      .min(1, 'Escribe una descripción, por ejemplo "Spotify"')
+      .max(255, 'Máximo 255 caracteres'),
     frequency: z.enum(['MONTHLY', 'YEARLY']),
     dayOfMonth: z.string(),
     monthOfYear: z.string(),
@@ -38,7 +42,10 @@ const recurringFormSchema = z
 
 type RecurringFormValues = z.infer<typeof recurringFormSchema>
 
-function getDefaultValues(recurring: RecurringTransaction | undefined, defaultType: TransactionType): RecurringFormValues {
+function getDefaultValues(
+  recurring: RecurringTransaction | undefined,
+  defaultType: TransactionType,
+): RecurringFormValues {
   if (!recurring) {
     const today = todayIsoDate() // "YYYY-MM-DD"
     return {
@@ -220,9 +227,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
               </option>
             ))}
           </select>
-          {categoriesQuery.isError && (
-            <p className={fieldErrorClass}>No se han podido cargar las categorías.</p>
-          )}
+          {categoriesQuery.isError && <p className={fieldErrorClass}>No se han podido cargar las categorías.</p>}
           <FieldError message={errors.categoryId?.message} />
         </div>
       </div>

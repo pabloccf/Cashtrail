@@ -36,7 +36,14 @@ const MONTHLY_TEMPLATES: SampleTemplate[] = [
   { category: 'Coche', type: 'EXPENSE', day: 15, description: 'Gasolina', amount: 5500, vary: true },
   { category: 'Supermercado', type: 'EXPENSE', day: 17, description: 'Compra Mercadona', amount: 7200, vary: true },
   { category: 'Ocio', type: 'EXPENSE', day: 22, description: 'Cine', amount: 1800 },
-  { category: 'Supermercado', type: 'EXPENSE', day: 24, description: 'Compra fruta y verdura', amount: 2300, vary: true },
+  {
+    category: 'Supermercado',
+    type: 'EXPENSE',
+    day: 24,
+    description: 'Compra fruta y verdura',
+    amount: 2300,
+    vary: true,
+  },
 ];
 
 // Only once, in a given month ago (0 = this month)

@@ -85,7 +85,8 @@ function BudgetsPage() {
               copyMutation.mutate(month, {
                 // Copying nothing is not a success worth a toast: the inline message below explains it
                 onSuccess: ({ copied }) => {
-                  if (copied > 0) toast.success(copied === 1 ? '1 presupuesto copiado' : `${copied} presupuestos copiados`)
+                  if (copied > 0)
+                    toast.success(copied === 1 ? '1 presupuesto copiado' : `${copied} presupuestos copiados`)
                 },
               })
             }
@@ -122,7 +123,9 @@ function BudgetsPage() {
           </ul>
 
           {categoriesQuery.isSuccess && availableCategories.length === 0 && (
-            <p className="text-center text-sm text-slate-500">Todas tus categorías de gasto tienen presupuesto este mes.</p>
+            <p className="text-center text-sm text-slate-500">
+              Todas tus categorías de gasto tienen presupuesto este mes.
+            </p>
           )}
         </>
       )}

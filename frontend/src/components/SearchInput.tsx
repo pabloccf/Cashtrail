@@ -49,7 +49,10 @@ function SearchInput({ value, onDebouncedChange, label, placeholder }: SearchInp
 
   return (
     <div className="relative">
-      <Search className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+      <Search
+        className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-slate-400"
+        aria-hidden="true"
+      />
       <input
         type="search"
         value={text}

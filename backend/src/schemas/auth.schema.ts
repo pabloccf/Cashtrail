@@ -25,7 +25,10 @@ export const registerBodySchema = z.object({
 // No minimum length here: login only checks the password, the rules are enforced on register
 export const loginBodySchema = z.object({
   email: emailSchema,
-  password: z.string().min(1).refine(passwordMaxBytes, { message: `Password must be at most ${BCRYPT_MAX_BYTES} bytes` }),
+  password: z
+    .string()
+    .min(1)
+    .refine(passwordMaxBytes, { message: `Password must be at most ${BCRYPT_MAX_BYTES} bytes` }),
 });
 
 // PUT /auth/me. Email and password are not here: changing them needs the current password

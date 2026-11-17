@@ -27,7 +27,12 @@ function SummaryCards({ summary }: SummaryCardsProps) {
     // Stacked on mobile. On large screens the hero takes two thirds of the row
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <div className="lg:col-span-2">
-        <BalanceHero month={summary.month} balance={summary.balance} income={summary.income} expense={summary.expense} />
+        <BalanceHero
+          month={summary.month}
+          balance={summary.balance}
+          income={summary.income}
+          expense={summary.expense}
+        />
       </div>
       <StatCard
         label="Saldo estimado a fin de mes"

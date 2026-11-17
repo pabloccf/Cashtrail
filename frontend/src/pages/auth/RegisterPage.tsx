@@ -20,7 +20,10 @@ const registerFormSchema = z
     password: z
       .string()
       .min(PASSWORD_MIN_LENGTH, `Mínimo ${PASSWORD_MIN_LENGTH} caracteres`)
-      .refine((value) => new TextEncoder().encode(value).length <= PASSWORD_MAX_BYTES, 'La contraseña es demasiado larga'),
+      .refine(
+        (value) => new TextEncoder().encode(value).length <= PASSWORD_MAX_BYTES,
+        'La contraseña es demasiado larga',
+      ),
     confirmPassword: z.string(),
   })
   // Rule that involves two fields: it goes on the object, and `path` says where to show the error
@@ -67,7 +70,13 @@ function RegisterPage() {
     >
       <form onSubmit={handleSubmit(submit)} noValidate className="flex flex-col gap-4">
         <TextField label="Nombre" autoComplete="name" error={errors.name?.message} {...register('name')} />
-        <TextField label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register('email')}
+        />
         {/* "new-password" makes password managers offer to generate a strong one */}
         <TextField
           label="Contraseña"

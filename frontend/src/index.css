@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Design tokens. Every value declared in @theme becomes a CSS variable and a set of utilities:
    --color-brand-600 -> bg-brand-600, text-brand-600, ring-brand-600...
@@ -6,7 +6,7 @@
    Changing a value here restyles the whole app, with no component to touch. */
 @theme {
   /* Inter is loaded in index.html. The system fonts are the fallback while it downloads */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 
   /* Brand color (indigo). Kept apart from green and red, which mean income and expense */
   --color-brand-50: oklch(96.2% 0.018 272.314);

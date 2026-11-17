@@ -1,4 +1,13 @@
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from 'recharts'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  type TooltipContentProps,
+} from 'recharts'
 import type { MonthlyTotals } from '../types/stats'
 import { useMoney } from '../hooks/useMoney'
 import ChartTooltip from './ChartTooltip'
@@ -36,7 +45,11 @@ function MonthlyTooltip({ active, payload }: TooltipContentProps) {
       <div className="flex flex-col gap-1">
         {series.map((item) => (
           <p key={item.key} className="flex items-center gap-2">
-            <span className="h-0.5 w-3 shrink-0 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
+            <span
+              className="h-0.5 w-3 shrink-0 rounded-full"
+              style={{ backgroundColor: item.color }}
+              aria-hidden="true"
+            />
             <span className="font-semibold text-slate-900 tabular-nums">{formatMoney(row[item.key])}</span>
             <span className="text-slate-500">{item.label}</span>
           </p>

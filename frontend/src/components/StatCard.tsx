@@ -28,7 +28,10 @@ function StatCard({ label, amount, tone, icon: Icon, children }: StatCardProps) 
   return (
     <Card className="flex flex-col">
       <div className="flex items-center gap-3">
-        <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${classes.icon}`} aria-hidden="true">
+        <span
+          className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${classes.icon}`}
+          aria-hidden="true"
+        >
           <Icon className="size-5" />
         </span>
         <p className="text-sm font-medium text-slate-500">{label}</p>

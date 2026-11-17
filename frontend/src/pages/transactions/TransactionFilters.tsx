@@ -3,11 +3,7 @@ import { SlidersHorizontal } from 'lucide-react'
 import SearchInput from '../../components/SearchInput'
 import { useCategories } from '../../hooks/useCategories'
 import type { Category } from '../../types/category'
-import {
-  countPanelFilters,
-  hasActiveFilters,
-  type TransactionFilters as Filters,
-} from '../../utils/transactionFilters'
+import { countPanelFilters, hasActiveFilters, type TransactionFilters as Filters } from '../../utils/transactionFilters'
 import Card from '../../components/Card'
 import { fieldClass, labelClass, selectClass } from '../../utils/formStyles'
 
