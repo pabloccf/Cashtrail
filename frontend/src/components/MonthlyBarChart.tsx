@@ -1,6 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from 'recharts'
 import type { MonthlyTotals } from '../types/stats'
-import { formatMoney, formatMoneyCompact } from '../utils/money'
+import { useMoney } from '../hooks/useMoney'
 import { formatMonth, formatShortMonth } from '../utils/month'
 
 interface MonthlyBarChartProps {
@@ -23,6 +23,7 @@ const series = [
 ] as const
 
 function MonthlyTooltip({ active, payload }: TooltipContentProps) {
+  const { formatMoney } = useMoney()
   // `payload[0].payload` is the original row of the hovered month
   const row = payload?.[0]?.payload as MonthlyTotals | undefined
   if (!active || !row) return null
@@ -46,6 +47,7 @@ function MonthlyTooltip({ active, payload }: TooltipContentProps) {
 // Income and expenses side by side, one pair of bars per month. It receives the data by props and
 // does not fetch anything, so the shared dashboard (phase 8) can reuse it
 function MonthlyBarChart({ data }: MonthlyBarChartProps) {
+  const { formatMoney, formatMoneyCompact } = useMoney()
   return (
     <div className="flex flex-col gap-3">
       {/* Legend in HTML above the chart: two series, so identity never depends on color alone */}
@@ -75,7 +77,9 @@ function MonthlyBarChart({ data }: MonthlyBarChartProps) {
             tick={{ fill: AXIS_TEXT_COLOR, fontSize: 12 }}
             width={64}
           />
-          <Tooltip content={MonthlyTooltip} cursor={{ fill: '#f1f5f9' }} />
+          {/* A function that returns an element (not content={MonthlyTooltip}): Recharts would call that one
+              as a plain function, and the hook inside MonthlyTooltip needs it to be rendered as a component */}
+          <Tooltip content={(props) => <MonthlyTooltip {...props} />} cursor={{ fill: '#f1f5f9' }} />
           {series.map((item) => (
             <Bar
               key={item.key}

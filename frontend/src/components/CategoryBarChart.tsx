@@ -12,7 +12,7 @@ import {
 } from 'recharts'
 import type { CategoryTotal } from '../types/stats'
 import { getCategoryIcon } from '../utils/categoryIcons'
-import { formatMoney } from '../utils/money'
+import { useMoney } from '../hooks/useMoney'
 
 interface CategoryBarChartProps {
   items: CategoryTotal[] // Highest first, as the backend returns them
@@ -71,6 +71,7 @@ function CategoryTick({ x, y, row }: CategoryTickProps) {
 }
 
 function CategoryTooltip({ active, payload }: TooltipContentProps) {
+  const { formatMoney } = useMoney()
   // `payload[0].payload` is the original row of the hovered bar
   const row = payload?.[0]?.payload as ChartRow | undefined
   if (!active || !row) return null
@@ -88,6 +89,7 @@ function CategoryTooltip({ active, payload }: TooltipContentProps) {
 // Ranked horizontal bars: one row per category, highest first. It receives the data by props and
 // does not fetch anything, so the shared dashboard (phase 8) can reuse it
 function CategoryBarChart({ items }: CategoryBarChartProps) {
+  const { formatMoney } = useMoney()
   const grandTotal = items.reduce((sum, item) => sum + item.total, 0)
   const rows: ChartRow[] = items.map(({ category, total }) => ({
     ...category,
@@ -112,7 +114,8 @@ function CategoryBarChart({ items }: CategoryBarChartProps) {
             <CategoryTick x={Number(props.x)} y={Number(props.y)} row={rowsById.get(String(props.payload.value))} />
           )}
         />
-        <Tooltip content={CategoryTooltip} cursor={{ fill: '#f1f5f9' }} />
+        {/* Rendered as a component (not content={CategoryTooltip}): the tooltip uses a hook. See MonthlyBarChart */}
+        <Tooltip content={(props) => <CategoryTooltip {...props} />} cursor={{ fill: '#f1f5f9' }} />
         <Bar dataKey="total" barSize={BAR_SIZE} radius={[0, 4, 4, 0]} isAnimationActive={false}>
           {/* One <Cell> per bar, so each one takes the color of its category */}
           {rows.map((row) => (

@@ -3,7 +3,7 @@ import CategoryIcon from '../../components/CategoryIcon'
 import TrashIcon from '../../components/TrashIcon'
 import type { Budget } from '../../types/budget'
 import { getBudgetProgress } from '../../utils/budget'
-import { formatMoney } from '../../utils/money'
+import { useMoney } from '../../hooks/useMoney'
 
 interface BudgetListItemProps {
   budget: Budget
@@ -14,6 +14,7 @@ interface BudgetListItemProps {
 // Same structure as RecurringListItem: tapping the card edits, the trash icon deletes.
 // They are sibling buttons: HTML does not allow nesting them
 function BudgetListItem({ budget, onEdit, onDelete }: BudgetListItemProps) {
+  const { formatMoney } = useMoney()
   const { amount, spent, category } = budget
   const { percent, level, remaining } = getBudgetProgress(spent, amount)
 

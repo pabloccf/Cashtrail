@@ -15,3 +15,11 @@ export const CURRENCY_LABELS: Record<Currency, string> = {
 export function isSupportedCurrency(value: string): value is Currency {
   return (SUPPORTED_CURRENCIES as readonly string[]).includes(value)
 }
+
+// "EUR" -> "€", "GBP" -> "£", "USD" -> "$", for labels such as "Importe (€)". Same as the backend
+// (src/lib/currency.ts), so the app and the CSV show the same symbol
+export function currencySymbol(currency: string): string {
+  const parts = new Intl.NumberFormat('es-ES', { style: 'currency', currency, currencyDisplay: 'narrowSymbol' }).formatToParts(0)
+  // A currency always has its symbol part; the code is only a fallback to keep TypeScript happy
+  return parts.find((part) => part.type === 'currency')?.value ?? currency
+}

@@ -1,6 +1,6 @@
 import CategoryIcon from '../../components/CategoryIcon'
 import type { AnnualTotals } from '../../utils/recurring'
-import { formatMoney } from '../../utils/money'
+import { useMoney } from '../../hooks/useMoney'
 
 interface AnnualSummaryProps {
   totals: AnnualTotals
@@ -9,6 +9,7 @@ interface AnnualSummaryProps {
 // How much the active recurring transactions add up to per year, with the expenses split by
 // category (that is where "Suscripciones" shows up, whatever the user has renamed it to)
 function AnnualSummary({ totals }: AnnualSummaryProps) {
+  const { formatMoney } = useMoney()
   return (
     <section aria-labelledby="annual-summary" className="flex flex-col gap-3">
       <h2 id="annual-summary" className="sr-only">

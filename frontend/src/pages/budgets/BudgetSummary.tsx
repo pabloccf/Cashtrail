@@ -1,7 +1,7 @@
 import BudgetProgressBar from '../../components/BudgetProgressBar'
 import type { Budget } from '../../types/budget'
 import { getBudgetProgress } from '../../utils/budget'
-import { formatMoney } from '../../utils/money'
+import { useMoney } from '../../hooks/useMoney'
 
 interface BudgetSummaryProps {
   budgets: Budget[]
@@ -10,6 +10,7 @@ interface BudgetSummaryProps {
 // Every budget of the month added up. Only the categories with a budget count: spending in the
 // others is not part of any limit
 function BudgetSummary({ budgets }: BudgetSummaryProps) {
+  const { formatMoney } = useMoney()
   const amount = budgets.reduce((sum, budget) => sum + budget.amount, 0)
   const spent = budgets.reduce((sum, budget) => sum + budget.spent, 0)
   const { percent, remaining } = getBudgetProgress(spent, amount)

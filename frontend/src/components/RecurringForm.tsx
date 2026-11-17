@@ -8,6 +8,7 @@ import { centsToInput, parseAmountToCents } from '../utils/money'
 import { toIsoDateOnly, todayIsoDate } from '../utils/date'
 import { MONTH_NAMES, maxDaysInMonth } from '../utils/recurring'
 import TransactionTypeToggle from './TransactionTypeToggle'
+import { useMoney } from '../hooks/useMoney'
 
 // The form works with text (what the inputs and selects hold). Numbers are converted only on submit
 const recurringFormSchema = z
@@ -103,6 +104,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSubmit, onCancel }: RecurringFormProps) {
+  const { symbol } = useMoney()
   const {
     register,
     handleSubmit,
@@ -187,7 +189,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="amount" className="mb-1 block text-sm font-medium">
-            Importe (€)
+            Importe ({symbol})
           </label>
           {/* Same as in TransactionForm: text + inputMode="decimal" accepts the comma */}
           <input

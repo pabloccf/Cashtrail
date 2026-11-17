@@ -1,5 +1,5 @@
 import type { TransactionType } from '../types/transaction'
-import { formatMoney } from '../utils/money'
+import { useMoney } from '../hooks/useMoney'
 
 interface TransactionAmountProps {
   amount: number
@@ -8,6 +8,7 @@ interface TransactionAmountProps {
 
 // Expenses in red with "−", income in green with "+"
 function TransactionAmount({ amount, type }: TransactionAmountProps) {
+  const { formatMoney } = useMoney()
   const isIncome = type === 'INCOME'
   return (
     // tabular-nums: all digits have the same width, so amounts line up in columns

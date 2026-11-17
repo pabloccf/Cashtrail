@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { formatMoney } from '../utils/money'
+import { useMoney } from '../hooks/useMoney'
 
 // Full class names (not built from strings), so Tailwind can find them when it generates the CSS
 const toneClasses = {
@@ -20,6 +20,7 @@ interface StatCardProps {
 
 // A single figure of the dashboard: a label and a big amount
 function StatCard({ label, amount, tone, children }: StatCardProps) {
+  const { formatMoney } = useMoney()
   return (
     <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-4">
       <p className="text-sm text-slate-500">{label}</p>

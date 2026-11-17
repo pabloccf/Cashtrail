@@ -8,6 +8,7 @@ import type { Transaction } from '../types/transaction'
 import { formatDate } from '../utils/date'
 import { getErrorMessage } from '../utils/errorMessage'
 import { centsToInput, parseAmountToCents } from '../utils/money'
+import { useMoney } from '../hooks/useMoney'
 
 const confirmFormSchema = z.object({
   amount: z.string().refine((value) => {
@@ -26,6 +27,7 @@ interface ConfirmTransactionModalProps {
 // Confirms a pending record (from a recurring transaction in "ask for confirmation" mode).
 // The amount comes filled in with the expected one and can be adjusted to the real one
 function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionModalProps) {
+  const { symbol } = useMoney()
   const confirmMutation = useConfirmTransaction()
   const {
     register,
@@ -57,7 +59,7 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
 
         <div>
           <label htmlFor="confirm-amount" className="mb-1 block text-sm font-medium">
-            Importe (€)
+            Importe ({symbol})
           </label>
           <input
             id="confirm-amount"

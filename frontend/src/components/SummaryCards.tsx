@@ -1,5 +1,5 @@
 import type { StatsSummary } from '../types/stats'
-import { formatMoney } from '../utils/money'
+import { useMoney } from '../hooks/useMoney'
 import StatCard, { type StatTone } from './StatCard'
 
 interface SummaryCardsProps {
@@ -16,6 +16,7 @@ function signTone(amount: number): StatTone {
 // The four figures of a month. It receives the data by props and does not fetch anything,
 // so the shared dashboard (phase 8) can reuse it with the data of a shared space
 function SummaryCards({ summary }: SummaryCardsProps) {
+  const { formatMoney } = useMoney()
   const { income, expense } = summary.remainingRecurring
   const hasRemaining = income > 0 || expense > 0
 

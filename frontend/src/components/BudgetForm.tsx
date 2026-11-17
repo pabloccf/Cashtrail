@@ -5,6 +5,7 @@ import type { Budget } from '../types/budget'
 import type { TransactionCategory } from '../types/transaction'
 import { centsToInput, parseAmountToCents } from '../utils/money'
 import CategoryIcon from './CategoryIcon'
+import { useMoney } from '../hooks/useMoney'
 
 // The form works with text (what the inputs and selects hold). The amount is converted only on submit
 const budgetFormSchema = z.object({
@@ -44,6 +45,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 function BudgetForm({ budget, availableCategories, isSubmitting, submitError, onSubmit, onCancel }: BudgetFormProps) {
+  const { symbol } = useMoney()
   const {
     register,
     handleSubmit,
@@ -99,7 +101,7 @@ function BudgetForm({ budget, availableCategories, isSubmitting, submitError, on
 
       <div>
         <label htmlFor="amount" className="mb-1 block text-sm font-medium">
-          Límite del mes (€)
+          Límite del mes ({symbol})
         </label>
         {/* Same as in TransactionForm: text + inputMode="decimal" accepts the comma */}
         <input

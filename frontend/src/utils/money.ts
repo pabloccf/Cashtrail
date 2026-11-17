@@ -1,18 +1,26 @@
-// Formatters are relatively expensive to create, so one is cached per currency
+// Formatters are relatively expensive to create, so one is cached per currency and style.
+// In components, use the useMoney() hook: it passes the user's currency to these functions
 const formatters = new Map<string, Intl.NumberFormat>()
 
-function getFormatter(currency: string) {
-  let formatter = formatters.get(currency)
+function getFormatter(currency: string, compact: boolean) {
+  const key = `${currency}:${compact}`
+  let formatter = formatters.get(key)
   if (!formatter) {
-    formatter = new Intl.NumberFormat('es-ES', { style: 'currency', currency })
-    formatters.set(currency, formatter)
+    formatter = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency,
+      // The short symbol ("$", "£"). The default in es-ES is "US$" and "GBP". Same as the CSV export
+      currencyDisplay: 'narrowSymbol',
+      ...(compact ? { notation: 'compact', maximumFractionDigits: 1 } : {}),
+    })
+    formatters.set(key, formatter)
   }
   return formatter
 }
 
 // 1250 -> "12,50 €". Amounts are stored in cents; dividing by 100 happens only here, for display
-export function formatMoney(cents: number, currency = 'EUR'): string {
-  return getFormatter(currency).format(cents / 100)
+export function formatMoney(cents: number, currency: string): string {
+  return getFormatter(currency, false).format(cents / 100)
 }
 
 // Euros with an optional comma or dot and up to 2 decimals: "12", "12,5", "12.50".
@@ -37,15 +45,8 @@ export function centsToInput(cents: number): string {
   return `${euros},${rest}`
 }
 
-const compactFormatter = new Intl.NumberFormat('es-ES', {
-  style: 'currency',
-  currency: 'EUR',
-  notation: 'compact',
-  maximumFractionDigits: 1,
-})
-
 // 125000 -> "1,3 mil €". Only for chart axes, where the exact amount would not fit; the
 // tooltip and the table always show the exact one with formatMoney
-export function formatMoneyCompact(cents: number): string {
-  return compactFormatter.format(cents / 100)
+export function formatMoneyCompact(cents: number, currency: string): string {
+  return getFormatter(currency, true).format(cents / 100)
 }

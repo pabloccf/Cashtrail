@@ -6,6 +6,7 @@ import type { Transaction, TransactionInput } from '../types/transaction'
 import { centsToInput, parseAmountToCents } from '../utils/money'
 import { toIsoDateOnly, todayIsoDate } from '../utils/date'
 import TransactionTypeToggle from './TransactionTypeToggle'
+import { useMoney } from '../hooks/useMoney'
 
 // The form works with text (what the inputs hold). The amount is converted to cents only on submit
 const transactionFormSchema = z.object({
@@ -54,6 +55,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onCancel }: TransactionFormProps) {
+  const { symbol } = useMoney()
   const {
     register,
     handleSubmit,
@@ -92,7 +94,7 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
 
       <div>
         <label htmlFor="amount" className="mb-1 block text-sm font-medium">
-          Importe (€)
+          Importe ({symbol})
         </label>
         {/* type="text" + inputMode="decimal": numeric keyboard on mobile, and the comma is accepted.
             type="number" depends on the browser language and returns a float */}
