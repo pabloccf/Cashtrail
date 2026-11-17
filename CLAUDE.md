@@ -109,6 +109,7 @@ docker compose up -d
 # Backend (desde /backend)
 npm run dev                 # Servidor en modo desarrollo
 npx prisma migrate dev      # Crear y aplicar migraciones
+npx prisma generate         # Regenerar el cliente (Prisma 7 no lo hace tras migrate dev)
 npx prisma studio           # Ver la base de datos en el navegador
 
 # Frontend (desde /frontend)
@@ -120,12 +121,16 @@ npm run lint
 ## Modelo de datos
 
 - **User**: id, email (único), passwordHash, name, currency (por defecto "EUR"), createdAt
+  - `currency` solo admite las monedas de `src/constants/currencies.ts` (EUR, USD, GBP, CHF): todas con 2 decimales y con un símbolo propio. Solo cambia cómo se **muestran** los importes; nunca se convierte ninguna cantidad. El frontend tiene una copia de la lista en `src/utils/currency.ts` (mantenerlas sincronizadas).
 - **Category**: id, userId, name, color, icon, type (EXPENSE | INCOME)
 - **Transaction**: id, userId, categoryId, recurringTransactionId (opcional), amount, description, date, type (EXPENSE | INCOME), status (CONFIRMED | PENDING), createdAt
   - Una "transacción" es solo un **registro o apunte** de un gasto o ingreso, nunca un pago.
 - **RecurringTransaction** (gastos e ingresos fijos): id, userId, categoryId, amount, description, type (EXPENSE | INCOME), frequency (MONTHLY | YEARLY), dayOfMonth, monthOfYear (solo si es anual), startDate, endDate (opcional), mode (AUTO | CONFIRM), active, lastGeneratedAt
   - Ejemplos: préstamo del coche (con `endDate`), Spotify (sin `endDate`), nómina (ingreso).
-- **Budget**: id, userId, categoryId, amount, month, year (único por userId + categoryId + month + year)
+- **Budget**: id, userId, categoryId, amount, month (1-12), year, createdAt (único por userId + categoryId + month + year)
+  - Solo para categorías de **gasto**. Es una referencia para comparar: nunca bloquea ni cambia ningún registro.
+  - Lo gastado (`spent`) se calcula con los gastos `CONFIRMED` de la categoría en ese mes, con la misma consulta que las estadísticas, para que las cifras coincidan siempre.
+  - Cada mes empieza vacío. "Copiar del mes anterior" copia los presupuestos del mes previo; las categorías que ya tienen presupuesto ese mes conservan el suyo.
 
 ### Categorías por defecto
 
@@ -201,13 +206,17 @@ Un **espacio compartido** permite a dos usuarios, cada uno con su propia cuenta,
 Todas las rutas empiezan por `/api`. Todas salvo las de registro y login requieren autenticación.
 
 - `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
+- `PUT /auth/me`: actualiza el perfil (`{ name, currency }`). El email y la contraseña no se cambian aquí
 - `GET|POST /transactions`, `PUT|DELETE /transactions/:id`
   - `GET` admite filtros: `from`, `to`, `category`, `type`, `status`, `q` (búsqueda en la descripción, sin distinguir mayúsculas), `page` y `pageSize` (solo 10, 25 o 50; por defecto 25)
+- `GET /transactions/export`: descarga un CSV con los mismos filtros que el listado, sin paginar (ver "Exportar a CSV")
 - `PATCH /transactions/:id/confirm`: confirma un registro pendiente (opcionalmente con un importe ajustado)
 - `GET|POST /recurring`, `PUT|DELETE /recurring/:id`, `PATCH /recurring/:id/toggle` (activar o desactivar)
 - `GET /recurring/upcoming?days=30`: próximos gastos e ingresos fijos
 - `GET|POST /categories`, `PUT|DELETE /categories/:id`
-- `GET|POST /budgets`, `PUT /budgets/:id` (filtro por `month` y `year`)
+- `GET /budgets?month=YYYY-MM` (obligatorio; cada presupuesto incluye su categoría y `spent`), `POST /budgets` (`{ categoryId, amount, month }`), `PUT /budgets/:id` (solo `{ amount }`: otra categoría u otro mes es otro presupuesto), `DELETE /budgets/:id`
+- `POST /budgets/copy` (`{ month }`): copia los presupuestos del mes anterior y devuelve `{ copied }`. Repetirla no duplica nada
+- Los meses viajan siempre como `"YYYY-MM"` (estadísticas, presupuestos y URL del frontend); la base de datos guarda los presupuestos con `month` y `year` enteros
 - `GET /stats/summary`, `GET /stats/by-category`, `GET /stats/monthly`
 - `POST /jobs/recurring`: genera los registros fijos pendientes. **No** usa la autenticación de usuario: exige la cabecera `x-cron-secret` con el valor de la variable `CRON_SECRET`; si no coincide, responde 401. Debe ser idempotente.
 - `GET /health`: responde `{ "status": "ok" }`. Sin autenticación. Sirve para comprobar que el servidor está despierto.
@@ -225,6 +234,15 @@ Todas las rutas empiezan por `/api`. Todas salvo las de registro y login requier
 
 Formato de error común: `{ "error": { "message": string, "details"?: unknown } }`
 
+### Exportar a CSV
+
+- Pensado para Excel en español: separador `;`, coma decimal, fechas `dd/mm/aaaa`, saltos de línea `\r\n` y BOM UTF-8 al principio (sin él, Excel muestra mal los acentos). La utilidad genérica vive en `src/lib/csv.ts`.
+- Columnas: Fecha, Tipo, Categoría, Descripción, `Importe (€)` y "Pendiente de confirmar" (Sí / No). Orden cronológico ascendente.
+- El importe va **con signo** (negativo en los gastos) para poder sumarlo en la hoja. El símbolo de la moneda del usuario va en el título de la columna, nunca en cada celda: algunas hojas de cálculo leerían `-12,50 €` como texto y no podrían sumarlo.
+- **Inyección de fórmulas CSV:** los textos que escribe el usuario (categoría y descripción) pasan por `escapeFormula`, que antepone `'` si empiezan por `=`, `+`, `-`, `@`, tabulador o retorno de carro. Nunca se aplica a los números que genera la app.
+- Respuesta con `Content-Disposition: attachment` (el nombre del archivo lo decide el controlador según el rango) y `Cache-Control: no-store`.
+- El frontend lo descarga con `fetch` + `Blob` (`apiClient.download` y `utils/download.ts`), no con un enlace directo, para mostrar los errores como en el resto de la app.
+
 ## Pantallas del frontend
 
 - `/login`, `/register`
@@ -237,7 +255,11 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 - `/recurring`: gestión de gastos e ingresos fijos (crear, editar, activar o desactivar) y total anual en suscripciones
 - `/categories`: gestión de categorías
 - `/budgets`: presupuestos mensuales con barra de progreso
-- `/settings`: perfil, moneda, exportar a CSV y, si no pertenezco a ningún espacio, "Crear espacio compartido" y "Unirme con un código"
+  - Selector de mes con el mes en la URL (`?month=`), como en el dashboard. Tarjeta "Total del mes" y una tarjeta por presupuesto.
+  - Barra verde por debajo del 80 %, ámbar desde el 80 % hasta el límite y roja si se pasa; el rojo siempre va acompañado de texto ("Te has pasado…").
+  - Si el mes no tiene presupuestos, se ofrece "Copiar los de <mes anterior>".
+- `/settings`: perfil (nombre y moneda; el email solo se muestra), exportar a CSV (este mes, mes anterior, año actual o todo), enlace a Categorías en móvil y, si no pertenezco a ningún espacio, "Crear espacio compartido" y "Unirme con un código"
+- Los importes se formatean siempre con el hook `useMoney()`, que usa la moneda del usuario (de la caché de `/auth/me`) con `currencyDisplay: 'narrowSymbol'` (€, $, £), igual que el CSV. Nunca escribir "€" a mano en los componentes.
 
 **Apartado "Gastos compartidos" (Fase 8)**, visible en la navegación solo si el usuario pertenece a un espacio:
 
@@ -280,6 +302,8 @@ El repositorio de GitHub es **privado** por ahora, pero puede hacerse público e
 
 - Diseñar primero para móvil y ampliar con `md:` y `lg:`.
 - Navegación: barra inferior con iconos en móvil, barra lateral en escritorio.
+  - La barra inferior tiene solo **4 secciones** de uso diario (Inicio, Transacciones, Fijos y Presupuestos), para que las etiquetas quepan enteras. Ajustes va como icono en la barra superior del móvil, y Categorías se abre desde Ajustes. En escritorio, todas están en la barra lateral.
+  - Se controla con `inBottomBar` en la lista `navItems` de `AppLayout.tsx`. Antes de añadir una sección nueva a la barra inferior, comprobar que sigue cabiendo en 360px.
 - Transacciones: lista de tarjetas en móvil, tabla en escritorio.
 - Botón flotante "+" en móvil para añadir una transacción.
 - Gráficos siempre dentro de `ResponsiveContainer` de Recharts.
@@ -344,7 +368,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 - [x] **Fase 3:** categorías, filtros y paginación
 - [x] **Fase 4:** gastos e ingresos fijos: modelo, CRUD, lógica de generación, endpoint `/jobs/recurring` y confirmación de pendientes
 - [x] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
-- [ ] **Fase 6:** presupuestos y exportar a CSV
+- [x] **Fase 6:** presupuestos y exportar a CSV, más la página `/settings` con perfil y moneda
 - [ ] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
 - [ ] **Fase 7.5:** registro e inicio de sesión con Google (OAuth 2.0 / OpenID Connect con PKCE). Microsoft, opcional y más adelante. Se descartan Apple (de pago y usa `form_post`, incompatible con la cookie `sameSite: "lax"`), Facebook y X. Dividirla en pasos al planificarla:
   - Modelo `AuthAccount` (userId, provider, providerAccountId; único por provider + providerAccountId) y `passwordHash` opcional en `User`.
