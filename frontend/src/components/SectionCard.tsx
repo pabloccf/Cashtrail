@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import Card from './Card'
 
 interface SectionCardProps {
   title: string
@@ -12,7 +13,7 @@ interface SectionCardProps {
 function SectionCard({ title, link, children }: SectionCardProps) {
   return (
     // min-w-0 lets the card shrink inside a grid, so the charts can measure their real width
-    <section className="flex min-w-0 flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4">
+    <Card as="section" className="flex min-w-0 flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-semibold">{title}</h2>
         {link && (
@@ -26,7 +27,7 @@ function SectionCard({ title, link, children }: SectionCardProps) {
         )}
       </div>
       {children}
-    </section>
+    </Card>
   )
 }
 

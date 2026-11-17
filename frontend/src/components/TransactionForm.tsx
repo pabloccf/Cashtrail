@@ -7,6 +7,7 @@ import { centsToInput, parseAmountToCents } from '../utils/money'
 import { toIsoDateOnly, todayIsoDate } from '../utils/date'
 import TransactionTypeToggle from './TransactionTypeToggle'
 import { useMoney } from '../hooks/useMoney'
+import Button from './Button'
 
 // The form works with text (what the inputs hold). The amount is converted to cents only on submit
 const transactionFormSchema = z.object({
@@ -171,20 +172,12 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
       )}
 
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="min-h-11 rounded-lg px-4 font-medium text-slate-600 hover:bg-slate-100"
-        >
+        <Button variant="ghost" onClick={onCancel}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        >
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Guardando…' : 'Guardar'}
-        </button>
+        </Button>
       </div>
     </form>
   )

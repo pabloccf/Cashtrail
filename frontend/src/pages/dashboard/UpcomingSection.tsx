@@ -1,7 +1,8 @@
 import SectionCard from '../../components/SectionCard'
 import UpcomingList from '../../components/UpcomingList'
 import { useUpcomingRecurring } from '../../hooks/useRecurring'
-import SectionError from './SectionError'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 
 const DAYS = 30
 // A long list would push the rest of the dashboard down; the full list is in /recurring
@@ -14,9 +15,9 @@ function UpcomingSection() {
   return (
     <SectionCard title={`Próximos fijos · ${DAYS} días`} link={{ to: '/recurring', label: 'Ver fijos' }}>
       {isPending ? (
-        <p className="text-sm text-slate-500">Cargando…</p>
+        <ListSkeleton label="Cargando…" rows={4} rowClassName="h-12" />
       ) : isError ? (
-        <SectionError message="No se han podido cargar los próximos fijos." error={error} onRetry={() => refetch()} />
+        <ErrorState message="No se han podido cargar los próximos fijos." error={error} onRetry={() => refetch()} />
       ) : data.length === 0 ? (
         <p className="text-sm text-slate-500">No hay gastos ni ingresos fijos en los próximos {DAYS} días.</p>
       ) : (

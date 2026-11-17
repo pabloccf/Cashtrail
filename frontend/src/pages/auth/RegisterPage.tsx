@@ -7,6 +7,7 @@ import TextField from '../../components/TextField'
 import { useRegister } from '../../hooks/useAuth'
 import { getErrorMessage } from '../../utils/errorMessage'
 import AuthLayout from './AuthLayout'
+import Button from '../../components/Button'
 
 // Same limits as the backend. bcrypt only uses the first 72 bytes ("ñ" or "€" take more than 1)
 const PASSWORD_MIN_LENGTH = 8
@@ -88,13 +89,9 @@ function RegisterPage() {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={registerMutation.isPending}
-          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={registerMutation.isPending}>
           {registerMutation.isPending ? 'Creando cuenta…' : 'Crear cuenta'}
-        </button>
+        </Button>
       </form>
     </AuthLayout>
   )

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 import { useSearchParams } from 'react-router'
 import MonthNavigator from '../../components/MonthNavigator'
 import { useBudgets } from '../../hooks/useBudgets'
@@ -11,6 +13,7 @@ import BudgetFormModal from './BudgetFormModal'
 import BudgetListItem from './BudgetListItem'
 import BudgetSummary from './BudgetSummary'
 import DeleteBudgetDialog from './DeleteBudgetDialog'
+import Button from '../../components/Button'
 
 // Same pattern as RecurringPage: null is closed, `kind` tells creating from editing
 type FormState = null | { kind: 'new' } | { kind: 'edit'; budget: Budget }
@@ -63,27 +66,19 @@ function BudgetsPage() {
       <MonthNavigator month={month} onMonthChange={handleMonthChange} />
 
       {isPending ? (
-        <p className="text-slate-500">Cargando presupuestos…</p>
+        <ListSkeleton label="Cargando presupuestos…" />
       ) : isError ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
-          <p className="font-medium">No se han podido cargar los presupuestos.</p>
-          <p className="text-sm">{getErrorMessage(error)}</p>
-          <button type="button" className="mt-2 min-h-11 font-medium underline" onClick={() => refetch()}>
-            Reintentar
-          </button>
-        </div>
+        <ErrorState message="No se han podido cargar los presupuestos." error={error} onRetry={() => refetch()} />
       ) : budgets.length === 0 ? (
         // Each month starts empty, so the empty state offers to bring last month's budgets
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 p-6 text-center">
           <p className="text-slate-500">No tienes presupuestos para {formatMonth(month).toLowerCase()}.</p>
-          <button
-            type="button"
+          <Button
             onClick={() => copyMutation.mutate(month)}
             disabled={copyMutation.isPending}
-            className="min-h-11 rounded-lg bg-brand-600 px-4 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           >
             {copyMutation.isPending ? 'Copiando…' : `Copiar los de ${formatMonth(shiftMonth(month, -1)).toLowerCase()}`}
-          </button>
+          </Button>
           {copiedNothing && (
             <p className="text-sm text-slate-500" role="status">
               {formatMonth(shiftMonth(month, -1))} no tiene presupuestos. Crea uno con «+ Añadir».

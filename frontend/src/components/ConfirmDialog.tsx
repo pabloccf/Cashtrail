@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useOpenDialog } from '../hooks/useOpenDialog'
+import Button from './Button'
 import TrashIcon from './TrashIcon'
 
 interface ConfirmDialogProps {
@@ -60,23 +61,12 @@ function ConfirmDialog({ title, message, confirmLabel, isConfirming = false, err
 
         <div className="mt-6 grid w-full grid-cols-2 gap-2">
           {/* First in the DOM and autoFocus: Enter on an accidental opening cancels, it never deletes */}
-          <button
-            type="button"
-            autoFocus
-            onClick={dismiss}
-            disabled={isConfirming}
-            className="min-h-11 rounded-lg border border-slate-300 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-          >
+          <Button variant="secondary" autoFocus onClick={dismiss} disabled={isConfirming}>
             Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={isConfirming}
-            className="min-h-11 rounded-lg bg-rose-600 font-medium text-white hover:bg-rose-700 disabled:opacity-60"
-          >
+          </Button>
+          <Button variant="danger" onClick={onConfirm} disabled={isConfirming}>
             {isConfirming ? 'Eliminando…' : confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </dialog>

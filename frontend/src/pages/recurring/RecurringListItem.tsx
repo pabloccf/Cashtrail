@@ -4,6 +4,7 @@ import TrashIcon from '../../components/TrashIcon'
 import type { RecurringTransaction } from '../../types/recurring'
 import { formatDate } from '../../utils/date'
 import { formatSchedule } from '../../utils/recurring'
+import Card from '../../components/Card'
 
 interface RecurringListItemProps {
   recurring: RecurringTransaction
@@ -23,12 +24,12 @@ function RecurringListItem({ recurring, isToggling, onEdit, onToggle, onDelete }
   const { active } = recurring
 
   return (
-    <div className="flex items-stretch rounded-xl border border-slate-200 bg-white">
+    <Card padding="none" className="flex items-stretch">
       <button
         type="button"
         onClick={() => onEdit(recurring)}
         // Paused ones are dimmed. Only the content, so the switch keeps its normal look
-        className={`flex min-w-0 flex-1 items-center gap-3 rounded-l-xl p-3 text-left hover:bg-slate-50 active:bg-slate-50 ${active ? '' : 'opacity-50'}`}
+        className={`flex min-w-0 flex-1 items-center gap-3 rounded-l-2xl p-3 text-left hover:bg-slate-50 active:bg-slate-50 ${active ? '' : 'opacity-50'}`}
       >
         <CategoryIcon icon={recurring.category.icon} color={recurring.category.color} />
         {/* Texts wrap instead of being truncated: on mobile there is little room next to the amount,
@@ -76,12 +77,12 @@ function RecurringListItem({ recurring, isToggling, onEdit, onToggle, onDelete }
       <button
         type="button"
         onClick={() => onDelete(recurring)}
-        className="flex w-12 shrink-0 items-center justify-center rounded-r-xl border-l border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-50 active:text-rose-600"
+        className="flex w-12 shrink-0 items-center justify-center rounded-r-2xl border-l border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-50 active:text-rose-600"
         aria-label={`Eliminar fijo ${recurring.description}`}
       >
         <TrashIcon className="size-5" />
       </button>
-    </div>
+    </Card>
   )
 }
 

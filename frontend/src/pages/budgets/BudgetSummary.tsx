@@ -2,6 +2,7 @@ import BudgetProgressBar from '../../components/BudgetProgressBar'
 import type { Budget } from '../../types/budget'
 import { getBudgetProgress } from '../../utils/budget'
 import { useMoney } from '../../hooks/useMoney'
+import Card from '../../components/Card'
 
 interface BudgetSummaryProps {
   budgets: Budget[]
@@ -17,7 +18,7 @@ function BudgetSummary({ budgets }: BudgetSummaryProps) {
   const overCount = budgets.filter((budget) => budget.spent > budget.amount).length
 
   return (
-    <section aria-labelledby="budget-summary-title" className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4">
+    <Card as="section" aria-labelledby="budget-summary-title" className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="budget-summary-title" className="font-semibold">
           Total del mes
@@ -39,7 +40,7 @@ function BudgetSummary({ budgets }: BudgetSummaryProps) {
           </p>
         )}
       </div>
-    </section>
+    </Card>
   )
 }
 

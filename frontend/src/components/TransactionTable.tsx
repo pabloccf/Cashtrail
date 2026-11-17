@@ -3,6 +3,7 @@ import { formatDate, toIsoDateOnly } from '../utils/date'
 import CategoryBadge from './CategoryBadge'
 import TransactionAmount from './TransactionAmount'
 import TransactionMarkers from './TransactionMarkers'
+import Card from './Card'
 
 interface TransactionTableProps {
   transactions: Transaction[]
@@ -14,7 +15,7 @@ interface TransactionTableProps {
 // Desktop view of the transactions
 function TransactionTable({ transactions, onEdit, onConfirm, onDelete }: TransactionTableProps) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <Card padding="none" className="overflow-hidden">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
           <tr>
@@ -75,7 +76,7 @@ function TransactionTable({ transactions, onEdit, onConfirm, onDelete }: Transac
           ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   )
 }
 

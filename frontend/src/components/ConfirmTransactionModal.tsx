@@ -9,6 +9,7 @@ import { formatDate } from '../utils/date'
 import { getErrorMessage } from '../utils/errorMessage'
 import { centsToInput, parseAmountToCents } from '../utils/money'
 import { useMoney } from '../hooks/useMoney'
+import Button from './Button'
 
 const confirmFormSchema = z.object({
   amount: z.string().refine((value) => {
@@ -87,20 +88,12 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
         )}
 
         <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-11 rounded-lg px-4 font-medium text-slate-600 hover:bg-slate-100"
-          >
+          <Button variant="ghost" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={confirmMutation.isPending}
-            className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          >
+          </Button>
+          <Button type="submit" disabled={confirmMutation.isPending}>
             {confirmMutation.isPending ? 'Confirmando…' : 'Confirmar'}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

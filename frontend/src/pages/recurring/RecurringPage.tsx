@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 import { useRecurring } from '../../hooks/useRecurring'
 import { useToggleRecurring } from '../../hooks/useRecurringMutations'
 import type { TransactionType } from '../../types/transaction'
@@ -40,15 +42,9 @@ function RecurringPage() {
       <h1 className="text-2xl font-bold">Gastos e ingresos fijos</h1>
 
       {isPending ? (
-        <p className="text-slate-500">Cargando fijos…</p>
+        <ListSkeleton label="Cargando fijos…" />
       ) : isError ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
-          <p className="font-medium">No se han podido cargar los gastos e ingresos fijos.</p>
-          <p className="text-sm">{getErrorMessage(error)}</p>
-          <button type="button" className="mt-2 min-h-11 font-medium underline" onClick={() => refetch()}>
-            Reintentar
-          </button>
-        </div>
+        <ErrorState message="No se han podido cargar los gastos e ingresos fijos." error={error} onRetry={() => refetch()} />
       ) : (
         <>
           {recurringList.some((recurring) => recurring.active) && (

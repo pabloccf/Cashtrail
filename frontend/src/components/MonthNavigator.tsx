@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { formatMonth, shiftMonth } from '../utils/month'
+import Card from './Card'
 
 interface MonthNavigatorProps {
   month: string // "YYYY-MM"
@@ -15,7 +16,7 @@ const arrowClass =
 // "‹ Noviembre de 2026 ›". Only moves between months: what to do with the month is up to each page
 function MonthNavigator({ month, onMonthChange, children }: MonthNavigatorProps) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1">
+    <Card padding="none" className="flex items-center gap-2 p-1">
       <button
         type="button"
         className={arrowClass}
@@ -37,7 +38,7 @@ function MonthNavigator({ month, onMonthChange, children }: MonthNavigatorProps)
         <ChevronRight className="size-5" aria-hidden="true" />
       </button>
       {children}
-    </div>
+    </Card>
   )
 }
 

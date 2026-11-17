@@ -16,7 +16,7 @@ function SettingsPage() {
           so it is reached from here. On desktop it is in the sidebar */}
       <Link
         to="/categories"
-        className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 md:hidden"
+        className="flex min-h-14 items-center gap-3 rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-900/5 hover:bg-slate-50 md:hidden"
       >
         <Tags className="size-5 text-slate-500" aria-hidden="true" />
         <span className="flex-1">

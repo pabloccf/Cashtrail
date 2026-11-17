@@ -7,6 +7,7 @@ import { CATEGORY_ICON_OPTIONS } from '../utils/categoryIcons'
 import CategoryIcon from './CategoryIcon'
 import TextField from './TextField'
 import TransactionTypeToggle from './TransactionTypeToggle'
+import Button from './Button'
 
 // Same palette as the default categories, so the defaults are always shown as selected
 const COLOR_OPTIONS = [
@@ -128,20 +129,12 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
       )}
 
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="min-h-11 rounded-lg px-4 font-medium text-slate-600 hover:bg-slate-100"
-        >
+        <Button variant="ghost" onClick={onCancel}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        >
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Guardando…' : 'Guardar'}
-        </button>
+        </Button>
       </div>
     </form>
   )

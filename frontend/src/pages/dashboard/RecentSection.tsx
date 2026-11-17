@@ -2,7 +2,8 @@ import CompactTransactionList from '../../components/CompactTransactionList'
 import SectionCard from '../../components/SectionCard'
 import { useTransactions } from '../../hooks/useTransactions'
 import { currentMonth, formatMonth, monthRange } from '../../utils/month'
-import SectionError from './SectionError'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 
 interface RecentSectionProps {
   month: string // "YYYY-MM"
@@ -26,9 +27,9 @@ function RecentSection({ month }: RecentSectionProps) {
   return (
     <SectionCard title="Últimas transacciones" link={{ to: listUrl, label: 'Ver todas' }}>
       {isPending ? (
-        <p className="text-sm text-slate-500">Cargando…</p>
+        <ListSkeleton label="Cargando…" rows={4} rowClassName="h-12" />
       ) : isError ? (
-        <SectionError message="No se han podido cargar las transacciones." error={error} onRetry={() => refetch()} />
+        <ErrorState message="No se han podido cargar las transacciones." error={error} onRetry={() => refetch()} />
       ) : data.data.length === 0 ? (
         <p className="text-sm text-slate-500">No hay transacciones en {formatMonth(month).toLowerCase()}.</p>
       ) : (

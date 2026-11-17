@@ -1,8 +1,9 @@
 import { useSearchParams } from 'react-router'
+import ErrorState from '../../components/ErrorState'
 import MonthNavigator from '../../components/MonthNavigator'
+import Skeleton from '../../components/Skeleton'
 import SummaryCards from '../../components/SummaryCards'
 import { useStatsSummary } from '../../hooks/useStats'
-import { getErrorMessage } from '../../utils/errorMessage'
 import { currentMonth, isValidMonth } from '../../utils/month'
 import CategorySection from './CategorySection'
 import MonthlySection from './MonthlySection'
@@ -34,15 +35,15 @@ function DashboardPage() {
       <MonthNavigator month={month} onMonthChange={handleMonthChange} />
 
       {isPending ? (
-        <p className="text-slate-500">Cargando resumen…</p>
-      ) : isError ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
-          <p className="font-medium">No se ha podido cargar el resumen del mes.</p>
-          <p className="text-sm">{getErrorMessage(error)}</p>
-          <button type="button" className="mt-2 min-h-11 font-medium underline" onClick={() => refetch()}>
-            Reintentar
-          </button>
+        // Same grid as SummaryCards, so nothing moves when the figures arrive
+        <div role="status" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <span className="sr-only">Cargando resumen…</span>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Skeleton key={index} className="h-24 rounded-2xl" />
+          ))}
         </div>
+      ) : isError ? (
+        <ErrorState message="No se ha podido cargar el resumen del mes." error={error} onRetry={() => refetch()} />
       ) : (
         <SummaryCards summary={summary} />
       )}

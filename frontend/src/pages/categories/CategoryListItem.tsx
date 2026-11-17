@@ -1,6 +1,7 @@
 import CategoryIcon from '../../components/CategoryIcon'
 import TrashIcon from '../../components/TrashIcon'
 import type { Category } from '../../types/category'
+import Card from '../../components/Card'
 
 interface CategoryListItemProps {
   category: Category
@@ -11,11 +12,11 @@ interface CategoryListItemProps {
 // Same structure as TransactionCard: tapping the row edits, the trash icon deletes
 function CategoryListItem({ category, onEdit, onDelete }: CategoryListItemProps) {
   return (
-    <div className="flex items-stretch rounded-xl border border-slate-200 bg-white">
+    <Card padding="none" className="flex items-stretch">
       <button
         type="button"
         onClick={() => onEdit(category)}
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-l-xl p-3 text-left hover:bg-slate-50 active:bg-slate-50"
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-l-2xl p-3 text-left hover:bg-slate-50 active:bg-slate-50"
       >
         <CategoryIcon icon={category.icon} color={category.color} />
         <span className="truncate font-medium">{category.name}</span>
@@ -23,12 +24,12 @@ function CategoryListItem({ category, onEdit, onDelete }: CategoryListItemProps)
       <button
         type="button"
         onClick={() => onDelete(category)}
-        className="flex w-12 shrink-0 items-center justify-center rounded-r-xl border-l border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-50 active:text-rose-600"
+        className="flex w-12 shrink-0 items-center justify-center rounded-r-2xl border-l border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-50 active:text-rose-600"
         aria-label={`Eliminar categoría ${category.name}`}
       >
         <TrashIcon className="size-5" />
       </button>
-    </div>
+    </Card>
   )
 }
 

@@ -1,12 +1,15 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { useTransactions } from '../../hooks/useTransactions'
+import Button from '../../components/Button'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 import PageSizeSelect from '../../components/PageSizeSelect'
 import Pagination from '../../components/Pagination'
 import TransactionCard from '../../components/TransactionCard'
 import TransactionTable from '../../components/TransactionTable'
 import type { Transaction } from '../../types/transaction'
-import { getErrorMessage } from '../../utils/errorMessage'
 import { currentMonth, formatMonth } from '../../utils/month'
 import { loadPageSize, PAGE_SIZE_OPTIONS, parsePageSize, savePageSize, type PageSize } from '../../utils/pageSize'
 import {
@@ -117,13 +120,13 @@ function TransactionsPage() {
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Transacciones</h1>
         {/* Desktop button. On mobile the floating "+" is used instead */}
-        <button
-          type="button"
-          onClick={() => setFormState('new')}
-          className="hidden min-h-11 rounded-lg bg-brand-600 px-4 font-medium text-white hover:bg-brand-700 md:block"
-        >
-          Nueva transacción
-        </button>
+        {/* The wrapper hides it: `hidden` on the Button itself would clash with its own `inline-flex` */}
+        <div className="hidden md:block">
+          <Button onClick={() => setFormState('new')}>
+            <Plus className="size-5" aria-hidden="true" />
+            Nueva transacción
+          </Button>
+        </div>
       </div>
 
       {/* Hidden while the list already shows only the pending ones */}
@@ -134,19 +137,9 @@ function TransactionsPage() {
       <TransactionFilters filters={filters} onChange={handleFiltersChange} onClear={handleClearFilters} />
 
       {isPending ? (
-        <p className="text-slate-500">Cargando transacciones…</p>
+        <ListSkeleton label="Cargando transacciones…" rows={5} />
       ) : isError ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
-          <p className="font-medium">No se han podido cargar las transacciones.</p>
-          <p className="text-sm">{getErrorMessage(error)}</p>
-          <button
-            type="button"
-            className="mt-2 min-h-11 font-medium underline"
-            onClick={() => refetch()}
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorState message="No se han podido cargar las transacciones." error={error} onRetry={() => refetch()} />
       ) : data.data.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
           {isFiltering ? (

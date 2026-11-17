@@ -3,6 +3,7 @@ import { formatDayMonth, toIsoDateOnly } from '../utils/date'
 import CategoryIcon from './CategoryIcon'
 import TransactionAmount from './TransactionAmount'
 import TransactionMarkers from './TransactionMarkers'
+import Button from './Button'
 
 interface CompactTransactionListProps {
   transactions: Transaction[]
@@ -29,13 +30,9 @@ function CompactTransactionList({ transactions, onConfirm }: CompactTransactionL
           <div className="flex shrink-0 flex-col items-end gap-1">
             <TransactionAmount amount={transaction.amount} type={transaction.type} />
             {onConfirm && transaction.status === 'PENDING' && (
-              <button
-                type="button"
-                onClick={() => onConfirm(transaction)}
-                className="min-h-11 rounded-lg bg-brand-600 px-3 text-sm font-medium text-white hover:bg-brand-700"
-              >
+              <Button size="sm" onClick={() => onConfirm(transaction)}>
                 Confirmar
-              </button>
+              </Button>
             )}
           </div>
         </li>

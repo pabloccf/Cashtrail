@@ -2,7 +2,8 @@ import CategoryBarChart from '../../components/CategoryBarChart'
 import SectionCard from '../../components/SectionCard'
 import { useStatsByCategory } from '../../hooks/useStats'
 import { formatMonth } from '../../utils/month'
-import SectionError from './SectionError'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 
 interface CategorySectionProps {
   month: string // "YYYY-MM"
@@ -15,9 +16,9 @@ function CategorySection({ month }: CategorySectionProps) {
   return (
     <SectionCard title="Gastos por categoría">
       {isPending ? (
-        <p className="text-sm text-slate-500">Cargando…</p>
+        <ListSkeleton label="Cargando gráfico…" rows={1} rowClassName="h-56" />
       ) : isError ? (
-        <SectionError
+        <ErrorState
           message="No se han podido cargar los gastos por categoría."
           error={error}
           onRetry={() => refetch()}

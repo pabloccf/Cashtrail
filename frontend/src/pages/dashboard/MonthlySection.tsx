@@ -1,7 +1,8 @@
 import SectionCard from '../../components/SectionCard'
 import MonthlyBarChart from '../../components/MonthlyBarChart'
 import { useStatsMonthly } from '../../hooks/useStats'
-import SectionError from './SectionError'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 
 interface MonthlySectionProps {
   month: string // "YYYY-MM", the last month of the chart
@@ -17,9 +18,9 @@ function MonthlySection({ month }: MonthlySectionProps) {
   return (
     <SectionCard title={`Ingresos y gastos · últimos ${MONTHS} meses`}>
       {isPending ? (
-        <p className="text-sm text-slate-500">Cargando…</p>
+        <ListSkeleton label="Cargando gráfico…" rows={1} rowClassName="h-56" />
       ) : isError ? (
-        <SectionError message="No se ha podido cargar la evolución mensual." error={error} onRetry={() => refetch()} />
+        <ErrorState message="No se ha podido cargar la evolución mensual." error={error} onRetry={() => refetch()} />
       ) : data.every((row) => row.income === 0 && row.expense === 0) ? (
         // Without this, an empty chart would show "0 €" on every line of the axis
         <p className="text-sm text-slate-500">No hay movimientos en estos meses.</p>

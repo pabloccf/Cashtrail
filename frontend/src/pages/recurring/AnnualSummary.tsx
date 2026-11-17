@@ -1,6 +1,7 @@
 import CategoryIcon from '../../components/CategoryIcon'
 import type { AnnualTotals } from '../../utils/recurring'
 import { useMoney } from '../../hooks/useMoney'
+import Card from '../../components/Card'
 
 interface AnnualSummaryProps {
   totals: AnnualTotals
@@ -17,18 +18,18 @@ function AnnualSummary({ totals }: AnnualSummaryProps) {
       </h2>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <Card>
           <p className="text-sm text-slate-500">Gastos fijos al año</p>
           <p className="mt-1 text-xl font-bold text-rose-600 tabular-nums">{formatMoney(totals.expense)}</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
+        </Card>
+        <Card>
           <p className="text-sm text-slate-500">Ingresos fijos al año</p>
           <p className="mt-1 text-xl font-bold text-emerald-600 tabular-nums">{formatMoney(totals.income)}</p>
-        </div>
+        </Card>
       </div>
 
       {totals.expenseByCategory.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <Card>
           <h3 className="mb-2 text-sm font-medium text-slate-500">Gastos fijos por categoría</h3>
           <ul className="flex flex-col divide-y divide-slate-100">
             {totals.expenseByCategory.map(({ category, total }) => (
@@ -41,7 +42,7 @@ function AnnualSummary({ totals }: AnnualSummaryProps) {
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       )}
 
       <p className="text-xs text-slate-500">

@@ -7,6 +7,7 @@ import TextField from '../../components/TextField'
 import { useLogin } from '../../hooks/useAuth'
 import { getErrorMessage } from '../../utils/errorMessage'
 import AuthLayout from './AuthLayout'
+import Button from '../../components/Button'
 
 // Only checks that the fields are filled in: the password rules are enforced on register
 const loginFormSchema = z.object({
@@ -63,13 +64,9 @@ function LoginPage() {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={loginMutation.isPending}
-          className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={loginMutation.isPending}>
           {loginMutation.isPending ? 'Entrando…' : 'Entrar'}
-        </button>
+        </Button>
       </form>
     </AuthLayout>
   )

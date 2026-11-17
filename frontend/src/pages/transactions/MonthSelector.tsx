@@ -1,6 +1,7 @@
 import MonthNavigator from '../../components/MonthNavigator'
 import { currentMonth } from '../../utils/month'
 import { ALL_MONTHS, type TransactionPeriod } from '../../utils/transactionFilters'
+import Card from '../../components/Card'
 
 interface MonthSelectorProps {
   period: TransactionPeriod
@@ -26,7 +27,7 @@ function MonthSelector({ period, onMonthChange, onClearRange }: MonthSelectorPro
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1">
+    <Card padding="none" className="flex items-center gap-2 p-1">
       <p className="flex-1 px-3 font-semibold">
         {period.kind === 'all' ? 'Todos los meses' : 'Rango de fechas personalizado'}
       </p>
@@ -37,7 +38,7 @@ function MonthSelector({ period, onMonthChange, onClearRange }: MonthSelectorPro
       >
         Ver por mes
       </button>
-    </div>
+    </Card>
   )
 }
 

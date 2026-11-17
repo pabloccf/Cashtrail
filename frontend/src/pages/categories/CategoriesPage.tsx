@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import ErrorState from '../../components/ErrorState'
+import ListSkeleton from '../../components/ListSkeleton'
 import { useCategories } from '../../hooks/useCategories'
 import type { Category } from '../../types/category'
 import type { TransactionType } from '../../types/transaction'
-import { getErrorMessage } from '../../utils/errorMessage'
 import CategoryFormModal from './CategoryFormModal'
 import CategoryListItem from './CategoryListItem'
 import DeleteCategoryDialog from './DeleteCategoryDialog'
@@ -33,15 +34,9 @@ function CategoriesPage() {
       <h1 className="text-2xl font-bold">Categorías</h1>
 
       {isPending ? (
-        <p className="text-slate-500">Cargando categorías…</p>
+        <ListSkeleton label="Cargando categorías…" />
       ) : isError ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
-          <p className="font-medium">No se han podido cargar las categorías.</p>
-          <p className="text-sm">{getErrorMessage(error)}</p>
-          <button type="button" className="mt-2 min-h-11 font-medium underline" onClick={() => refetch()}>
-            Reintentar
-          </button>
-        </div>
+        <ErrorState message="No se han podido cargar las categorías." error={error} onRetry={() => refetch()} />
       ) : (
         sections.map((section) => {
           // The backend already returns them sorted by name

@@ -6,6 +6,8 @@ import { useUpdateProfile } from '../../hooks/useAuth'
 import type { User } from '../../types/user'
 import { CURRENCY_LABELS, SUPPORTED_CURRENCIES, isSupportedCurrency } from '../../utils/currency'
 import { getErrorMessage } from '../../utils/errorMessage'
+import Button from '../../components/Button'
+import Card from '../../components/Card'
 
 // Same rules as the backend (updateProfileBodySchema)
 const profileFormSchema = z.object({
@@ -44,7 +46,7 @@ function ProfileSection({ user }: ProfileSectionProps) {
   }
 
   return (
-    <section aria-labelledby="profile-title" className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4">
+    <Card as="section" aria-labelledby="profile-title" className="flex flex-col gap-4">
       <h2 id="profile-title" className="font-semibold">
         Perfil
       </h2>
@@ -90,16 +92,12 @@ function ProfileSection({ user }: ProfileSectionProps) {
               Cambios guardados
             </p>
           )}
-          <button
-            type="submit"
-            disabled={!isDirty || updateMutation.isPending}
-            className="min-h-11 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          >
+          <Button type="submit" disabled={!isDirty || updateMutation.isPending}>
             {updateMutation.isPending ? 'Guardando…' : 'Guardar'}
-          </button>
+          </Button>
         </div>
       </form>
-    </section>
+    </Card>
   )
 }
 

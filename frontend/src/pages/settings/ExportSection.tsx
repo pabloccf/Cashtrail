@@ -6,6 +6,8 @@ import { saveFile } from '../../utils/download'
 import { getErrorMessage } from '../../utils/errorMessage'
 import { currentMonth, formatMonth, monthRange, shiftMonth } from '../../utils/month'
 import type { TransactionFilters } from '../../utils/transactionFilters'
+import Button from '../../components/Button'
+import Card from '../../components/Card'
 
 type ExportRange = 'month' | 'previousMonth' | 'year' | 'all'
 
@@ -44,7 +46,7 @@ function ExportSection() {
   }
 
   return (
-    <section aria-labelledby="export-title" className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4">
+    <Card as="section" aria-labelledby="export-title" className="flex flex-col gap-4">
       <div>
         <h2 id="export-title" className="font-semibold">
           Exportar a CSV
@@ -83,17 +85,12 @@ function ExportSection() {
       )}
 
       <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={exportMutation.isPending}
-          className="flex min-h-11 items-center gap-2 rounded-lg bg-brand-600 px-5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        >
+        <Button onClick={handleExport} disabled={exportMutation.isPending}>
           <Download className="size-5" aria-hidden="true" />
           {exportMutation.isPending ? 'Exportando…' : 'Exportar'}
-        </button>
+        </Button>
       </div>
-    </section>
+    </Card>
   )
 }
 

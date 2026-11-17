@@ -8,6 +8,7 @@ import {
   hasActiveFilters,
   type TransactionFilters as Filters,
 } from '../../utils/transactionFilters'
+import Card from '../../components/Card'
 
 // `undefined` removes the filter
 export type FilterChanges = Partial<Record<keyof Filters, string | undefined>>
@@ -76,9 +77,9 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
         </button>
       </div>
 
-      <div
+      <Card
         id={panelId}
-        className={`${isPanelOpen ? 'grid' : 'hidden'} gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 md:grid md:grid-cols-3 lg:grid-cols-5`}
+        className={`${isPanelOpen ? 'grid' : 'hidden'} gap-3 sm:grid-cols-2 md:grid md:grid-cols-3 lg:grid-cols-5`}
       >
         <div>
           <label htmlFor={`${id}-type`} className={labelClass}>
@@ -179,7 +180,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
             Limpiar filtros
           </button>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

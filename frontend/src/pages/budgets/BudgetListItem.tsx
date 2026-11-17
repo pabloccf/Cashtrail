@@ -4,6 +4,7 @@ import TrashIcon from '../../components/TrashIcon'
 import type { Budget } from '../../types/budget'
 import { getBudgetProgress } from '../../utils/budget'
 import { useMoney } from '../../hooks/useMoney'
+import Card from '../../components/Card'
 
 interface BudgetListItemProps {
   budget: Budget
@@ -19,11 +20,11 @@ function BudgetListItem({ budget, onEdit, onDelete }: BudgetListItemProps) {
   const { percent, level, remaining } = getBudgetProgress(spent, amount)
 
   return (
-    <div className="flex items-stretch rounded-xl border border-slate-200 bg-white">
+    <Card padding="none" className="flex items-stretch">
       <button
         type="button"
         onClick={() => onEdit(budget)}
-        className="flex min-w-0 flex-1 flex-col gap-2 rounded-l-xl p-3 text-left hover:bg-slate-50 active:bg-slate-50"
+        className="flex min-w-0 flex-1 flex-col gap-2 rounded-l-2xl p-3 text-left hover:bg-slate-50 active:bg-slate-50"
       >
         <div className="flex w-full items-center gap-3">
           <CategoryIcon icon={category.icon} color={category.color} />
@@ -52,12 +53,12 @@ function BudgetListItem({ budget, onEdit, onDelete }: BudgetListItemProps) {
       <button
         type="button"
         onClick={() => onDelete(budget)}
-        className="flex w-12 shrink-0 items-center justify-center rounded-r-xl border-l border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-50 active:text-rose-600"
+        className="flex w-12 shrink-0 items-center justify-center rounded-r-2xl border-l border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 active:bg-rose-50 active:text-rose-600"
         aria-label={`Eliminar presupuesto de ${category.name}`}
       >
         <TrashIcon className="size-5" />
       </button>
-    </div>
+    </Card>
   )
 }
 

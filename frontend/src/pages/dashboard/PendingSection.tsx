@@ -5,7 +5,7 @@ import SectionCard from '../../components/SectionCard'
 import { useTransactions } from '../../hooks/useTransactions'
 import type { Transaction } from '../../types/transaction'
 import { ALL_MONTHS } from '../../utils/transactionFilters'
-import SectionError from './SectionError'
+import ErrorState from '../../components/ErrorState'
 
 // Pending records of any month (not only the one on screen), oldest ones included.
 // Hidden when there are none, so it only takes space when there is something to do
@@ -17,7 +17,7 @@ function PendingSection() {
   if (isError) {
     return (
       <SectionCard title="Pendientes de confirmar">
-        <SectionError message="No se han podido cargar los pendientes." error={error} onRetry={() => refetch()} />
+        <ErrorState message="No se han podido cargar los pendientes." error={error} onRetry={() => refetch()} />
       </SectionCard>
     )
   }
