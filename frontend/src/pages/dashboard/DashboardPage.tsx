@@ -3,6 +3,7 @@ import ErrorState from '../../components/ErrorState'
 import MonthNavigator from '../../components/MonthNavigator'
 import Skeleton from '../../components/Skeleton'
 import SummaryCards from '../../components/SummaryCards'
+import { useCurrentUser } from '../../hooks/useAuth'
 import { useStatsSummary } from '../../hooks/useStats'
 import { currentMonth, isValidMonth } from '../../utils/month'
 import CategorySection from './CategorySection'
@@ -20,6 +21,11 @@ function DashboardPage() {
   const month = monthParam && isValidMonth(monthParam) ? monthParam : currentMonth()
 
   const { data: summary, isPending, isError, error, refetch } = useStatsSummary(month)
+  // ProtectedRoute already loaded the user, so this reads it from the cache without a new request
+  const { data: user } = useCurrentUser()
+  // Only the first name: "Hola, Pablo" instead of the full name
+  const firstName = user?.name.trim().split(/\s+/)[0]
+  const greeting = firstName ? `Hola, ${firstName}` : 'Inicio'
 
   function handleMonthChange(newMonth: string) {
     setSearchParams(newMonth === currentMonth() ? {} : { month: newMonth })
@@ -27,7 +33,11 @@ function DashboardPage() {
 
   return (
     <section className="mx-auto flex max-w-5xl flex-col gap-4">
-      <h1 className="text-2xl font-bold">Inicio</h1>
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{greeting}</h1>
+        {/* Not "este mes": the selector below can show any other month */}
+        <p className="mt-1 text-slate-500">Tu resumen de ingresos y gastos.</p>
+      </header>
 
       {/* First, what needs action. It does not depend on the month, so it goes above the selector */}
       <PendingSection />
@@ -35,12 +45,11 @@ function DashboardPage() {
       <MonthNavigator month={month} onMonthChange={handleMonthChange} />
 
       {isPending ? (
-        // Same grid as SummaryCards, so nothing moves when the figures arrive
-        <div role="status" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        // Same grid as SummaryCards (hero + one card), so nothing moves when the figures arrive
+        <div role="status" className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <span className="sr-only">Cargando resumen…</span>
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-24 rounded-2xl" />
-          ))}
+          <Skeleton className="h-52 rounded-2xl lg:col-span-2" />
+          <Skeleton className="h-36 rounded-2xl lg:h-52" />
         </div>
       ) : isError ? (
         <ErrorState message="No se ha podido cargar el resumen del mes." error={error} onRetry={() => refetch()} />

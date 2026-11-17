@@ -1,5 +1,7 @@
+import { CalendarClock } from 'lucide-react'
 import type { StatsSummary } from '../types/stats'
 import { useMoney } from '../hooks/useMoney'
+import BalanceHero from './BalanceHero'
 import StatCard, { type StatTone } from './StatCard'
 
 interface SummaryCardsProps {
@@ -13,20 +15,26 @@ function signTone(amount: number): StatTone {
   return 'neutral'
 }
 
-// The four figures of a month. It receives the data by props and does not fetch anything,
-// so the shared dashboard (phase 8) can reuse it with the data of a shared space
+// The figures of a month: the balance as the hero (with income and expenses inside it) and the
+// estimated balance at the end of the month next to it. It receives the data by props and does not
+// fetch anything, so the shared dashboard (phase 8) can reuse it with the data of a shared space
 function SummaryCards({ summary }: SummaryCardsProps) {
   const { formatMoney } = useMoney()
   const { income, expense } = summary.remainingRecurring
   const hasRemaining = income > 0 || expense > 0
 
   return (
-    // 2 columns on mobile, the 4 cards in a row on large screens
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <StatCard label="Ingresos" amount={summary.income} tone="positive" />
-      <StatCard label="Gastos" amount={summary.expense} tone="negative" />
-      <StatCard label="Balance" amount={summary.balance} tone={signTone(summary.balance)} />
-      <StatCard label="Saldo estimado a fin de mes" amount={summary.estimatedBalance} tone={signTone(summary.estimatedBalance)}>
+    // Stacked on mobile. On large screens the hero takes two thirds of the row
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="lg:col-span-2">
+        <BalanceHero month={summary.month} balance={summary.balance} income={summary.income} expense={summary.expense} />
+      </div>
+      <StatCard
+        label="Saldo estimado a fin de mes"
+        amount={summary.estimatedBalance}
+        tone={signTone(summary.estimatedBalance)}
+        icon={CalendarClock}
+      >
         {hasRemaining ? (
           <>
             Cuenta los fijos que faltan:

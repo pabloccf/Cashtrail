@@ -1,6 +1,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from 'recharts'
 import type { MonthlyTotals } from '../types/stats'
 import { useMoney } from '../hooks/useMoney'
+import ChartTooltip from './ChartTooltip'
 import { formatMonth, formatShortMonth } from '../utils/month'
 
 interface MonthlyBarChartProps {
@@ -29,18 +30,25 @@ function MonthlyTooltip({ active, payload }: TooltipContentProps) {
   if (!active || !row) return null
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-md">
-      <p className="mb-1 font-medium text-slate-900">{formatMonth(row.month)}</p>
-      {series.map((item) => (
-        <p key={item.key} className="flex items-center gap-2 text-slate-600">
-          <span className="size-2.5 rounded-sm" style={{ backgroundColor: item.color }} aria-hidden="true" />
-          {item.label}: <span className="tabular-nums">{formatMoney(row[item.key])}</span>
-        </p>
-      ))}
-      <p className="mt-1 border-t border-slate-100 pt-1 text-slate-600">
-        Balance: <span className="tabular-nums">{formatMoney(row.income - row.expense)}</span>
+    <ChartTooltip title={formatMonth(row.month)}>
+      {/* The value leads (the reader already knows the series and wants the number) and the series
+          is keyed with a short stroke of its color: a filled box would be too heavy at this size */}
+      <div className="flex flex-col gap-1">
+        {series.map((item) => (
+          <p key={item.key} className="flex items-center gap-2">
+            <span className="h-0.5 w-3 shrink-0 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
+            <span className="font-semibold text-slate-900 tabular-nums">{formatMoney(row[item.key])}</span>
+            <span className="text-slate-500">{item.label}</span>
+          </p>
+        ))}
+      </div>
+      <p className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-2">
+        {/* Empty key of the same width, so the balance lines up with the two values above */}
+        <span className="w-3 shrink-0" aria-hidden="true" />
+        <span className="font-semibold text-slate-900 tabular-nums">{formatMoney(row.income - row.expense)}</span>
+        <span className="text-slate-500">Balance</span>
       </p>
-    </div>
+    </ChartTooltip>
   )
 }
 

@@ -13,6 +13,7 @@ import {
 import type { CategoryTotal } from '../types/stats'
 import { getCategoryIcon } from '../utils/categoryIcons'
 import { useMoney } from '../hooks/useMoney'
+import ChartTooltip from './ChartTooltip'
 
 interface CategoryBarChartProps {
   items: CategoryTotal[] // Highest first, as the backend returns them
@@ -77,12 +78,13 @@ function CategoryTooltip({ active, payload }: TooltipContentProps) {
   if (!active || !row) return null
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-md">
-      <p className="font-medium text-slate-900">{row.name}</p>
-      <p className="text-slate-600 tabular-nums">
-        {formatMoney(row.total)} · {Math.round(row.share * 100)} %
+    // Same frame as the monthly chart. The value leads, its share of the month follows
+    <ChartTooltip title={row.name}>
+      <p className="flex items-baseline gap-2">
+        <span className="font-semibold text-slate-900 tabular-nums">{formatMoney(row.total)}</span>
+        <span className="text-slate-500 tabular-nums">{Math.round(row.share * 100)} % del mes</span>
       </p>
-    </div>
+    </ChartTooltip>
   )
 }
 
