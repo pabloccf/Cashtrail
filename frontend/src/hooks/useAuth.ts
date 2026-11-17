@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { CURRENT_USER_QUERY_KEY, getCurrentUser, login, logout, register } from '../api/auth'
+import { CURRENT_USER_QUERY_KEY, getCurrentUser, login, logout, register, updateProfile } from '../api/auth'
 import type { User } from '../types/user'
 
 // The TanStack Query cache is the single source of truth for "who is logged in":
@@ -33,4 +33,14 @@ export function useRegister() {
 export function useLogout() {
   const queryClient = useQueryClient()
   return useMutation({ mutationFn: logout, onSuccess: () => setSessionUser(queryClient, null) })
+}
+
+// The backend returns the updated user, so it is written straight into the cache instead of asking
+// /auth/me again. Everything that reads useCurrentUser (the name in the sidebar...) updates at once
+export function useUpdateProfile() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (user) => queryClient.setQueryData(CURRENT_USER_QUERY_KEY, user),
+  })
 }

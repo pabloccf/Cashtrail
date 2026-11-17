@@ -1,5 +1,5 @@
 import { ApiError, apiClient } from './client'
-import type { LoginInput, RegisterInput, User } from '../types/user'
+import type { LoginInput, RegisterInput, UpdateProfileInput, User } from '../types/user'
 
 // Cache key of "who is logged in". Lives here (not in the hook) so queryClient.ts can use it too
 export const CURRENT_USER_QUERY_KEY = ['auth', 'me'] as const
@@ -25,4 +25,8 @@ export function register(input: RegisterInput) {
 
 export function logout() {
   return apiClient.post<void>('/auth/logout', undefined)
+}
+
+export function updateProfile(input: UpdateProfileInput) {
+  return apiClient.put<User>('/auth/me', input)
 }

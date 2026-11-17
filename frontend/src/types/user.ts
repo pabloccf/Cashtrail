@@ -17,3 +17,9 @@ export interface RegisterInput {
   email: string
   password: string
 }
+
+// Body of PUT /auth/me. The currency only changes how amounts are shown: nothing is converted
+export interface UpdateProfileInput {
+  name: string
+  currency: string // "EUR", "USD", "GBP" or "CHF"
+}

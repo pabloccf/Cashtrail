@@ -8,13 +8,22 @@ export interface TransactionListParams extends TransactionFilters {
   pageSize: PageSize
 }
 
-export function getTransactions(params: TransactionListParams) {
-  // URLSearchParams encodes the values safely (spaces, accents, "&"...). Missing filters are not sent
+// URLSearchParams encodes the values safely (spaces, accents, "&"...). Missing filters are not sent
+function toQueryString(params: object): string {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined) query.set(key, String(value))
   }
-  return apiClient.get<PaginatedResponse<Transaction>>(`/transactions?${query}`)
+  return query.toString()
+}
+
+export function getTransactions(params: TransactionListParams) {
+  return apiClient.get<PaginatedResponse<Transaction>>(`/transactions?${toQueryString(params)}`)
+}
+
+// Every transaction that matches the filters, as a CSV file (no pagination)
+export function downloadTransactionsCsv(filters: TransactionFilters) {
+  return apiClient.download(`/transactions/export?${toQueryString(filters)}`, 'cashtrail.csv')
 }
 
 export function createTransaction(input: TransactionInput) {

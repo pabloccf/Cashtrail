@@ -8,6 +8,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import CategoriesPage from './pages/categories/CategoriesPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import RecurringPage from './pages/recurring/RecurringPage'
+import SettingsPage from './pages/settings/SettingsPage'
 import TransactionsPage from './pages/transactions/TransactionsPage'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/recurring" element={<RecurringPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/budgets" element={<BudgetsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>
 

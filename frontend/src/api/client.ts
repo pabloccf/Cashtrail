@@ -35,7 +35,9 @@ function isApiErrorBody(body: unknown): body is ApiErrorBody {
   )
 }
 
-async function request<T>(method: string, path: string, data?: unknown): Promise<T> {
+// Sends the request and turns every failure into an ApiError: no response at all (network) or an
+// error status (4xx/5xx). Shared by JSON requests and file downloads, so both fail the same way
+async function send(method: string, path: string, data?: unknown): Promise<Response> {
   let response: Response
   try {
     // Relative URL: the request goes to the same domain, so the session cookie is sent automatically
@@ -49,23 +51,50 @@ async function request<T>(method: string, path: string, data?: unknown): Promise
     throw new ApiError(NETWORK_ERROR_STATUS, 'Network error')
   }
 
-  // 204 No Content (e.g. DELETE) has no body to parse
-  if (response.status === 204) {
-    return undefined as T
-  }
-
-  // If the body is not JSON (e.g. the backend is down and the proxy answers with HTML), keep null
-  const body: unknown = await response.json().catch(() => null)
-
   if (!response.ok) {
+    // If the body is not JSON (e.g. the backend is down and the proxy answers with HTML), keep null
+    const body: unknown = await response.json().catch(() => null)
     if (isApiErrorBody(body)) {
       throw new ApiError(response.status, body.error.message, body.error.details)
     }
     throw new ApiError(response.status, `Request failed with status ${response.status}`)
   }
 
+  return response
+}
+
+async function request<T>(method: string, path: string, data?: unknown): Promise<T> {
+  const response = await send(method, path, data)
+
+  // 204 No Content (e.g. DELETE) has no body to parse
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   // The backend is trusted to return the type T; there is no runtime check here
+  const body: unknown = await response.json().catch(() => null)
   return body as T
+}
+
+// Content-Disposition: attachment; filename="cashtrail-todo.csv" -> "cashtrail-todo.csv".
+// The quotes are optional (Express only adds them when the name needs them)
+function getFilename(contentDisposition: string | null, fallback: string): string {
+  const match = contentDisposition?.match(/filename="?([^";]+)"?/)
+  return match?.[1] ?? fallback
+}
+
+export interface DownloadedFile {
+  blob: Blob // The raw content of the file
+  filename: string // Name chosen by the backend
+}
+
+// For endpoints that return a file instead of JSON (the CSV export)
+async function download(path: string, fallbackFilename: string): Promise<DownloadedFile> {
+  const response = await send('GET', path)
+  return {
+    blob: await response.blob(),
+    filename: getFilename(response.headers.get('Content-Disposition'), fallbackFilename),
+  }
 }
 
 export const apiClient = {
@@ -75,4 +104,5 @@ export const apiClient = {
   // `data` is optional: some PATCH actions need no body (e.g. toggling a recurring transaction)
   patch: <T>(path: string, data?: unknown) => request<T>('PATCH', path, data),
   delete: (path: string) => request<void>('DELETE', path),
+  download,
 }
