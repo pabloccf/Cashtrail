@@ -8,7 +8,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed:sample": "tsx prisma/seedSample.ts"
+    "seed:sample": "tsx prisma/seedSample.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [],
   "author": "",
@@ -34,6 +36,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
+    "prettier": "3.10.1",
     "prisma": "^7.10.1",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3"

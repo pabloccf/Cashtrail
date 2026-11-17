@@ -1,0 +1,4 @@
+{
+  // VS Code suggests installing these when the project is opened
+  "recommendations": ["esbenp.prettier-vscode"]
+}

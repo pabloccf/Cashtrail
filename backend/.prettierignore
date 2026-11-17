@@ -1,0 +1,8 @@
+# Build output and generated files are never formatted
+dist
+src/generated
+package-lock.json
+prisma/migrations
+# Sample HTTP requests and Markdown are written by hand
+requests
+*.md
