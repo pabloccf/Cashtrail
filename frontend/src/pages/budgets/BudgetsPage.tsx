@@ -16,6 +16,7 @@ import DeleteBudgetDialog from './DeleteBudgetDialog'
 import Button from '../../components/Button'
 import EmptyState from '../../components/EmptyState'
 import { PiggyBank } from 'lucide-react'
+import { useToast } from '../../hooks/useToast'
 
 // Same pattern as RecurringPage: null is closed, `kind` tells creating from editing
 type FormState = null | { kind: 'new' } | { kind: 'edit'; budget: Budget }
@@ -30,6 +31,7 @@ function BudgetsPage() {
   const { data: budgets, isPending, isError, error, refetch } = useBudgets(month)
   const categoriesQuery = useCategories()
   const copyMutation = useCopyBudgets()
+  const toast = useToast()
   const [formState, setFormState] = useState<FormState>(null)
   const [budgetToDelete, setBudgetToDelete] = useState<Budget | null>(null)
 
@@ -79,7 +81,14 @@ function BudgetsPage() {
           description="Cada mes empieza vacío. Trae los del mes anterior o crea uno nuevo con «+ Añadir»."
         >
           <Button
-            onClick={() => copyMutation.mutate(month)}
+            onClick={() =>
+              copyMutation.mutate(month, {
+                // Copying nothing is not a success worth a toast: the inline message below explains it
+                onSuccess: ({ copied }) => {
+                  if (copied > 0) toast.success(copied === 1 ? '1 presupuesto copiado' : `${copied} presupuestos copiados`)
+                },
+              })
+            }
             disabled={copyMutation.isPending}
           >
             {copyMutation.isPending ? 'Copiando…' : `Copiar los de ${formatMonth(shiftMonth(month, -1)).toLowerCase()}`}

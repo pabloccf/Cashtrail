@@ -14,6 +14,7 @@ import RecurringListItem from './RecurringListItem'
 import EmptyState from '../../components/EmptyState'
 import Button from '../../components/Button'
 import { Plus, Repeat } from 'lucide-react'
+import { useToast } from '../../hooks/useToast'
 
 const sections: { type: TransactionType; title: string; emptyText: string; emptyHint: string; addLabel: string }[] = [
   {
@@ -41,6 +42,7 @@ type FormState =
 function RecurringPage() {
   const { data: recurringList, isPending, isError, error, refetch } = useRecurring()
   const toggleMutation = useToggleRecurring()
+  const toast = useToast()
   const [formState, setFormState] = useState<FormState>(null)
   const [recurringToDelete, setRecurringToDelete] = useState<RecurringTransaction | null>(null)
 
@@ -49,7 +51,10 @@ function RecurringPage() {
   }
 
   function toggle(recurring: RecurringTransaction) {
-    toggleMutation.mutate(recurring.id)
+    toggleMutation.mutate(recurring.id, {
+      // `recurring` is the state before the change: if it was active, it is now paused
+      onSuccess: () => toast.success(recurring.active ? 'Fijo pausado' : 'Fijo reactivado'),
+    })
   }
 
   return (

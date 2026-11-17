@@ -4,6 +4,7 @@ import { useCreateCategory, useUpdateCategory } from '../../hooks/useCategoryMut
 import type { Category, CategoryInput } from '../../types/category'
 import type { TransactionType } from '../../types/transaction'
 import { getCategorySaveErrorMessage } from '../../utils/categoryErrors'
+import { useToast } from '../../hooks/useToast'
 
 interface CategoryFormModalProps {
   // Present when editing, missing when creating
@@ -16,14 +17,21 @@ interface CategoryFormModalProps {
 function CategoryFormModal({ category, defaultType, onClose }: CategoryFormModalProps) {
   const createMutation = useCreateCategory()
   const updateMutation = useUpdateCategory()
+  const toast = useToast()
 
   const saveMutation = category ? updateMutation : createMutation
 
+  // Closes the modal and confirms the action with a toast
+  function done(message: string) {
+    onClose()
+    toast.success(message)
+  }
+
   function handleSubmit(input: CategoryInput) {
     if (category) {
-      updateMutation.mutate({ id: category.id, input }, { onSuccess: onClose })
+      updateMutation.mutate({ id: category.id, input }, { onSuccess: () => done('Categoría actualizada') })
     } else {
-      createMutation.mutate(input, { onSuccess: onClose })
+      createMutation.mutate(input, { onSuccess: () => done('Categoría creada') })
     }
   }
 

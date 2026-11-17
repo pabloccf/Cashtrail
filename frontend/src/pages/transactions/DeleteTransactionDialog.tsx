@@ -4,6 +4,7 @@ import { useDeleteTransaction } from '../../hooks/useTransactionMutations'
 import type { Transaction } from '../../types/transaction'
 import { formatDate } from '../../utils/date'
 import { getErrorMessage } from '../../utils/errorMessage'
+import { useToast } from '../../hooks/useToast'
 
 interface DeleteTransactionDialogProps {
   transaction: Transaction
@@ -14,6 +15,7 @@ interface DeleteTransactionDialogProps {
 // Mounted only while open, so each opening starts with a clean mutation state (no old error)
 function DeleteTransactionDialog({ transaction, onClose }: DeleteTransactionDialogProps) {
   const deleteMutation = useDeleteTransaction()
+  const toast = useToast()
 
   return (
     <ConfirmDialog
@@ -32,7 +34,14 @@ function DeleteTransactionDialog({ transaction, onClose }: DeleteTransactionDial
       confirmLabel="Eliminar"
       isConfirming={deleteMutation.isPending}
       error={deleteMutation.isError ? getErrorMessage(deleteMutation.error) : undefined}
-      onConfirm={() => deleteMutation.mutate(transaction.id, { onSuccess: onClose })}
+      onConfirm={() =>
+        deleteMutation.mutate(transaction.id, {
+          onSuccess: () => {
+            onClose()
+            toast.success('Transacción eliminada')
+          },
+        })
+      }
       onCancel={onClose}
     />
   )

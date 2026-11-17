@@ -11,6 +11,7 @@ import { centsToInput, parseAmountToCents } from '../utils/money'
 import { useMoney } from '../hooks/useMoney'
 import Button from './Button'
 import { fieldClass, fieldErrorClass, labelClass } from '../utils/formStyles'
+import { useToast } from '../hooks/useToast'
 
 const confirmFormSchema = z.object({
   amount: z.string().refine((value) => {
@@ -31,6 +32,7 @@ interface ConfirmTransactionModalProps {
 function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionModalProps) {
   const { symbol } = useMoney()
   const confirmMutation = useConfirmTransaction()
+  const toast = useToast()
   const {
     register,
     handleSubmit,
@@ -45,7 +47,15 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
     if (amount === null) return // Cannot happen: the schema already checked it
     // Only sent when it changed: without it, the backend keeps the current amount
     const adjustedAmount = amount === transaction.amount ? undefined : amount
-    confirmMutation.mutate({ id: transaction.id, amount: adjustedAmount }, { onSuccess: onClose })
+    confirmMutation.mutate(
+      { id: transaction.id, amount: adjustedAmount },
+      {
+        onSuccess: () => {
+          onClose()
+          toast.success('Registro confirmado')
+        },
+      },
+    )
   }
 
   return (

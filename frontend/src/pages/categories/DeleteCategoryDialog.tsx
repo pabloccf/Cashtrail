@@ -3,6 +3,7 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import { useDeleteCategory } from '../../hooks/useCategoryMutations'
 import type { Category } from '../../types/category'
 import { getCategoryDeleteErrorMessage } from '../../utils/categoryErrors'
+import { useToast } from '../../hooks/useToast'
 
 interface DeleteCategoryDialogProps {
   category: Category
@@ -13,6 +14,7 @@ interface DeleteCategoryDialogProps {
 // and answers 409 with the counts, which are shown in the dialog's error box
 function DeleteCategoryDialog({ category, onClose }: DeleteCategoryDialogProps) {
   const deleteMutation = useDeleteCategory()
+  const toast = useToast()
 
   return (
     <ConfirmDialog
@@ -29,7 +31,14 @@ function DeleteCategoryDialog({ category, onClose }: DeleteCategoryDialogProps) 
       confirmLabel="Eliminar"
       isConfirming={deleteMutation.isPending}
       error={deleteMutation.isError ? getCategoryDeleteErrorMessage(deleteMutation.error) : undefined}
-      onConfirm={() => deleteMutation.mutate(category.id, { onSuccess: onClose })}
+      onConfirm={() =>
+        deleteMutation.mutate(category.id, {
+          onSuccess: () => {
+            onClose()
+            toast.success('Categoría eliminada')
+          },
+        })
+      }
       onCancel={onClose}
     />
   )

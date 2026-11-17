@@ -8,6 +8,7 @@ import { currentMonth, formatMonth, monthRange, shiftMonth } from '../../utils/m
 import type { TransactionFilters } from '../../utils/transactionFilters'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
+import { useToast } from '../../hooks/useToast'
 
 type ExportRange = 'month' | 'previousMonth' | 'year' | 'all'
 
@@ -34,10 +35,14 @@ function ExportSection() {
   const [range, setRange] = useState<ExportRange>('month')
   const options = getRangeOptions()
 
+  const toast = useToast()
   // A mutation, not a query: it is an action the user starts, and its result is not kept in the cache
   const exportMutation = useMutation({
     mutationFn: downloadTransactionsCsv,
-    onSuccess: ({ blob, filename }) => saveFile(blob, filename),
+    onSuccess: ({ blob, filename }) => {
+      saveFile(blob, filename)
+      toast.success('CSV descargado')
+    },
   })
 
   function handleExport() {

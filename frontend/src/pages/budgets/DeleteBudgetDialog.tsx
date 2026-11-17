@@ -4,6 +4,7 @@ import { useDeleteBudget } from '../../hooks/useBudgetMutations'
 import type { Budget } from '../../types/budget'
 import { getErrorMessage } from '../../utils/errorMessage'
 import { formatMonth } from '../../utils/month'
+import { useToast } from '../../hooks/useToast'
 
 interface DeleteBudgetDialogProps {
   budget: Budget
@@ -12,6 +13,7 @@ interface DeleteBudgetDialogProps {
 
 function DeleteBudgetDialog({ budget, onClose }: DeleteBudgetDialogProps) {
   const deleteMutation = useDeleteBudget()
+  const toast = useToast()
 
   return (
     <ConfirmDialog
@@ -30,7 +32,14 @@ function DeleteBudgetDialog({ budget, onClose }: DeleteBudgetDialogProps) {
       confirmLabel="Eliminar"
       isConfirming={deleteMutation.isPending}
       error={deleteMutation.isError ? getErrorMessage(deleteMutation.error) : undefined}
-      onConfirm={() => deleteMutation.mutate(budget.id, { onSuccess: onClose })}
+      onConfirm={() =>
+        deleteMutation.mutate(budget.id, {
+          onSuccess: () => {
+            onClose()
+            toast.success('Presupuesto eliminado')
+          },
+        })
+      }
       onCancel={onClose}
     />
   )

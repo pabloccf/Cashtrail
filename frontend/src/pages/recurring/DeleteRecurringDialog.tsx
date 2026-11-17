@@ -3,6 +3,7 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import { useDeleteRecurring } from '../../hooks/useRecurringMutations'
 import type { RecurringTransaction } from '../../types/recurring'
 import { getErrorMessage } from '../../utils/errorMessage'
+import { useToast } from '../../hooks/useToast'
 
 interface DeleteRecurringDialogProps {
   recurring: RecurringTransaction
@@ -11,6 +12,7 @@ interface DeleteRecurringDialogProps {
 
 function DeleteRecurringDialog({ recurring, onClose }: DeleteRecurringDialogProps) {
   const deleteMutation = useDeleteRecurring()
+  const toast = useToast()
 
   return (
     <ConfirmDialog
@@ -29,7 +31,14 @@ function DeleteRecurringDialog({ recurring, onClose }: DeleteRecurringDialogProp
       confirmLabel="Eliminar"
       isConfirming={deleteMutation.isPending}
       error={deleteMutation.isError ? getErrorMessage(deleteMutation.error) : undefined}
-      onConfirm={() => deleteMutation.mutate(recurring.id, { onSuccess: onClose })}
+      onConfirm={() =>
+        deleteMutation.mutate(recurring.id, {
+          onSuccess: () => {
+            onClose()
+            toast.success('Fijo eliminado')
+          },
+        })
+      }
       onCancel={onClose}
     />
   )

@@ -9,6 +9,7 @@ import { getErrorMessage } from '../../utils/errorMessage'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
 import { labelClass, selectClass } from '../../utils/formStyles'
+import { useToast } from '../../hooks/useToast'
 
 // Same rules as the backend (updateProfileBodySchema)
 const profileFormSchema = z.object({
@@ -24,6 +25,7 @@ interface ProfileSectionProps {
 
 function ProfileSection({ user }: ProfileSectionProps) {
   const updateMutation = useUpdateProfile()
+  const toast = useToast()
   const {
     register,
     handleSubmit,
@@ -41,8 +43,11 @@ function ProfileSection({ user }: ProfileSectionProps) {
   function submit(values: ProfileFormValues) {
     updateMutation.mutate(values, {
       // reset() makes the saved values the new "clean" state: isDirty goes back to false, so the
-      // button is disabled again and the "saved" message shows until the next change
-      onSuccess: (updated) => reset({ name: updated.name, currency: values.currency }),
+      // button is disabled again until the next change
+      onSuccess: (updated) => {
+        reset({ name: updated.name, currency: values.currency })
+        toast.success('Perfil guardado')
+      },
     })
   }
 
@@ -88,11 +93,6 @@ function ProfileSection({ user }: ProfileSectionProps) {
         )}
 
         <div className="flex items-center justify-end gap-3">
-          {updateMutation.isSuccess && !isDirty && (
-            <p className="text-sm text-emerald-700" role="status">
-              Cambios guardados
-            </p>
-          )}
           <Button type="submit" disabled={!isDirty || updateMutation.isPending}>
             {updateMutation.isPending ? 'Guardando…' : 'Guardar'}
           </Button>

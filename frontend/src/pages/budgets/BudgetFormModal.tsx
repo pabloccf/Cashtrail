@@ -6,6 +6,7 @@ import type { Budget } from '../../types/budget'
 import type { TransactionCategory } from '../../types/transaction'
 import { getErrorMessage } from '../../utils/errorMessage'
 import { formatMonth } from '../../utils/month'
+import { useToast } from '../../hooks/useToast'
 
 interface BudgetFormModalProps {
   // Present when editing, missing when creating
@@ -28,14 +29,21 @@ function getBudgetSaveErrorMessage(error: unknown): string {
 function BudgetFormModal({ budget, month, availableCategories, onClose }: BudgetFormModalProps) {
   const createMutation = useCreateBudget()
   const updateMutation = useUpdateBudget()
+  const toast = useToast()
 
   const saveMutation = budget ? updateMutation : createMutation
 
+  // Closes the modal and confirms the action with a toast
+  function done(message: string) {
+    onClose()
+    toast.success(message)
+  }
+
   function handleSubmit({ categoryId, amount }: BudgetFormData) {
     if (budget) {
-      updateMutation.mutate({ id: budget.id, input: { amount } }, { onSuccess: onClose })
+      updateMutation.mutate({ id: budget.id, input: { amount } }, { onSuccess: () => done('Presupuesto actualizado') })
     } else {
-      createMutation.mutate({ categoryId, amount, month }, { onSuccess: onClose })
+      createMutation.mutate({ categoryId, amount, month }, { onSuccess: () => done('Presupuesto creado') })
     }
   }
 
