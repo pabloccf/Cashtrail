@@ -7,6 +7,9 @@ import type { TransactionType } from '../../types/transaction'
 import CategoryFormModal from './CategoryFormModal'
 import CategoryListItem from './CategoryListItem'
 import DeleteCategoryDialog from './DeleteCategoryDialog'
+import EmptyState from '../../components/EmptyState'
+import Button from '../../components/Button'
+import { Plus, Tags } from 'lucide-react'
 
 const sections: { type: TransactionType; title: string }[] = [
   { type: 'EXPENSE', title: 'Gastos' },
@@ -59,9 +62,12 @@ function CategoriesPage() {
               </div>
 
               {sectionCategories.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-                  No tienes categorías de {section.title.toLowerCase()}.
-                </p>
+                <EmptyState icon={Tags} title={`No tienes categorías de ${section.title.toLowerCase()}`}>
+                  <Button variant="secondary" size="sm" onClick={() => setFormState({ kind: 'new', type: section.type })}>
+                    <Plus className="size-4" aria-hidden="true" />
+                    Crear categoría
+                  </Button>
+                </EmptyState>
               ) : (
                 <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {sectionCategories.map((category) => (

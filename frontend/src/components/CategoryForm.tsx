@@ -8,6 +8,7 @@ import CategoryIcon from './CategoryIcon'
 import TextField from './TextField'
 import TransactionTypeToggle from './TransactionTypeToggle'
 import Button from './Button'
+import { fieldErrorClass, labelClass } from '../utils/formStyles'
 
 // Same palette as the default categories, so the defaults are always shown as selected
 const COLOR_OPTIONS = [
@@ -71,7 +72,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
       <TextField label="Nombre" autoComplete="off" maxLength={50} error={errors.name?.message} {...register('name')} />
 
       <fieldset>
-        <legend className="mb-1 block text-sm font-medium">Color</legend>
+        <legend className={labelClass}>Color</legend>
         <div className="grid grid-cols-6 gap-1 sm:grid-cols-9">
           {COLOR_OPTIONS.map((option) => (
             <label key={option} className="flex size-11 cursor-pointer items-center justify-center">
@@ -103,11 +104,11 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
             </span>
           </label>
         </div>
-        {errors.color && <p className="mt-1 text-sm text-rose-600">{errors.color.message}</p>}
+        {errors.color && <p className={fieldErrorClass}>{errors.color.message}</p>}
       </fieldset>
 
       <fieldset>
-        <legend className="mb-1 block text-sm font-medium">Icono</legend>
+        <legend className={labelClass}>Icono</legend>
         {/* Fixed height with its own scroll, so the form fits on small screens */}
         <div className="grid max-h-48 grid-cols-6 gap-1 overflow-y-auto rounded-lg border border-slate-200 p-1 sm:grid-cols-8">
           {CATEGORY_ICON_OPTIONS.map(({ name: iconName, label, Icon }) => (
@@ -119,7 +120,7 @@ function CategoryForm({ category, defaultType, isSubmitting, submitError, onSubm
             </label>
           ))}
         </div>
-        {errors.icon && <p className="mt-1 text-sm text-rose-600">{errors.icon.message}</p>}
+        {errors.icon && <p className={fieldErrorClass}>{errors.icon.message}</p>}
       </fieldset>
 
       {submitError && (

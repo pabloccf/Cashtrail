@@ -32,3 +32,34 @@ export function todayIsoDate(): string {
   const day = String(now.getDate()).padStart(2, '0')
   return `${now.getFullYear()}-${month}-${day}`
 }
+
+// "2026-11-04" plus `days` (negative to go back) -> "2026-11-03". In UTC, like the stored days
+export function shiftIsoDate(isoDate: string, days: number): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10)
+}
+
+const weekdayFormatter = new Intl.DateTimeFormat('es-ES', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
+})
+const weekdayWithYearFormatter = new Intl.DateTimeFormat('es-ES', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+// Heading of a day in a list: "Hoy", "Ayer", "Lunes, 16 de noviembre" or, in another year,
+// "Martes, 30 de diciembre de 2025". `today` is a parameter so it can be tested with a fixed date
+export function formatDayHeading(isoDate: string, today: string = todayIsoDate()): string {
+  const day = toIsoDateOnly(isoDate)
+  if (day === today) return 'Hoy'
+  if (day === shiftIsoDate(today, -1)) return 'Ayer'
+  const formatter = day.slice(0, 4) === today.slice(0, 4) ? weekdayFormatter : weekdayWithYearFormatter
+  const text = formatter.format(new Date(`${day}T00:00:00Z`))
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}

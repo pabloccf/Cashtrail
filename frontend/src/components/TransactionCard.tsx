@@ -9,6 +9,8 @@ import Card from './Card'
 
 interface TransactionCardProps {
   transaction: Transaction
+  // false when the list already shows the day in a heading (GroupedTransactionList)
+  showDate?: boolean
   onEdit: (transaction: Transaction) => void
   onConfirm: (transaction: Transaction) => void
   onDelete: (transaction: Transaction) => void
@@ -17,7 +19,7 @@ interface TransactionCardProps {
 // Mobile view of a transaction. Tapping the card opens it for editing; the trash icon deletes it.
 // Pending ones also get a check button to confirm them.
 // They are sibling buttons: HTML does not allow a button inside another button
-function TransactionCard({ transaction, onEdit, onConfirm, onDelete }: TransactionCardProps) {
+function TransactionCard({ transaction, showDate = true, onEdit, onConfirm, onDelete }: TransactionCardProps) {
   return (
     <Card padding="none" className="flex items-stretch">
       <button
@@ -32,9 +34,11 @@ function TransactionCard({ transaction, onEdit, onConfirm, onDelete }: Transacti
               too little room on mobile and cut it ("Agua …") */}
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
             <CategoryBadge category={transaction.category} />
-            <time className="text-xs text-slate-500" dateTime={toIsoDateOnly(transaction.date)}>
-              {formatDate(transaction.date)}
-            </time>
+            {showDate && (
+              <time className="text-xs text-slate-500" dateTime={toIsoDateOnly(transaction.date)}>
+                {formatDate(transaction.date)}
+              </time>
+            )}
             <TransactionMarkers transaction={transaction} />
           </div>
         </div>

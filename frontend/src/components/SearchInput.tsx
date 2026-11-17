@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Search, X } from 'lucide-react'
+import { fieldSurfaceClass } from '../utils/formStyles'
 
 const DEBOUNCE_MS = 300
 
@@ -57,7 +58,8 @@ function SearchInput({ value, onDebouncedChange, label, placeholder }: SearchInp
         aria-label={label}
         maxLength={100}
         // `[&::-webkit-search-cancel-button]:hidden` hides the browser's own "x": there is a custom one
-        className="min-h-11 w-full rounded-lg border border-slate-300 bg-white pr-11 pl-10 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        // Its own padding, with room for the magnifier on the left and the "x" on the right
+        className={`${fieldSurfaceClass} w-full pr-11 pl-10 [&::-webkit-search-cancel-button]:hidden`}
       />
       {text && (
         <button

@@ -8,6 +8,7 @@ import { CURRENCY_LABELS, SUPPORTED_CURRENCIES, isSupportedCurrency } from '../.
 import { getErrorMessage } from '../../utils/errorMessage'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
+import { labelClass, selectClass } from '../../utils/formStyles'
 
 // Same rules as the backend (updateProfileBodySchema)
 const profileFormSchema = z.object({
@@ -61,12 +62,12 @@ function ProfileSection({ user }: ProfileSectionProps) {
         </div>
 
         <div>
-          <label htmlFor="currency" className="mb-1 block text-sm font-medium">
+          <label htmlFor="currency" className={labelClass}>
             Moneda
           </label>
           <select
             id="currency"
-            className="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none"
+            className={selectClass}
             {...register('currency')}
           >
             {SUPPORTED_CURRENCIES.map((currency) => (

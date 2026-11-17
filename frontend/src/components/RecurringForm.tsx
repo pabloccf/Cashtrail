@@ -10,6 +10,7 @@ import { MONTH_NAMES, maxDaysInMonth } from '../utils/recurring'
 import TransactionTypeToggle from './TransactionTypeToggle'
 import { useMoney } from '../hooks/useMoney'
 import Button from './Button'
+import { fieldClass, fieldErrorClass, labelClass, selectClass } from '../utils/formStyles'
 
 // The form works with text (what the inputs and selects hold). Numbers are converted only on submit
 const recurringFormSchema = z
@@ -94,14 +95,9 @@ interface RecurringFormProps {
   onCancel: () => void
 }
 
-const inputClass =
-  'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ' +
-  'aria-invalid:border-rose-500'
-
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="mt-1 text-sm text-rose-600">{message}</p>
+  return <p className={fieldErrorClass}>{message}</p>
 }
 
 function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSubmit, onCancel }: RecurringFormProps) {
@@ -172,7 +168,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
       <TransactionTypeToggle registration={register('type', { onChange: () => setValue('categoryId', '') })} />
 
       <div>
-        <label htmlFor="description" className="mb-1 block text-sm font-medium">
+        <label htmlFor="description" className={labelClass}>
           Descripción
         </label>
         <input
@@ -180,7 +176,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
           type="text"
           maxLength={255}
           placeholder="Spotify, préstamo del coche, nómina…"
-          className={inputClass}
+          className={fieldClass}
           aria-invalid={errors.description ? true : undefined}
           {...register('description')}
         />
@@ -189,7 +185,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="amount" className="mb-1 block text-sm font-medium">
+          <label htmlFor="amount" className={labelClass}>
             Importe ({symbol})
           </label>
           {/* Same as in TransactionForm: text + inputMode="decimal" accepts the comma */}
@@ -199,7 +195,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
             inputMode="decimal"
             autoComplete="off"
             placeholder="0,00"
-            className={inputClass}
+            className={fieldClass}
             aria-invalid={errors.amount ? true : undefined}
             {...register('amount')}
           />
@@ -207,12 +203,12 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
         </div>
 
         <div>
-          <label htmlFor="categoryId" className="mb-1 block text-sm font-medium">
+          <label htmlFor="categoryId" className={labelClass}>
             Categoría
           </label>
           <select
             id="categoryId"
-            className={inputClass}
+            className={selectClass}
             disabled={categoriesQuery.isPending}
             aria-invalid={errors.categoryId ? true : undefined}
             {...register('categoryId')}
@@ -225,16 +221,16 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
             ))}
           </select>
           {categoriesQuery.isError && (
-            <p className="mt-1 text-sm text-rose-600">No se han podido cargar las categorías.</p>
+            <p className={fieldErrorClass}>No se han podido cargar las categorías.</p>
           )}
           <FieldError message={errors.categoryId?.message} />
         </div>
       </div>
 
       <fieldset>
-        <legend className="mb-1 block text-sm font-medium">Se repite</legend>
+        <legend className={labelClass}>Se repite</legend>
         {/* Same visual pattern as TransactionTypeToggle: hidden radios and styled spans */}
-        <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
+        <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
           {frequencyOptions.map((option) => (
             <label key={option.value} className="cursor-pointer">
               <input
@@ -243,7 +239,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
                 className="peer sr-only"
                 {...register('frequency', { onChange: clampDay })}
               />
-              <span className="flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">
+              <span className="flex min-h-11 items-center justify-center rounded-lg text-sm font-medium text-slate-600 transition-colors peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">
                 {option.label}
               </span>
             </label>
@@ -253,10 +249,10 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="dayOfMonth" className="mb-1 block text-sm font-medium">
+          <label htmlFor="dayOfMonth" className={labelClass}>
             Día
           </label>
-          <select id="dayOfMonth" className={inputClass} {...register('dayOfMonth')}>
+          <select id="dayOfMonth" className={selectClass} {...register('dayOfMonth')}>
             {dayOptions.map((day) => (
               <option key={day} value={day}>
                 {day}
@@ -268,10 +264,10 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
         {/* The month only exists for yearly ones. When hidden, its value is ignored on submit */}
         {frequency === 'YEARLY' && (
           <div>
-            <label htmlFor="monthOfYear" className="mb-1 block text-sm font-medium">
+            <label htmlFor="monthOfYear" className={labelClass}>
               Mes
             </label>
-            <select id="monthOfYear" className={inputClass} {...register('monthOfYear', { onChange: clampDay })}>
+            <select id="monthOfYear" className={selectClass} {...register('monthOfYear', { onChange: clampDay })}>
               {MONTH_NAMES.map((name, index) => (
                 <option key={name} value={index + 1}>
                   {name.charAt(0).toUpperCase() + name.slice(1)}
@@ -289,13 +285,13 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="startDate" className="mb-1 block text-sm font-medium">
+          <label htmlFor="startDate" className={labelClass}>
             Desde
           </label>
           <input
             id="startDate"
             type="date"
-            className={inputClass}
+            className={fieldClass}
             aria-invalid={errors.startDate ? true : undefined}
             {...register('startDate')}
           />
@@ -303,13 +299,13 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
         </div>
 
         <div>
-          <label htmlFor="endDate" className="mb-1 block text-sm font-medium">
+          <label htmlFor="endDate" className={labelClass}>
             Hasta <span className="font-normal text-slate-400">(opcional)</span>
           </label>
           <input
             id="endDate"
             type="date"
-            className={inputClass}
+            className={fieldClass}
             aria-invalid={errors.endDate ? true : undefined}
             {...register('endDate')}
           />
@@ -323,7 +319,7 @@ function RecurringForm({ recurring, defaultType, isSubmitting, submitError, onSu
       )}
 
       <fieldset>
-        <legend className="mb-1 block text-sm font-medium">Al llegar el día</legend>
+        <legend className={labelClass}>Al llegar el día</legend>
         <div className="flex flex-col gap-2">
           {modeOptions.map((option) => (
             // has-checked: styles the card when the radio inside it is selected

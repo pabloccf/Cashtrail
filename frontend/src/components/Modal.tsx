@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
+import { X } from 'lucide-react'
 import { useOpenDialog } from '../hooks/useOpenDialog'
+import { dialogClass } from '../utils/dialogStyles'
 
 interface ModalProps {
   title: string
@@ -21,26 +23,26 @@ function Modal({ title, onClose, children }: ModalProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      // Same pop-up animation as ConfirmDialog: fades in and grows slightly when it opens
-      className="m-auto w-[calc(100%-2rem)] max-w-lg scale-100 rounded-2xl bg-white p-0 opacity-100 shadow-xl transition duration-200 ease-out backdrop:bg-slate-900/40 starting:scale-95 starting:opacity-0"
+      // Bottom sheet on mobile, centered pop-up on desktop (see dialogStyles.ts)
+      className={`${dialogClass} md:max-w-lg`}
       aria-labelledby="modal-title"
     >
-      <div className="p-5">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 id="modal-title" className="text-lg font-semibold">
-            {title}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex size-11 items-center justify-center rounded-lg text-2xl text-slate-500 hover:bg-slate-100"
-            aria-label="Cerrar"
-          >
-            ×
-          </button>
-        </div>
-        {children}
+      {/* Sticky header: in a long form (a recurring transaction) the title and the close button
+          stay visible while the content scrolls under them */}
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-white px-5 pt-4 pb-2">
+        <h2 id="modal-title" className="text-lg font-semibold tracking-tight">
+          {title}
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="-mr-2 flex size-11 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          aria-label="Cerrar"
+        >
+          <X className="size-5" aria-hidden="true" />
+        </button>
       </div>
+      <div className="px-5 pt-2 pb-5">{children}</div>
     </dialog>
   )
 }

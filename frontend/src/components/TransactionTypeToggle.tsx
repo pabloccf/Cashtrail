@@ -16,14 +16,14 @@ function TransactionTypeToggle({ registration }: TransactionTypeToggleProps) {
   return (
     <fieldset>
       <legend className="sr-only">Tipo</legend>
-      <div className="grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
+      <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
         {typeOptions.map((option) => (
           <label key={option.value} className="cursor-pointer">
             {/* A real radio input, visually hidden: the styled span reacts to it with `peer-checked:`.
                 Both radios share the same registration: React Hook Form groups them by `name` */}
             <input type="radio" value={option.value} className="peer sr-only" {...registration} />
             <span
-              className={`flex min-h-11 items-center justify-center rounded-md text-sm font-medium text-slate-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 ${option.checkedClass}`}
+              className={`flex min-h-11 items-center justify-center rounded-lg text-sm font-medium text-slate-600 transition-colors peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 ${option.checkedClass}`}
             >
               {option.label}
             </span>

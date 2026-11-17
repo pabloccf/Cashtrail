@@ -50,8 +50,9 @@ function AppLayout() {
         isLoggingOut={logoutMutation.isPending}
       />
 
-      {/* Mobile: top bar. Sticky and translucent, like the bottom bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-900/5 bg-white/85 py-1 pr-2 pl-4 backdrop-blur-lg md:hidden">
+      {/* Mobile: top bar. Sticky and translucent, like the bottom bar.
+          Fixed height (h-14): the day headings of the transactions list stick right under it (top-14) */}
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-900/5 bg-white/85 pr-2 pl-4 backdrop-blur-lg md:hidden">
         {/* Same as in the sidebar: the logo goes to the home page */}
         <Link to="/dashboard" aria-label="Cashtrail, ir a Inicio" className="flex min-h-11 items-center rounded-xl">
           <BrandLogo />

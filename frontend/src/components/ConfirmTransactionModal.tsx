@@ -10,6 +10,7 @@ import { getErrorMessage } from '../utils/errorMessage'
 import { centsToInput, parseAmountToCents } from '../utils/money'
 import { useMoney } from '../hooks/useMoney'
 import Button from './Button'
+import { fieldClass, fieldErrorClass, labelClass } from '../utils/formStyles'
 
 const confirmFormSchema = z.object({
   amount: z.string().refine((value) => {
@@ -59,7 +60,7 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
         </div>
 
         <div>
-          <label htmlFor="confirm-amount" className="mb-1 block text-sm font-medium">
+          <label htmlFor="confirm-amount" className={labelClass}>
             Importe ({symbol})
           </label>
           <input
@@ -67,13 +68,13 @@ function ConfirmTransactionModal({ transaction, onClose }: ConfirmTransactionMod
             type="text"
             inputMode="decimal"
             autoComplete="off"
-            className="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none aria-invalid:border-rose-500"
+            className={fieldClass}
             aria-invalid={errors.amount ? true : undefined}
             aria-describedby="confirm-amount-hint"
             {...register('amount')}
           />
           {errors.amount?.message ? (
-            <p className="mt-1 text-sm text-rose-600">{errors.amount.message}</p>
+            <p className={fieldErrorClass}>{errors.amount.message}</p>
           ) : (
             <p id="confirm-amount-hint" className="mt-1 text-sm text-slate-500">
               Ajústalo si el importe real es distinto.

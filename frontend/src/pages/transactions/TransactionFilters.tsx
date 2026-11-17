@@ -9,6 +9,7 @@ import {
   type TransactionFilters as Filters,
 } from '../../utils/transactionFilters'
 import Card from '../../components/Card'
+import { fieldClass, labelClass, selectClass } from '../../utils/formStyles'
 
 // `undefined` removes the filter
 export type FilterChanges = Partial<Record<keyof Filters, string | undefined>>
@@ -18,12 +19,6 @@ interface TransactionFiltersProps {
   onChange: (changes: FilterChanges) => void
   onClear: () => void
 }
-
-const selectClass =
-  'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
-
-const labelClass = 'mb-1 block text-sm font-medium text-slate-600'
 
 function CategoryOptions({ categories }: { categories: Category[] }) {
   return categories.map((category) => (
@@ -65,7 +60,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
         <button
           type="button"
           onClick={() => setIsPanelOpen((open) => !open)}
-          className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 font-medium text-slate-700 hover:bg-slate-50 md:hidden"
+          className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-white px-3 font-medium text-slate-700 shadow-sm ring-1 ring-slate-300 ring-inset hover:bg-slate-50 md:hidden"
           aria-expanded={isPanelOpen}
           aria-controls={panelId}
         >
@@ -150,7 +145,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
           <input
             id={`${id}-from`}
             type="date"
-            className={selectClass}
+            className={fieldClass}
             value={filters.from ?? ''}
             max={filters.to}
             onChange={(event) => onChange({ from: event.target.value || undefined })}
@@ -164,7 +159,7 @@ function TransactionFilters({ filters, onChange, onClear }: TransactionFiltersPr
           <input
             id={`${id}-to`}
             type="date"
-            className={selectClass}
+            className={fieldClass}
             value={filters.to ?? ''}
             min={filters.from}
             onChange={(event) => onChange({ to: event.target.value || undefined })}

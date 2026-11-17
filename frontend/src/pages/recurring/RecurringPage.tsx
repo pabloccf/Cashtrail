@@ -11,10 +11,25 @@ import AnnualSummary from './AnnualSummary'
 import DeleteRecurringDialog from './DeleteRecurringDialog'
 import RecurringFormModal from './RecurringFormModal'
 import RecurringListItem from './RecurringListItem'
+import EmptyState from '../../components/EmptyState'
+import Button from '../../components/Button'
+import { Plus, Repeat } from 'lucide-react'
 
-const sections: { type: TransactionType; title: string; emptyText: string }[] = [
-  { type: 'EXPENSE', title: 'Gastos fijos', emptyText: 'No tienes gastos fijos.' },
-  { type: 'INCOME', title: 'Ingresos fijos', emptyText: 'No tienes ingresos fijos.' },
+const sections: { type: TransactionType; title: string; emptyText: string; emptyHint: string; addLabel: string }[] = [
+  {
+    type: 'EXPENSE',
+    title: 'Gastos fijos',
+    emptyText: 'No tienes gastos fijos',
+    emptyHint: 'El alquiler, Spotify o el préstamo del coche: apúntalos una vez y se registran solos cada mes.',
+    addLabel: 'Añadir gasto fijo',
+  },
+  {
+    type: 'INCOME',
+    title: 'Ingresos fijos',
+    emptyText: 'No tienes ingresos fijos',
+    emptyHint: 'Tu nómina u otros ingresos que llegan siempre el mismo día.',
+    addLabel: 'Añadir ingreso fijo',
+  },
 ]
 
 // Same pattern as CategoriesPage: null is closed, `kind` tells creating from editing
@@ -78,9 +93,12 @@ function RecurringPage() {
                 </div>
 
                 {sectionItems.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-                    {section.emptyText}
-                  </p>
+                  <EmptyState icon={Repeat} title={section.emptyText} description={section.emptyHint}>
+                    <Button variant="secondary" size="sm" onClick={() => setFormState({ kind: 'new', type: section.type })}>
+                      <Plus className="size-4" aria-hidden="true" />
+                      {section.addLabel}
+                    </Button>
+                  </EmptyState>
                 ) : (
                   // grid-cols-1 is minmax(0, 1fr): without it the column grows to fit the longest
                   // untruncated text and the cards overflow the screen on mobile

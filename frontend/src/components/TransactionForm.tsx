@@ -8,6 +8,7 @@ import { toIsoDateOnly, todayIsoDate } from '../utils/date'
 import TransactionTypeToggle from './TransactionTypeToggle'
 import { useMoney } from '../hooks/useMoney'
 import Button from './Button'
+import { fieldClass, fieldErrorClass, labelClass, selectClass } from '../utils/formStyles'
 
 // The form works with text (what the inputs hold). The amount is converted to cents only on submit
 const transactionFormSchema = z.object({
@@ -45,14 +46,9 @@ interface TransactionFormProps {
   onCancel: () => void
 }
 
-const inputClass =
-  'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ' +
-  'aria-invalid:border-rose-500'
-
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="mt-1 text-sm text-rose-600">{message}</p>
+  return <p className={fieldErrorClass}>{message}</p>
 }
 
 function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onCancel }: TransactionFormProps) {
@@ -94,7 +90,7 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
       <TransactionTypeToggle registration={register('type', { onChange: () => setValue('categoryId', '') })} />
 
       <div>
-        <label htmlFor="amount" className="mb-1 block text-sm font-medium">
+        <label htmlFor="amount" className={labelClass}>
           Importe ({symbol})
         </label>
         {/* type="text" + inputMode="decimal": numeric keyboard on mobile, and the comma is accepted.
@@ -105,7 +101,7 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
           inputMode="decimal"
           autoComplete="off"
           placeholder="0,00"
-          className={inputClass}
+          className={fieldClass}
           aria-invalid={errors.amount ? true : undefined}
           {...register('amount')}
         />
@@ -113,12 +109,12 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
       </div>
 
       <div>
-        <label htmlFor="categoryId" className="mb-1 block text-sm font-medium">
+        <label htmlFor="categoryId" className={labelClass}>
           Categoría
         </label>
         <select
           id="categoryId"
-          className={inputClass}
+          className={selectClass}
           disabled={categoriesQuery.isPending}
           aria-invalid={errors.categoryId ? true : undefined}
           {...register('categoryId')}
@@ -131,19 +127,19 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
           ))}
         </select>
         {categoriesQuery.isError && (
-          <p className="mt-1 text-sm text-rose-600">No se han podido cargar las categorías.</p>
+          <p className={fieldErrorClass}>No se han podido cargar las categorías.</p>
         )}
         <FieldError message={errors.categoryId?.message} />
       </div>
 
       <div>
-        <label htmlFor="date" className="mb-1 block text-sm font-medium">
+        <label htmlFor="date" className={labelClass}>
           Fecha
         </label>
         <input
           id="date"
           type="date"
-          className={inputClass}
+          className={fieldClass}
           aria-invalid={errors.date ? true : undefined}
           {...register('date')}
         />
@@ -151,14 +147,14 @@ function TransactionForm({ transaction, isSubmitting, submitError, onSubmit, onC
       </div>
 
       <div>
-        <label htmlFor="description" className="mb-1 block text-sm font-medium">
+        <label htmlFor="description" className={labelClass}>
           Descripción <span className="font-normal text-slate-400">(opcional)</span>
         </label>
         <input
           id="description"
           type="text"
           maxLength={255}
-          className={inputClass}
+          className={fieldClass}
           aria-invalid={errors.description ? true : undefined}
           {...register('description')}
         />

@@ -14,6 +14,8 @@ import BudgetListItem from './BudgetListItem'
 import BudgetSummary from './BudgetSummary'
 import DeleteBudgetDialog from './DeleteBudgetDialog'
 import Button from '../../components/Button'
+import EmptyState from '../../components/EmptyState'
+import { PiggyBank } from 'lucide-react'
 
 // Same pattern as RecurringPage: null is closed, `kind` tells creating from editing
 type FormState = null | { kind: 'new' } | { kind: 'edit'; budget: Budget }
@@ -71,8 +73,11 @@ function BudgetsPage() {
         <ErrorState message="No se han podido cargar los presupuestos." error={error} onRetry={() => refetch()} />
       ) : budgets.length === 0 ? (
         // Each month starts empty, so the empty state offers to bring last month's budgets
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 p-6 text-center">
-          <p className="text-slate-500">No tienes presupuestos para {formatMonth(month).toLowerCase()}.</p>
+        <EmptyState
+          icon={PiggyBank}
+          title={`No tienes presupuestos para ${formatMonth(month).toLowerCase()}`}
+          description="Cada mes empieza vacío. Trae los del mes anterior o crea uno nuevo con «+ Añadir»."
+        >
           <Button
             onClick={() => copyMutation.mutate(month)}
             disabled={copyMutation.isPending}
@@ -80,16 +85,16 @@ function BudgetsPage() {
             {copyMutation.isPending ? 'Copiando…' : `Copiar los de ${formatMonth(shiftMonth(month, -1)).toLowerCase()}`}
           </Button>
           {copiedNothing && (
-            <p className="text-sm text-slate-500" role="status">
+            <p className="w-full text-sm text-slate-500" role="status">
               {formatMonth(shiftMonth(month, -1))} no tiene presupuestos. Crea uno con «+ Añadir».
             </p>
           )}
           {copyMutation.isError && (
-            <p className="text-sm text-rose-600" role="alert">
+            <p className="w-full text-sm text-rose-600" role="alert">
               No se han podido copiar: {getErrorMessage(copyMutation.error)}
             </p>
           )}
-        </div>
+        </EmptyState>
       ) : (
         <>
           <BudgetSummary budgets={budgets} />

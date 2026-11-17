@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { PAGE_SIZE_OPTIONS, parsePageSize, type PageSize } from '../utils/pageSize'
+import { fieldSurfaceClass } from '../utils/formStyles'
 
 interface PageSizeSelectProps {
   value: PageSize
@@ -22,7 +23,8 @@ function PageSizeSelect({ value, onChange }: PageSizeSelectProps) {
         id={id}
         value={value}
         onChange={(event) => handleChange(event.target.value)}
-        className="min-h-11 rounded-lg border border-slate-300 bg-white px-3 text-base text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+        // Not selectClass: that one is full width, and this select sits inside a sentence
+        className={`${fieldSurfaceClass} select-chevron pr-10 pl-3.5`}
       >
         {PAGE_SIZE_OPTIONS.map((size) => (
           <option key={size} value={size}>

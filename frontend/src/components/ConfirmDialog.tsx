@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useOpenDialog } from '../hooks/useOpenDialog'
+import { dialogClass } from '../utils/dialogStyles'
 import Button from './Button'
 import TrashIcon from './TrashIcon'
 
@@ -36,9 +37,8 @@ function ConfirmDialog({ title, message, confirmLabel, isConfirming = false, err
       onClick={(event) => {
         if (event.target === event.currentTarget) dismiss()
       }}
-      // `starting:` = the styles on the first frame. With `transition` it animates from them:
-      // the dialog fades in and grows slightly, like a pop-up
-      className="m-auto w-[calc(100%-2rem)] max-w-sm scale-100 rounded-2xl bg-white p-0 opacity-100 shadow-xl transition duration-200 ease-out backdrop:bg-slate-900/50 starting:scale-90 starting:opacity-0"
+      // Bottom sheet on mobile, centered pop-up on desktop, like Modal (see dialogStyles.ts)
+      className={`${dialogClass} md:max-w-sm`}
       aria-labelledby="confirm-title"
       aria-describedby="confirm-message"
     >

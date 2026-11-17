@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { ArrowLeftRight, Plus, SearchX } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { useTransactions } from '../../hooks/useTransactions'
 import Button from '../../components/Button'
@@ -7,7 +7,7 @@ import ErrorState from '../../components/ErrorState'
 import ListSkeleton from '../../components/ListSkeleton'
 import PageSizeSelect from '../../components/PageSizeSelect'
 import Pagination from '../../components/Pagination'
-import TransactionCard from '../../components/TransactionCard'
+import GroupedTransactionList from '../../components/GroupedTransactionList'
 import TransactionTable from '../../components/TransactionTable'
 import type { Transaction } from '../../types/transaction'
 import { currentMonth, formatMonth } from '../../utils/month'
@@ -26,6 +26,7 @@ import MonthSelector from './MonthSelector'
 import PendingBanner from './PendingBanner'
 import TransactionFilters, { type FilterChanges } from './TransactionFilters'
 import TransactionFormModal from './TransactionFormModal'
+import EmptyState from '../../components/EmptyState'
 
 // ?page=abc, ?page=-3 or no param -> page 1
 function parsePage(value: string | null): number {
@@ -141,64 +142,62 @@ function TransactionsPage() {
       ) : isError ? (
         <ErrorState message="No se han podido cargar las transacciones." error={error} onRetry={() => refetch()} />
       ) : data.data.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
-          {isFiltering ? (
-            <>
-              <p>
-                No hay transacciones que coincidan con los filtros
-                {period.kind === 'month' && ` en ${formatMonth(period.month).toLowerCase()}`}.
-              </p>
-              <div className="mt-2 flex flex-wrap justify-center gap-x-4">
-                {/* The search only looks inside the chosen month, so offer to look in all of them */}
-                {period.kind === 'month' && (
-                  <button
-                    type="button"
-                    onClick={() => handleMonthChange(ALL_MONTHS)}
-                    className="min-h-11 font-medium text-brand-700 underline"
-                  >
-                    Buscar en todos los meses
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="min-h-11 font-medium text-brand-700 underline"
-                >
-                  Limpiar filtros
-                </button>
-              </div>
-            </>
-          ) : period.kind === 'month' && page === 1 ? (
-            <>
-              <p>No hay transacciones en {formatMonth(period.month).toLowerCase()}.</p>
-              <button
-                type="button"
-                onClick={() => handleMonthChange(ALL_MONTHS)}
-                className="mt-2 min-h-11 font-medium text-brand-700 underline"
-              >
-                Ver todos los meses
-              </button>
-            </>
-          ) : (
-            <p>{page > 1 ? 'No hay transacciones en esta página.' : 'Todavía no has apuntado ninguna transacción.'}</p>
-          )}
-        </div>
+        isFiltering ? (
+          <EmptyState
+            icon={SearchX}
+            title="Nada coincide con los filtros"
+            description={
+              period.kind === 'month'
+                ? `No hay transacciones así en ${formatMonth(period.month).toLowerCase()}.`
+                : 'Prueba con otros filtros.'
+            }
+          >
+            {/* The search only looks inside the chosen month, so offer to look in all of them */}
+            {period.kind === 'month' && (
+              <Button variant="secondary" size="sm" onClick={() => handleMonthChange(ALL_MONTHS)}>
+                Buscar en todos los meses
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+              Limpiar filtros
+            </Button>
+          </EmptyState>
+        ) : period.kind === 'month' && page === 1 ? (
+          <EmptyState icon={ArrowLeftRight} title={`No hay transacciones en ${formatMonth(period.month).toLowerCase()}`}>
+            <Button size="sm" onClick={() => setFormState('new')}>
+              <Plus className="size-4" aria-hidden="true" />
+              Nueva transacción
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => handleMonthChange(ALL_MONTHS)}>
+              Ver todos los meses
+            </Button>
+          </EmptyState>
+        ) : page > 1 ? (
+          <EmptyState icon={ArrowLeftRight} title="No hay transacciones en esta página" />
+        ) : (
+          <EmptyState
+            icon={ArrowLeftRight}
+            title="Todavía no has apuntado ninguna transacción"
+            description="Apunta tu primer gasto o ingreso y empieza a ver en qué se va el dinero."
+          >
+            <Button size="sm" onClick={() => setFormState('new')}>
+              <Plus className="size-4" aria-hidden="true" />
+              Nueva transacción
+            </Button>
+          </EmptyState>
+        )
       ) : (
         // Slightly faded while the next page is loading (the previous one is still shown)
         <div className={`flex flex-col gap-4 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}>
           {/* Mobile: cards */}
-          <ul className="flex flex-col gap-2 md:hidden">
-            {data.data.map((transaction) => (
-              <li key={transaction.id}>
-                <TransactionCard
-                  transaction={transaction}
-                  onEdit={setFormState}
-                  onConfirm={setTransactionToConfirm}
-                  onDelete={setTransactionToDelete}
-                />
-              </li>
-            ))}
-          </ul>
+          <div className="md:hidden">
+            <GroupedTransactionList
+              transactions={data.data}
+              onEdit={setFormState}
+              onConfirm={setTransactionToConfirm}
+              onDelete={setTransactionToDelete}
+            />
+          </div>
 
           {/* Desktop: table */}
           <div className="hidden md:block">

@@ -7,6 +7,7 @@ import { centsToInput, parseAmountToCents } from '../utils/money'
 import CategoryIcon from './CategoryIcon'
 import { useMoney } from '../hooks/useMoney'
 import Button from './Button'
+import { fieldClass, fieldErrorClass, labelClass, selectClass } from '../utils/formStyles'
 
 // The form works with text (what the inputs and selects hold). The amount is converted only on submit
 const budgetFormSchema = z.object({
@@ -35,14 +36,9 @@ interface BudgetFormProps {
   onCancel: () => void
 }
 
-const inputClass =
-  'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base ' +
-  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ' +
-  'aria-invalid:border-rose-500'
-
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="mt-1 text-sm text-rose-600">{message}</p>
+  return <p className={fieldErrorClass}>{message}</p>
 }
 
 function BudgetForm({ budget, availableCategories, isSubmitting, submitError, onSubmit, onCancel }: BudgetFormProps) {
@@ -80,12 +76,12 @@ function BudgetForm({ budget, availableCategories, isSubmitting, submitError, on
         </div>
       ) : (
         <div>
-          <label htmlFor="categoryId" className="mb-1 block text-sm font-medium">
+          <label htmlFor="categoryId" className={labelClass}>
             Categoría
           </label>
           <select
             id="categoryId"
-            className={inputClass}
+            className={selectClass}
             aria-invalid={errors.categoryId ? true : undefined}
             {...register('categoryId')}
           >
@@ -101,7 +97,7 @@ function BudgetForm({ budget, availableCategories, isSubmitting, submitError, on
       )}
 
       <div>
-        <label htmlFor="amount" className="mb-1 block text-sm font-medium">
+        <label htmlFor="amount" className={labelClass}>
           Límite del mes ({symbol})
         </label>
         {/* Same as in TransactionForm: text + inputMode="decimal" accepts the comma */}
@@ -111,7 +107,7 @@ function BudgetForm({ budget, availableCategories, isSubmitting, submitError, on
           inputMode="decimal"
           autoComplete="off"
           placeholder="0,00"
-          className={inputClass}
+          className={fieldClass}
           aria-invalid={errors.amount ? true : undefined}
           {...register('amount')}
         />
