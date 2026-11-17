@@ -37,11 +37,12 @@ function LoginPage() {
   // No navigate() here: on success the user is saved in the cache and GuestRoute redirects
   return (
     <AuthLayout
-      title="Iniciar sesión"
+      title="Inicia sesión"
+      subtitle="Entra para ver tus gastos, ingresos y presupuestos."
       footer={
         <>
           ¿No tienes cuenta?{' '}
-          <Link to="/register" className="font-medium text-brand-700 underline">
+          <Link to="/register" className="font-semibold text-brand-700 underline-offset-2 hover:underline">
             Regístrate
           </Link>
         </>
@@ -64,7 +65,7 @@ function LoginPage() {
           </p>
         )}
 
-        <Button type="submit" disabled={loginMutation.isPending}>
+        <Button type="submit" disabled={loginMutation.isPending} className="mt-2 w-full">
           {loginMutation.isPending ? 'Entrando…' : 'Entrar'}
         </Button>
       </form>

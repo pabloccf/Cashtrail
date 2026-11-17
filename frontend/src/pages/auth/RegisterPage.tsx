@@ -54,11 +54,12 @@ function RegisterPage() {
 
   return (
     <AuthLayout
-      title="Crear cuenta"
+      title="Crea tu cuenta"
+      subtitle="Empieza a registrar tus gastos en menos de un minuto."
       footer={
         <>
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-medium text-brand-700 underline">
+          <Link to="/login" className="font-semibold text-brand-700 underline-offset-2 hover:underline">
             Inicia sesión
           </Link>
         </>
@@ -89,7 +90,7 @@ function RegisterPage() {
           </p>
         )}
 
-        <Button type="submit" disabled={registerMutation.isPending}>
+        <Button type="submit" disabled={registerMutation.isPending} className="mt-2 w-full">
           {registerMutation.isPending ? 'Creando cuenta…' : 'Crear cuenta'}
         </Button>
       </form>
