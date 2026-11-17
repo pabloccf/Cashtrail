@@ -23,6 +23,8 @@ Aplicación web full-stack para registrar ingresos y gastos, organizarlos por ca
 - TanStack Query para las peticiones al backend
 - React Hook Form + Zod para formularios y validación
 - Recharts para los gráficos
+- Lucide (`lucide-react`) para los iconos
+- Fuente Inter, cargada desde Google Fonts en `index.html`
 
 **Backend** (`/backend`)
 - Node.js + Express + TypeScript
@@ -116,6 +118,10 @@ npx prisma studio           # Ver la base de datos en el navegador
 npm run dev                 # Servidor de Vite
 npm run build               # Build de producción
 npm run lint
+
+# Formato (desde /frontend o /backend)
+npm run format              # Formatea todos los archivos con Prettier
+npm run format:check        # Solo comprueba, sin cambiar nada
 ```
 
 ## Modelo de datos
@@ -246,8 +252,9 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 ## Pantallas del frontend
 
 - `/login`, `/register`
-- `/dashboard`: resumen del mes, gráficos, últimas transacciones, registros pendientes de confirmar, próximos gastos fijos y saldo disponible estimado (saldo actual menos los gastos fijos que quedan este mes)
+- `/dashboard`: saludo con el nombre, resumen del mes (el balance como cifra protagonista en `BalanceHero`, con ingresos y gastos dentro), gráficos, últimas transacciones, registros pendientes de confirmar, próximos gastos fijos y saldo disponible estimado (saldo actual menos los gastos fijos que quedan este mes)
 - `/transactions`: listado con filtros, búsqueda y paginación. Los registros generados a partir de un fijo se marcan con un icono
+  - En móvil, las transacciones se agrupan por día con cabeceras fijas al hacer scroll ("Hoy", "Ayer", "Lunes, 16 de noviembre"): `GroupedTransactionList`. En escritorio, tabla.
   - Por defecto muestra solo el **mes actual**, con un selector de mes (flechas para ir a meses anteriores o siguientes) y un botón "Ver todo" para quitar el límite. El mes va en la URL (`?month=2026-10` o `?month=all`); el mes actual no se escribe.
   - Si se elige un rango "Desde/Hasta" en los filtros, este manda sobre el mes ("Rango de fechas personalizado").
   - La búsqueda y los filtros actúan dentro del mes elegido; si no hay resultados, se ofrece "Buscar en todos los meses".
@@ -279,6 +286,8 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 - Validar **siempre** con Zod los datos que llegan al backend.
 - Respetar el orden de capas descrito en "Arquitectura del backend": solo los repositorios acceden a Prisma.
 - Commits en inglés siguiendo Conventional Commits (`feat:`, `fix:`, `refactor:`...).
+- **Formato con Prettier**, con un `.prettierrc.json` por paquete que respeta su estilo: el frontend **sin** punto y coma y el backend **con** punto y coma. En los dos, comillas simples, 120 caracteres y comas finales. No formatear a mano: VS Code formatea al guardar (`.vscode/settings.json`) y, si no, `npm run format`. Prettier va con la versión exacta (sin `^`) porque cada versión puede formatear distinto.
+- Los commits que solo reformatean se añaden a `.git-blame-ignore-revs`, para que `git blame` los ignore.
 
 ## Seguridad
 
@@ -298,12 +307,48 @@ El repositorio de GitHub es **privado** por ahora, pero puede hacerse público e
 - `.env.example` solo contiene los nombres de las variables con valores de ejemplo o vacíos.
 - Si un secreto llega a subirse por error, avísame enseguida: no basta con borrarlo en un commit nuevo, hay que **cambiarlo** (generar uno nuevo) porque queda en el historial.
 
+## Sistema de diseño (frontend)
+
+Estilo "moderno y suave": tarjetas blancas sin borde con sombra suave sobre fondo `slate-50`, esquinas redondeadas (`rounded-2xl` en tarjetas, `rounded-xl` en botones y campos) y color de marca índigo.
+
+**Tokens** (`src/index.css`, bloque `@theme` de Tailwind v4). Son la única fuente de los valores de diseño:
+
+- `brand-50…950`: color de marca (índigo). Se usa para acciones, enlaces, foco y navegación activa. **Nunca** para ingresos o gastos: el verde (`emerald`) es ingreso o éxito y el rojo (`rose`) es gasto o error, y la marca se mantiene aparte para que esos colores destaquen.
+- `shadow-card` (tarjetas), `shadow-elevated` (modales, tooltips, toasts) y `shadow-brand` (botón flotante "+" y logotipo).
+- `--font-sans`: Inter.
+- Utilidad propia `select-chevron` (`@utility`): la flecha de los `<select>`.
+- Preparado para un modo oscuro futuro: los colores salen de tokens, no de valores escritos en cada componente.
+
+**Componentes base** (`src/components/`). Usarlos siempre en lugar de repetir clases:
+
+- `Button`: variantes `primary`, `secondary`, `ghost` y `danger`, y tamaños `md` y `sm` (los dos de 44px de alto). Por defecto es `type="button"`; los de envío llevan `type="submit"` explícito.
+- `Card`: la superficie de todos los bloques. Padding por prop (`none`, `md` o `lg`) y `as` (`div`, `section` o `li`).
+- `SectionCard`: `Card` con título y enlace opcional ("Ver todas ›"), para los bloques del dashboard.
+- `StatCard` (cifra con icono) y `BalanceHero` (la cifra protagonista sobre el degradado de marca: **una sola por vista**).
+- `ErrorState`: error de carga con "Reintentar". `ListSkeleton` y `Skeleton`: placeholders con la forma del contenido mientras carga, en lugar de "Cargando…".
+- `EmptyState`: lista vacía con icono, título, pista y la acción para salir de ese estado (crear el primero, ver otros meses…).
+- `ChartTooltip`: el marco común de los tooltips de los gráficos (el valor en negrita delante y la serie detrás, identificada con una rayita de su color).
+- `BrandLogo` (variante `inverted` para fondos de color) y `UserAvatar` (iniciales).
+- **Regla de `className`:** en `Button`, `Card` y similares, `className` es solo para el **layout** (ancho, márgenes, `flex`, `gap`…), nunca para colores, padding o `display`. Dos clases de Tailwind para la misma propiedad no se pisan por su orden en el atributo, sino por su orden en el CSS generado. Para ocultar un `Button` según el tamaño de pantalla, envolverlo en un `div` con `hidden md:block`.
+
+**Estilos compartidos** (`src/utils/`), como cadenas de clases y no como componentes, porque cada formulario tiene su propio marcado:
+
+- `formStyles.ts`: `fieldClass` (inputs), `selectClass`, `labelClass`, `fieldErrorClass` y `fieldSurfaceClass` (la superficie sin padding, para campos con su propio padding como `SearchInput`). `TextField` los envuelve para los casos simples. Todo campo nuevo usa estas clases.
+- `dialogStyles.ts`: `dialogClass`, la forma de los `<dialog>`. En móvil es un *bottom sheet* que sube desde abajo; en escritorio, una ventana centrada. `Modal` y `ConfirmDialog` lo usan, y cada uno añade su ancho (`md:max-w-lg`, `md:max-w-sm`).
+
+**Avisos (toasts):** `useToast()` (contexto en `hooks/useToast.ts`, con `ToastProvider` envolviendo la app en `main.tsx`). Tras cada acción que guarda, borra, confirma o copia, mostrar `toast.success('…')` en el mismo `onSuccess` que cierra el modal. Los **errores** se muestran dentro del formulario o diálogo, junto a lo que ha fallado, y no en un toast.
+
+**Animaciones:** transición entre páginas con `<ViewTransition>` de React en `AppLayout` (no la prop `viewTransition` de React Router, que está deprecada). Lleva `key={pathname}` y `default="none"` para que los cambios de filtros o de mes dentro de una página no se animen. Toda animación respeta `prefers-reduced-motion` (`motion-reduce:`).
+
 ## Diseño responsive
 
 - Diseñar primero para móvil y ampliar con `md:` y `lg:`.
 - Navegación: barra inferior con iconos en móvil, barra lateral en escritorio.
   - La barra inferior tiene solo **4 secciones** de uso diario (Inicio, Transacciones, Fijos y Presupuestos), para que las etiquetas quepan enteras. Ajustes va como icono en la barra superior del móvil, y Categorías se abre desde Ajustes. En escritorio, todas están en la barra lateral.
   - Se controla con `inBottomBar` en la lista `navItems` de `AppLayout.tsx`. Antes de añadir una sección nueva a la barra inferior, comprobar que sigue cabiendo en 360px.
+  - La barra lateral (`Sidebar.tsx`) se pliega y despliega con el botón ☰ de arriba. Plegada, muestra solo los iconos, con el nombre en un tooltip. La elección se guarda en `localStorage` (`utils/sidebar.ts`). Sin elección previa, empieza plegada en tablet (`md`) y desplegada en pantallas grandes (`lg`).
+  - El logotipo lleva a `/dashboard`, en la barra lateral y en la barra superior del móvil.
+  - La barra superior del móvil tiene una altura fija (`h-14`): las cabeceras de día de `/transactions` se pegan justo debajo (`top-14`). Si cambia su altura, hay que cambiar las dos.
 - Transacciones: lista de tarjetas en móvil, tabla en escritorio.
 - Botón flotante "+" en móvil para añadir una transacción.
 - Gráficos siempre dentro de `ResponsiveContainer` de Recharts.
@@ -369,6 +414,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 - [x] **Fase 4:** gastos e ingresos fijos: modelo, CRUD, lógica de generación, endpoint `/jobs/recurring` y confirmación de pendientes
 - [x] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
 - [x] **Fase 6:** presupuestos y exportar a CSV, más la página `/settings` con perfil y moneda
+- [x] **Rediseño visual** (antes de la Fase 7): tokens de diseño, componentes base, barra lateral plegable, transiciones entre páginas, dashboard con hero, campos unificados, bottom sheets, estados vacíos, agrupación por día, login con panel de marca, toasts, favicon y Prettier (ver "Sistema de diseño")
 - [ ] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
 - [ ] **Fase 7.5:** registro e inicio de sesión con Google (OAuth 2.0 / OpenID Connect con PKCE). Microsoft, opcional y más adelante. Se descartan Apple (de pago y usa `form_post`, incompatible con la cookie `sameSite: "lax"`), Facebook y X. Dividirla en pasos al planificarla:
   - Modelo `AuthAccount` (userId, provider, providerAccountId; único por provider + providerAccountId) y `passwordHash` opcional en `User`.
@@ -380,4 +426,4 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
   - Librería propuesta: Arctic (pedir confirmación antes de instalarla).
 - [ ] **Fase 8:** gastos compartidos: espacios compartidos, invitaciones, gastos con reparto y cuenta común, balance y saldos, categorías y gastos fijos compartidos, dashboard compartido y presupuestos compartidos. Dividirla en subfases al planificarla.
 
-Ideas para después: importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro, PWA, categorización automática con IA.
+Ideas para después: importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro (los tokens ya lo dejan preparado), PWA (con un `apple-touch-icon` en PNG para iOS), atajos de teclado en escritorio (`N` para nueva transacción, `/` para buscar), categorización automática con IA.
