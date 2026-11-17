@@ -1,17 +1,15 @@
-import { ArrowLeftRight, LayoutDashboard, PiggyBank, Repeat, Settings, Tags, type LucideIcon } from 'lucide-react'
-import { NavLink, Outlet, useMatch } from 'react-router'
+import { useState, ViewTransition } from 'react'
+import { ArrowLeftRight, LayoutDashboard, LogOut, PiggyBank, Repeat, Settings, Tags } from 'lucide-react'
+import { Link, NavLink, Outlet, useLocation, useMatch } from 'react-router'
 import { useCurrentUser, useLogout } from '../hooks/useAuth'
+import type { NavItem } from '../types/navigation'
+import { loadSidebarCollapsed, saveSidebarCollapsed } from '../utils/sidebar'
+import BottomBar from './BottomBar'
+import BrandLogo from './BrandLogo'
+import Sidebar from './Sidebar'
 
-interface NavItem {
-  to: string
-  label: string
-  icon: LucideIcon
-  // false: only in the desktop sidebar. The mobile bottom bar keeps the sections used every day,
-  // so each label has room. Categorías is reached from Ajustes, and Ajustes from the top bar
-  inBottomBar: boolean
-}
-
-// New sections are added here as the phases go on
+// New sections are added here as the phases go on. Before adding one to the bottom bar
+// (inBottomBar: true), check that every label still fits in a 360px-wide screen
 const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Inicio', icon: LayoutDashboard, inBottomBar: true },
   { to: '/transactions', label: 'Transacciones', icon: ArrowLeftRight, inBottomBar: true },
@@ -23,91 +21,79 @@ const navItems: NavItem[] = [
 
 const bottomBarItems = navItems.filter((item) => item.inBottomBar)
 
-// NavLink passes `isActive`, so the current section can be highlighted
-function activeClass(isActive: boolean) {
-  return isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'
-}
-
-// Desktop sidebar: icon and label in a row
-function sidebarLinkClass({ isActive }: { isActive: boolean }) {
-  return `flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium ${activeClass(isActive)}`
-}
-
-// Mobile bottom bar: icon with a small label under it, so four sections fit in a narrow screen.
-// min-w-0 lets each item shrink below the width of its label instead of overflowing the bar
-function bottomLinkClass({ isActive }: { isActive: boolean }) {
-  return `flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[11px] font-medium ${activeClass(isActive)}`
-}
+const topBarButtonClass = 'flex size-11 items-center justify-center rounded-xl disabled:opacity-60'
 
 function AppLayout() {
   // ProtectedRoute already loaded the user, so this reads it from the cache without a new request
   const { data: user } = useCurrentUser()
   const logoutMutation = useLogout()
+  const { pathname } = useLocation()
   // On mobile, Categorías is opened from Ajustes, so the settings icon stays highlighted there too
   const isInCategories = useMatch('/categories') !== null
+  // Function passed to useState: localStorage is read only on the first render
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(loadSidebarCollapsed)
 
-  const logoutButton = (
-    <button
-      type="button"
-      onClick={() => logoutMutation.mutate()}
-      disabled={logoutMutation.isPending}
-      className="min-h-11 rounded-lg px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60"
-    >
-      {logoutMutation.isPending ? 'Saliendo…' : 'Cerrar sesión'}
-    </button>
-  )
+  function toggleSidebar() {
+    const collapsed = !sidebarCollapsed
+    setSidebarCollapsed(collapsed)
+    saveSidebarCollapsed(collapsed)
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 md:flex">
-      {/* Desktop: sidebar */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-white p-4 md:flex">
-        <p className="mb-6 px-3 text-xl font-bold text-brand-600">Cashtrail</p>
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={sidebarLinkClass}>
-              <item.icon className="size-5 shrink-0" aria-hidden="true" />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-        {/* mt-auto pushes the user block to the bottom of the sidebar */}
-        <div className="mt-auto flex flex-col gap-1 border-t border-slate-200 pt-4">
-          <p className="truncate px-3 text-sm text-slate-500">{user?.name}</p>
-          <div className="flex">{logoutButton}</div>
-        </div>
-      </aside>
+    <div className="min-h-dvh bg-slate-50 text-slate-900 md:flex">
+      <Sidebar
+        items={navItems}
+        user={user}
+        collapsed={sidebarCollapsed}
+        onToggle={toggleSidebar}
+        onLogout={() => logoutMutation.mutate()}
+        isLoggingOut={logoutMutation.isPending}
+      />
 
-      {/* Mobile: top bar with the logo, the settings icon and the logout button */}
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-1 md:hidden">
-        <p className="text-lg font-bold text-brand-600">Cashtrail</p>
-        <div className="flex items-center gap-1">
+      {/* Mobile: top bar. Sticky and translucent, like the bottom bar */}
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-900/5 bg-white/85 py-1 pr-2 pl-4 backdrop-blur-lg md:hidden">
+        {/* Same as in the sidebar: the logo goes to the home page */}
+        <Link to="/dashboard" aria-label="Cashtrail, ir a Inicio" className="flex min-h-11 items-center rounded-xl">
+          <BrandLogo />
+        </Link>
+        <div className="flex items-center">
           <NavLink
             to="/settings"
             aria-label="Ajustes"
             className={({ isActive }) =>
-              `flex size-11 items-center justify-center rounded-lg ${activeClass(isActive || isInCategories)}`
+              `${topBarButtonClass} ${isActive || isInCategories ? 'bg-brand-50 text-brand-700' : 'text-slate-500 hover:bg-slate-100'}`
             }
           >
             <Settings className="size-5" aria-hidden="true" />
           </NavLink>
-          {logoutButton}
+          <button
+            type="button"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            className={`${topBarButtonClass} text-slate-500 hover:bg-slate-100`}
+            aria-label={logoutMutation.isPending ? 'Saliendo…' : 'Cerrar sesión'}
+          >
+            <LogOut className="size-5" aria-hidden="true" />
+          </button>
         </div>
       </header>
 
-      {/* Bottom padding on mobile so the fixed bottom bar never covers the content */}
-      <main className="flex-1 px-4 pt-4 pb-24 md:px-8 md:pt-8 md:pb-8">
-        <Outlet />
+      {/* min-w-0: without it, a wide child (a table, a chart) would stretch this flex item past the screen.
+          Bottom padding on mobile so the fixed bottom bar never covers the content */}
+      <main className="min-w-0 flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-8 md:pb-10">
+        {/* Page transition: React animates what is inside when it changes in a transition, and
+            React Router makes every navigation one. The key gives each page its own boundary, so a new
+            page is an "exit" of the old one plus an "enter" of the new one (a cross-fade).
+            default="none": changes within the same page (filters, month, page number, which also go
+            through the URL) are "updates" and are not animated, so typing in the search box never fades */}
+        <ViewTransition key={pathname} default="none" enter="page-enter" exit="page-exit">
+          <div>
+            <Outlet />
+          </div>
+        </ViewTransition>
       </main>
 
-      {/* Mobile: bottom bar */}
-      <nav className="fixed inset-x-0 bottom-0 flex gap-1 border-t border-slate-200 bg-white p-2 md:hidden">
-        {bottomBarItems.map((item) => (
-          <NavLink key={item.to} to={item.to} className={bottomLinkClass}>
-            <item.icon className="size-5 shrink-0" aria-hidden="true" />
-            <span className="max-w-full truncate">{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
+      <BottomBar items={bottomBarItems} />
     </div>
   )
 }

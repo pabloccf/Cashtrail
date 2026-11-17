@@ -28,6 +28,40 @@
   --shadow-brand: 0 6px 16px -4px oklch(51.1% 0.262 276.966 / 0.45);
 }
 
+/* Page transitions (see AppLayout). During a View Transition the browser takes a snapshot of the old
+   page and of the new one, and animates them with these pseudo-elements. `.page-exit` and
+   `.page-enter` are the classes the <ViewTransition> boundary gives to each snapshot.
+   The old page fades out quickly and the new one fades in while rising a few pixels */
+::view-transition-old(.page-exit) {
+  animation: 120ms ease-in both page-fade-out;
+}
+
+::view-transition-new(.page-enter) {
+  animation: 220ms ease-out 60ms both page-fade-in;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Users who ask their system for less motion get no page animation (the change is instant) */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 @layer base {
   body {
     /* Smoother text on macOS and iOS */

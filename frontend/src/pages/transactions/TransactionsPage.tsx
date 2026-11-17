@@ -231,10 +231,11 @@ function TransactionsPage() {
       <button
         type="button"
         onClick={() => setFormState('new')}
-        className="fixed right-4 bottom-20 flex size-14 items-center justify-center rounded-full bg-brand-600 text-3xl text-white shadow-lg active:bg-brand-700 md:hidden"
+        // bottom-24 clears the bottom bar (about 70px high) with some air
+        className="fixed right-4 bottom-24 z-20 flex size-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-brand transition active:scale-95 active:bg-brand-700 md:hidden"
         aria-label="Nueva transacción"
       >
-        +
+        <Plus className="size-6" aria-hidden="true" />
       </button>
 
       {/* Mounted only while open: each opening starts with a clean form and clean mutation state */}
