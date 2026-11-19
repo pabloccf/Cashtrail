@@ -25,6 +25,21 @@ export function findPublicById(userId: string) {
   return prisma.user.findUnique({ where: { id: userId }, select: publicUserSelect });
 }
 
+// Whether the user has a password, without ever returning the hash. Null if the user does not exist
+export function hasPassword(userId: string) {
+  return prisma.user
+    .findUnique({ where: { id: userId }, select: { passwordHash: true } })
+    .then((user) => (user ? user.passwordHash !== null : null));
+}
+
+// Sets the password only if the user has none: the condition and the update are a single query,
+// so two requests at the same time cannot both succeed. Returns how many rows changed (0 or 1)
+export function setPasswordHashIfMissing(userId: string, passwordHash: string) {
+  return prisma.user
+    .updateMany({ where: { id: userId, passwordHash: null }, data: { passwordHash } })
+    .then((result) => result.count);
+}
+
 export interface ProfileData {
   name: string;
   currency: string;

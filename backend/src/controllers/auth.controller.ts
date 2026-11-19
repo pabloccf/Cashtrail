@@ -2,11 +2,12 @@ import type { RequestHandler } from 'express';
 import * as authService from '../services/auth.service.js';
 import { APP_URL } from '../lib/appUrl.js';
 import { clearOAuthCookie, OAUTH_COOKIE_NAME, parseOAuthCookie, setOAuthCookie } from '../lib/oauthCookie.js';
-import { clearSessionCookie, setSessionCookie } from '../lib/sessionCookie.js';
+import { clearSessionCookie, readSessionUserId, setSessionCookie } from '../lib/sessionCookie.js';
 import {
   googleCallbackQuerySchema,
   type LoginInput,
   type RegisterInput,
+  type SetPasswordInput,
   type UpdateProfileInput,
 } from '../schemas/auth.schema.js';
 
@@ -32,8 +33,8 @@ export const logout: RequestHandler = (_req, res) => {
   res.status(204).end();
 };
 
-// ---- Sign in with Google. These two are browser navigations, not fetch calls: they always answer
-// with a redirect, and errors go to /login?error=<reason> for the frontend to show ----
+// ---- Sign in with Google. These are browser navigations, not fetch calls: they always answer with
+// a redirect, and errors go in the URL (?error=… / ?google_error=…) for the frontend to show ----
 
 // GET /auth/google: keeps state and codeVerifier in the temporary cookie and sends the user to Google
 export const startGoogle: RequestHandler = (_req, res) => {
@@ -42,7 +43,14 @@ export const startGoogle: RequestHandler = (_req, res) => {
   res.redirect(url.toString());
 };
 
-// GET /auth/google/callback: Google sends the user back here
+// GET /auth/google/link (logged in): the same, but the callback will link Google to this account
+export const startGoogleLink: RequestHandler = (req, res) => {
+  const { url, state, codeVerifier, linkUserId } = authService.startGoogleLink(req.userId);
+  setOAuthCookie(res, { state, codeVerifier, linkUserId });
+  res.redirect(url.toString());
+};
+
+// GET /auth/google/callback: Google sends the user back here, both when signing in and when linking
 export const googleCallback: RequestHandler = async (req, res) => {
   const saved = parseOAuthCookie(req.cookies?.[OAUTH_COOKIE_NAME]);
   // Single use, whatever happens next: a used state must never be accepted again
@@ -51,8 +59,15 @@ export const googleCallback: RequestHandler = async (req, res) => {
   // Validated here and not with the validate middleware: that one answers 400 with JSON, and this
   // request comes from a browser navigation. Unknown or malformed values count as a failed attempt
   const query = googleCallbackQuerySchema.safeParse(req.query);
-  const result = await authService.finishGoogleSignIn(query.success ? query.data : { error: 'invalid_query' }, saved);
+  const params = query.success ? query.data : { error: 'invalid_query' };
 
+  if (saved?.linkUserId) {
+    const result = await authService.finishGoogleLink(params, saved, readSessionUserId(req.cookies));
+    res.redirect(`${APP_URL}/settings?${result.ok ? 'google=linked' : `google_error=${result.reason}`}`);
+    return;
+  }
+
+  const result = await authService.finishGoogleSignIn(params, saved);
   if (!result.ok) {
     res.redirect(`${APP_URL}/login?error=${result.reason}`);
     return;
@@ -60,6 +75,22 @@ export const googleCallback: RequestHandler = async (req, res) => {
 
   setSessionCookie(res, result.token);
   res.redirect(`${APP_URL}/dashboard`);
+};
+
+// ---- Sign-in methods (/settings) ----
+
+export const methods: RequestHandler = async (req, res) => {
+  res.json(await authService.getAuthMethods(req.userId));
+};
+
+export const unlinkGoogle: RequestHandler = async (req, res) => {
+  await authService.unlinkProvider(req.userId, 'GOOGLE');
+  res.status(204).end();
+};
+
+export const setPassword: RequestHandler<NoParams, unknown, SetPasswordInput> = async (req, res) => {
+  await authService.setPassword(req.userId, req.body.password);
+  res.status(204).end();
 };
 
 export const me: RequestHandler = async (req, res) => {

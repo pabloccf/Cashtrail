@@ -20,6 +20,9 @@ const MAX_AGE_MS = 10 * 60 * 1000;
 const oauthCookieSchema = z.object({
   state: z.string().min(1),
   codeVerifier: z.string().min(1),
+  // Only when linking Google to an account from /settings: who started it. The callback checks that
+  // the same user is still logged in. Missing means a normal sign-in
+  linkUserId: z.uuid().optional(),
 });
 
 export type OAuthCookie = z.infer<typeof oauthCookieSchema>;

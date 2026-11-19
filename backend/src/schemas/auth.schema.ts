@@ -13,13 +13,21 @@ const nameSchema = z.string().trim().min(1).max(50);
 
 const passwordMaxBytes = (password: string) => Buffer.byteLength(password, 'utf8') <= BCRYPT_MAX_BYTES;
 
+// Rules for a password being created: on register and when a Google user sets one
+const newPasswordSchema = z
+  .string()
+  .min(8)
+  .refine(passwordMaxBytes, { message: `Password must be at most ${BCRYPT_MAX_BYTES} bytes` });
+
 export const registerBodySchema = z.object({
   name: nameSchema,
   email: emailSchema,
-  password: z
-    .string()
-    .min(8)
-    .refine(passwordMaxBytes, { message: `Password must be at most ${BCRYPT_MAX_BYTES} bytes` }),
+  password: newPasswordSchema,
+});
+
+// POST /auth/password: only for users without a password (signed up with Google)
+export const setPasswordBodySchema = z.object({
+  password: newPasswordSchema,
 });
 
 // No minimum length here: login only checks the password, the rules are enforced on register
@@ -49,3 +57,4 @@ export const googleCallbackQuerySchema = z.object({
 export type RegisterInput = z.infer<typeof registerBodySchema>;
 export type LoginInput = z.infer<typeof loginBodySchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileBodySchema>;
+export type SetPasswordInput = z.infer<typeof setPasswordBodySchema>;
