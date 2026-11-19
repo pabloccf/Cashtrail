@@ -360,9 +360,11 @@ Todo en planes gratuitos. El despliegue lo hago yo manualmente (crear cuentas, c
 
 | Pieza | Servicio | Notas |
 |---|---|---|
-| Frontend | Vercel | Root directory: `frontend`. Se despliega en cada push a `main` |
-| Backend | Render (Web Service gratuito) | Root directory: `backend`. Se duerme tras 15 min sin tráfico y tarda ~1 min en despertar |
-| Base de datos | Neon (plan gratuito) | PostgreSQL. No usar la base de datos gratuita de Render, porque caduca y se borra |
+| Frontend | Vercel (`https://cashtrail-gilt.vercel.app`) | Root directory: `frontend`, preset Vite. Se despliega en cada push a `main` |
+| Backend | Render, Web Service gratuito (`https://cashtrail-api-r8v6.onrender.com`) | Root directory: `backend`, región Frankfurt, health check en `/api/health`. Se despliega en cada push a `main` que toque `backend/`. Se duerme tras 15 min sin tráfico y tarda ~1 min en despertar |
+| Base de datos | Neon, plan gratuito (región Frankfurt, PostgreSQL 17) | La misma versión que en Docker. No usar la base de datos gratuita de Render, porque caduca y se borra. Se suspende tras 5 min sin consultas |
+
+Backend y base de datos en la misma región para que cada consulta tarde ~1 ms. Las URLs públicas no son secretas; las credenciales, sí (ver "Variables de entorno").
 
 ### Rewrite en Vercel (mismo dominio para las cookies)
 
@@ -371,37 +373,58 @@ Safari (iPhone/iPad) bloquea las cookies entre dominios distintos. Para evitarlo
 ```json
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://URL-DEL-BACKEND.onrender.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://cashtrail-api-r8v6.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
 ```
 
-La segunda regla hace que React Router funcione al recargar cualquier ruta. En local, el proxy de Vite (`server.proxy` en `vite.config.ts`) hace lo mismo hacia `http://localhost:3000`, así el código del frontend usa siempre rutas relativas (`/api/...`).
+La segunda regla hace que React Router funcione al recargar cualquier ruta. Vercel sirve antes los archivos que existen (`/assets/...`, `/favicon.svg`), así que esa regla solo captura las rutas de la app. El orden importa: la regla de `/api` tiene que ir primero. Si cambia la URL de Render, hay que cambiarla aquí y en el secret `BACKEND_URL`. En local, el proxy de Vite (`server.proxy` en `vite.config.ts`) hace lo mismo hacia `http://localhost:3000`, así el código del frontend usa siempre rutas relativas (`/api/...`).
 
 Configuración de la cookie de sesión: `httpOnly: true`, `sameSite: "lax"`, `secure: true` en producción, `path: "/"`.
 
 ### Tarea diaria con GitHub Action
 
-`.github/workflows/daily-recurring.yml` se ejecuta una vez al día (`schedule` con cron, por ejemplo a las 05:00 UTC) y también manualmente (`workflow_dispatch`). Pasos:
+`.github/workflows/daily-recurring.yml` se ejecuta una vez al día a las **05:17 UTC** (no a una hora en punto: GitHub retrasa los workflows programados a esas horas) y también manualmente (`workflow_dispatch`, botón "Run workflow" en la pestaña Actions). Pasos:
 
-1. Llamar a `GET /api/health` para despertar el servidor, con reintentos y un tiempo de espera amplio (`curl --retry 5 --retry-delay 20 --max-time 120`), porque Render puede tardar en arrancar.
-2. Llamar a `POST /api/jobs/recurring` con la cabecera `x-cron-secret: ${{ secrets.CRON_SECRET }}`.
-3. Fallar el workflow si la respuesta no es 200, para que GitHub me avise por email.
+1. Llamar a `GET /api/health` para despertar el servidor, con reintentos y un tiempo de espera amplio (`curl --retry 5 --retry-delay 20 --retry-all-errors --max-time 120`), porque Render puede tardar en arrancar. `--retry-all-errors` hace falta porque `--retry` no reintenta las conexiones rechazadas mientras arranca.
+2. Llamar a `POST /api/jobs/recurring` con la cabecera `x-cron-secret`.
+3. Fallar el workflow si la respuesta no es 200, para que GitHub me avise por email. El endpoint responde 500 si falla algún fijo.
+
+Más detalles:
+
+- `BACKEND_URL` apunta a Render directamente, no a Vercel: aquí no hay cookies y el rewrite sería un salto más.
+- Los secretos se pasan con `env:` y el script los lee como variables del shell, nunca como `${{ secrets.X }}` dentro del script (evita la inyección de código en el script).
+- `permissions: {}` (el `GITHUB_TOKEN` no necesita acceso al repositorio), `timeout-minutes: 10` y `concurrency` para que nunca haya dos ejecuciones a la vez.
 
 La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunca en el código.
 
 ### Variables de entorno
 
-**Backend (Render):** `DATABASE_URL` (conexión con pooling de Neon), `DIRECT_URL` (conexión directa de Neon, para las migraciones de Prisma), `JWT_SECRET`, `CRON_SECRET`, `NODE_ENV=production`.
+**Backend (Render):** `DATABASE_URL` (conexión con pooling de Neon), `DIRECT_URL` (conexión directa de Neon, para las migraciones de Prisma), `JWT_SECRET`, `CRON_SECRET`, `NODE_ENV=production`. `PORT` no se define: la pone Render.
+
+- La **app** usa `DATABASE_URL` (en `src/lib/prisma.ts`, a través del adaptador). La **CLI de Prisma** usa `DIRECT_URL` y, si no existe, `DATABASE_URL` (en `prisma.config.ts`). Las migraciones necesitan la conexión directa porque el pooler de Neon (PgBouncer en modo transacción) no mantiene la sesión que usa el motor de migraciones. En local `DIRECT_URL` es opcional.
+- `JWT_SECRET` y `CRON_SECRET` de producción son **distintos** de los de local. El `CRON_SECRET` de Render y el de GitHub tienen que ser el mismo.
 
 **GitHub (secrets del repo):** `BACKEND_URL`, `CRON_SECRET`.
 
+**Vercel:** ninguna. La URL del backend está en `vercel.json`.
+
 ### Build y arranque en Render
 
-- Build: `npm install && npx prisma generate && npx prisma migrate deploy && npm run build`
+- Build: `npm ci --include=dev && npx prisma generate && npx prisma migrate deploy && npm run build`
+  - `--include=dev` es obligatorio: las variables de entorno también existen durante el build y, con `NODE_ENV=production`, npm no instala las `devDependencies`, donde están `prisma` y `typescript`. Sin ellas `npx` descargaría la última versión de Prisma (no la 7).
+  - `npm ci` instala exactamente lo que dice el `package-lock.json`.
+  - Las migraciones van en el build porque el "Pre-Deploy Command" de Render es de pago. Si una migración falla, el build falla y Render mantiene la versión anterior.
 - Start: `npm start` (ejecuta el JavaScript compilado en `dist/`)
+- La versión de Node la fija `engines.node` (`24.x`) en `backend/package.json`.
 - En producción se usa `prisma migrate deploy`, **nunca** `prisma migrate dev`.
+
+### Base de datos de producción
+
+- Para lanzar un comando de Prisma contra Neon desde mi máquina, poner la URL directa solo en la terminal con `read -rs "DIRECT_URL?…"` + `export DIRECT_URL` (no queda en el historial ni en ningún archivo), y hacer `unset DIRECT_URL` al terminar. `dotenv` no pisa las variables que ya existen.
+- **Nunca** guardar las URLs de Neon en `.env`, ni lanzar `prisma migrate dev` o el seed contra producción (el seed crea usuarios con una contraseña conocida).
+- Los usuarios de los seeds solo existen en local. En producción, cada uno se registra desde `/register`.
 
 ## Hoja de ruta
 
@@ -415,7 +438,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 - [x] **Fase 5:** dashboard con gráficos, endpoints de estadísticas y próximos gastos fijos
 - [x] **Fase 6:** presupuestos y exportar a CSV, más la página `/settings` con perfil y moneda
 - [x] **Rediseño visual** (antes de la Fase 7): tokens de diseño, componentes base, barra lateral plegable, transiciones entre páginas, dashboard con hero, campos unificados, bottom sheets, estados vacíos, agrupación por día, login con panel de marca, toasts, favicon y Prettier (ver "Sistema de diseño")
-- [ ] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
+- [x] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
 - [ ] **Fase 7.5:** registro e inicio de sesión con Google (OAuth 2.0 / OpenID Connect con PKCE). Microsoft, opcional y más adelante. Se descartan Apple (de pago y usa `form_post`, incompatible con la cookie `sameSite: "lax"`), Facebook y X. Dividirla en pasos al planificarla:
   - Modelo `AuthAccount` (userId, provider, providerAccountId; único por provider + providerAccountId) y `passwordHash` opcional en `User`.
   - Flujo en el backend: `GET /auth/google` y `GET /auth/google/callback`, con `state` y PKCE en una cookie temporal. Al terminar se crea la misma cookie JWT que en el login normal. El alta con Google crea las categorías por defecto de forma atómica.
@@ -426,4 +449,4 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
   - Librería propuesta: Arctic (pedir confirmación antes de instalarla).
 - [ ] **Fase 8:** gastos compartidos: espacios compartidos, invitaciones, gastos con reparto y cuenta común, balance y saldos, categorías y gastos fijos compartidos, dashboard compartido y presupuestos compartidos. Dividirla en subfases al planificarla.
 
-Ideas para después: importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro (los tokens ya lo dejan preparado), PWA (con un `apple-touch-icon` en PNG para iOS), atajos de teclado en escritorio (`N` para nueva transacción, `/` para buscar), categorización automática con IA.
+Ideas para después: límite de intentos en `/auth/login` y `/auth/register` (ahora el registro está abierto a cualquiera con la URL y no hay protección contra fuerza bruta; necesitaría `app.set('trust proxy', 1)` en Render), dividir el bundle del frontend por rutas con `lazy()`, importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro (los tokens ya lo dejan preparado), PWA (con un `apple-touch-icon` en PNG para iOS), atajos de teclado en escritorio (`N` para nueva transacción, `/` para buscar), categorización automática con IA.
