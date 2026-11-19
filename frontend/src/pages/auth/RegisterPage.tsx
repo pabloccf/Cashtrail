@@ -9,24 +9,15 @@ import PasswordField from '../../components/PasswordField'
 import TextField from '../../components/TextField'
 import { useRegister } from '../../hooks/useAuth'
 import { getErrorMessage } from '../../utils/errorMessage'
+import { newPasswordSchema } from '../../utils/password'
 import AuthLayout from './AuthLayout'
 import Button from '../../components/Button'
-
-// Same limits as the backend. bcrypt only uses the first 72 bytes ("ñ" or "€" take more than 1)
-const PASSWORD_MIN_LENGTH = 8
-const PASSWORD_MAX_BYTES = 72
 
 const registerFormSchema = z
   .object({
     name: z.string().trim().min(1, 'Introduce tu nombre').max(50, 'Máximo 50 caracteres'),
     email: z.string().trim().min(1, 'Introduce tu email').pipe(z.email('Introduce un email válido')),
-    password: z
-      .string()
-      .min(PASSWORD_MIN_LENGTH, `Mínimo ${PASSWORD_MIN_LENGTH} caracteres`)
-      .refine(
-        (value) => new TextEncoder().encode(value).length <= PASSWORD_MAX_BYTES,
-        'La contraseña es demasiado larga',
-      ),
+    password: newPasswordSchema,
     confirmPassword: z.string(),
   })
   // Rule that involves two fields: it goes on the object, and `path` says where to show the error

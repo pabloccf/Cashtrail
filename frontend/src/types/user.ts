@@ -23,3 +23,12 @@ export interface UpdateProfileInput {
   name: string
   currency: string // "EUR", "USD", "GBP" or "CHF"
 }
+
+// External sign-in providers (backend enum AuthProvider). Only Google for now
+export type AuthProvider = 'GOOGLE'
+
+// GET /auth/methods: how this account can sign in. Shown in /settings
+export interface AuthMethods {
+  hasPassword: boolean
+  providers: AuthProvider[]
+}

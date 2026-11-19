@@ -8,6 +8,8 @@ interface ConfirmDialogProps {
   title: string
   message: ReactNode
   confirmLabel: string
+  // Shown on the confirm button while the action runs
+  confirmingLabel?: string
   // While the action runs, the buttons are disabled and the dialog cannot be dismissed
   isConfirming?: boolean
   error?: string
@@ -21,6 +23,7 @@ function ConfirmDialog({
   title,
   message,
   confirmLabel,
+  confirmingLabel = 'Eliminando…',
   isConfirming = false,
   error,
   onConfirm,
@@ -73,7 +76,7 @@ function ConfirmDialog({
             Cancelar
           </Button>
           <Button variant="danger" onClick={onConfirm} disabled={isConfirming}>
-            {isConfirming ? 'Eliminando…' : confirmLabel}
+            {isConfirming ? confirmingLabel : confirmLabel}
           </Button>
         </div>
       </div>

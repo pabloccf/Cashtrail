@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useCurrentUser } from '../../hooks/useAuth'
 import ExportSection from './ExportSection'
 import ProfileSection from './ProfileSection'
+import SignInMethodsSection from './SignInMethodsSection'
 
 function SettingsPage() {
   // ProtectedRoute already loaded the user, so this reads it from the cache without a new request
@@ -28,6 +29,7 @@ function SettingsPage() {
 
       {/* `user` is never null inside ProtectedRoute; the check only satisfies TypeScript */}
       {user && <ProfileSection user={user} />}
+      {user && <SignInMethodsSection email={user.email} />}
 
       <ExportSection />
     </section>

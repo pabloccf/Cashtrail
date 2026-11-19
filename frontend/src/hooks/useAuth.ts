@@ -1,5 +1,15 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { CURRENT_USER_QUERY_KEY, getCurrentUser, login, logout, register, updateProfile } from '../api/auth'
+import {
+  CURRENT_USER_QUERY_KEY,
+  getAuthMethods,
+  getCurrentUser,
+  login,
+  logout,
+  register,
+  setPassword,
+  unlinkGoogle,
+  updateProfile,
+} from '../api/auth'
 import type { User } from '../types/user'
 
 // The TanStack Query cache is the single source of truth for "who is logged in":
@@ -42,5 +52,31 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: updateProfile,
     onSuccess: (user) => queryClient.setQueryData(CURRENT_USER_QUERY_KEY, user),
+  })
+}
+
+// Its own key and NOT ['auth', ...]: setSessionUser keeps every query that starts with 'auth' (the
+// current user), so this one would survive a logout and the next user could see the previous one's methods
+const AUTH_METHODS_QUERY_KEY = ['authMethods'] as const
+
+export function useAuthMethods() {
+  return useQuery({ queryKey: AUTH_METHODS_QUERY_KEY, queryFn: getAuthMethods })
+}
+
+// After a change, the methods are asked again instead of patched by hand: the backend decides
+// what changed (and it is a tiny request)
+export function useUnlinkGoogle() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: unlinkGoogle,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: AUTH_METHODS_QUERY_KEY }),
+  })
+}
+
+export function useSetPassword() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: setPassword,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: AUTH_METHODS_QUERY_KEY }),
   })
 }
