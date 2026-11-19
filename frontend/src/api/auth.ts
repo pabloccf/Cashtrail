@@ -15,6 +15,13 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
+// Sign in with Google is not a fetch call: the browser navigates here, the backend sends it to
+// Google, and Google sends it back to /api/auth/google/callback, which redirects to the app
+export const GOOGLE_SIGN_IN_URL = '/api/auth/google'
+
+// Reasons the callback can send back in /login?error=… (backend: GoogleSignInFailure in auth.service.ts)
+export type GoogleSignInError = 'google_cancelled' | 'google_failed' | 'email_not_verified' | 'account_exists'
+
 export function login(input: LoginInput) {
   return apiClient.post<User>('/auth/login', input)
 }

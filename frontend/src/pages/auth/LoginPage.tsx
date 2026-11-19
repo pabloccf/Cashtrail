@@ -1,8 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { z } from 'zod'
+import type { GoogleSignInError } from '../../api/auth'
 import { ApiError } from '../../api/client'
+import GoogleSignInButton from '../../components/GoogleSignInButton'
+import OrDivider from '../../components/OrDivider'
 import PasswordField from '../../components/PasswordField'
 import TextField from '../../components/TextField'
 import { useLogin } from '../../hooks/useAuth'
@@ -24,8 +27,26 @@ function getLoginErrorMessage(error: unknown): string {
   return getErrorMessage(error)
 }
 
+// Messages for the ?error=… the backend adds when sign-in with Google does not end in a session
+const GOOGLE_ERROR_MESSAGES: Record<GoogleSignInError, string> = {
+  google_cancelled: 'Has cancelado el inicio de sesión con Google.',
+  google_failed: 'No se ha podido iniciar sesión con Google. Inténtalo de nuevo.',
+  email_not_verified:
+    'Tu email de Google no está verificado. Verifícalo en Google o regístrate con email y contraseña.',
+  account_exists:
+    'Ya tienes una cuenta con este email. Inicia sesión con tu contraseña y vincula Google desde Ajustes.',
+}
+
+// Object.hasOwn and not `code in GOOGLE_ERROR_MESSAGES`: `in` also finds inherited keys such as
+// "toString", and the URL can contain anything
+function getGoogleErrorMessage(code: string | null): string | null {
+  return code && Object.hasOwn(GOOGLE_ERROR_MESSAGES, code) ? GOOGLE_ERROR_MESSAGES[code as GoogleSignInError] : null
+}
+
 function LoginPage() {
   const loginMutation = useLogin()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const googleError = getGoogleErrorMessage(searchParams.get('error'))
   const {
     register,
     handleSubmit,
@@ -34,6 +55,13 @@ function LoginPage() {
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: '', password: '' },
   })
+
+  // Trying the form clears the Google message, so it is never shown next to a new, unrelated error.
+  // `replace` so the back button does not bring the message back
+  function submit(values: LoginFormValues) {
+    if (googleError) setSearchParams({}, { replace: true })
+    loginMutation.mutate(values)
+  }
 
   // No navigate() here: on success the user is saved in the cache and GuestRoute redirects
   return (
@@ -49,11 +77,18 @@ function LoginPage() {
         </>
       }
     >
-      <form
-        onSubmit={handleSubmit((values) => loginMutation.mutate(values))}
-        noValidate
-        className="flex flex-col gap-4"
-      >
+      {googleError && (
+        <p className="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+          {googleError}
+        </p>
+      )}
+
+      <div className="mb-6 flex flex-col gap-6">
+        <GoogleSignInButton />
+        <OrDivider label="o con tu email" />
+      </div>
+
+      <form onSubmit={handleSubmit(submit)} noValidate className="flex flex-col gap-4">
         {/* autoComplete lets the browser and password managers fill in the right fields */}
         <TextField
           label="Email"

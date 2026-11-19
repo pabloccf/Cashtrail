@@ -3,6 +3,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { z } from 'zod'
 import { ApiError } from '../../api/client'
+import GoogleSignInButton from '../../components/GoogleSignInButton'
+import OrDivider from '../../components/OrDivider'
 import PasswordField from '../../components/PasswordField'
 import TextField from '../../components/TextField'
 import { useRegister } from '../../hooks/useAuth'
@@ -69,6 +71,12 @@ function RegisterPage() {
         </>
       }
     >
+      {/* Errors from Google always go to /login: there the user can also sign in with a password */}
+      <div className="mb-6 flex flex-col gap-6">
+        <GoogleSignInButton />
+        <OrDivider label="o con tu email" />
+      </div>
+
       <form onSubmit={handleSubmit(submit)} noValidate className="flex flex-col gap-4">
         <TextField label="Nombre" autoComplete="name" error={errors.name?.message} {...register('name')} />
         <TextField
