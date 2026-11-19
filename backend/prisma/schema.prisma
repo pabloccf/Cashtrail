@@ -29,18 +29,43 @@ enum RecurringMode {
   CONFIRM
 }
 
+// External identity providers a user can sign in with. Only Google for now
+enum AuthProvider {
+  GOOGLE
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
-  passwordHash String
+  // Null for users who signed up with Google and never created a password
+  passwordHash String?
   name         String
   currency     String   @default("EUR") @db.Char(3)
   createdAt    DateTime @default(now()) @db.Timestamptz
 
+  authAccounts          AuthAccount[]
   categories            Category[]
   transactions          Transaction[]
   recurringTransactions RecurringTransaction[]
   budgets               Budget[]
+}
+
+// Links a user to their account in an external provider (e.g. their Google account)
+model AuthAccount {
+  id                String       @id @default(uuid()) @db.Uuid
+  userId            String       @db.Uuid
+  provider          AuthProvider
+  // The provider's permanent id for the person (Google's `sub`). The email can change, this never does,
+  // so sign-in always looks the user up by this field and never by email
+  providerAccountId String
+  createdAt         DateTime     @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // A Google account belongs to one user only
+  @@unique([provider, providerAccountId])
+  // A user has at most one account per provider. It also serves as the index for "accounts of a user"
+  @@unique([userId, provider])
 }
 
 model Category {

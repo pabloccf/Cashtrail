@@ -22,10 +22,12 @@ export async function register(input: RegisterInput) {
 export async function login(input: LoginInput) {
   const found = await userRepository.findWithPasswordByEmail(input.email);
 
-  // bcrypt runs even if the email does not exist, so both cases take the same time
+  // bcrypt runs even if the email does not exist or the user has no password (signed up with Google),
+  // so every case takes the same time. Nobody knows the value behind the dummy hash, so it never matches
   const passwordMatches = await verifyPassword(input.password, found?.passwordHash ?? DUMMY_PASSWORD_HASH);
 
-  // Same message for "unknown email" and "wrong password": it does not reveal which emails exist
+  // Same message for "unknown email", "wrong password" and "no password": it does not reveal which
+  // emails exist or how each account signs in
   if (!found || !passwordMatches) {
     throw new AppError(401, 'Invalid email or password');
   }

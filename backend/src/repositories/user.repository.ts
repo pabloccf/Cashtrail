@@ -10,8 +10,8 @@ const publicUserSelect = {
   createdAt: true,
 } as const;
 
-// The only function that returns passwordHash, and only for the login check.
-// The service must strip it before returning the user
+// The only function that returns passwordHash, and only for the login check. It is null if the
+// user signed up with Google. The service must strip it before returning the user
 export function findWithPasswordByEmail(email: string) {
   return prisma.user.findUnique({ where: { email }, select: { ...publicUserSelect, passwordHash: true } });
 }
