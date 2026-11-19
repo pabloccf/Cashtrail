@@ -6,6 +6,7 @@ import BudgetsPage from './pages/budgets/BudgetsPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import CategoriesPage from './pages/categories/CategoriesPage'
+import PrivacyPage from './pages/legal/PrivacyPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import RecurringPage from './pages/recurring/RecurringPage'
 import SettingsPage from './pages/settings/SettingsPage'
@@ -14,6 +15,9 @@ import TransactionsPage from './pages/transactions/TransactionsPage'
 function App() {
   return (
     <Routes>
+      {/* Public, with or without a session: Google links to it from its consent screen */}
+      <Route path="/privacy" element={<PrivacyPage />} />
+
       {/* Only for users who are NOT logged in */}
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />

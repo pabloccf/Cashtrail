@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { ArrowLeftRight, PiggyBank, Repeat, ShieldCheck, type LucideIcon } from 'lucide-react'
+import { Link } from 'react-router'
 import BrandLogo from '../../components/BrandLogo'
 
 interface AuthLayoutProps {
@@ -74,6 +75,12 @@ function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
           <div className="mt-8">{children}</div>
 
           <p className="mt-8 text-center text-sm text-slate-600">{footer}</p>
+
+          <p className="mt-6 text-center text-xs text-slate-500">
+            <Link to="/privacy" className="underline-offset-2 hover:text-slate-700 hover:underline">
+              Política de privacidad
+            </Link>
+          </p>
         </div>
       </main>
     </div>
