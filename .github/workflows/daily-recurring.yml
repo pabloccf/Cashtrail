@@ -1,0 +1,59 @@
+# Generates the recurring transactions once a day by calling the protected backend endpoint.
+# The backend is idempotent, so a manual run on the same day does not duplicate anything
+name: Daily recurring transactions
+
+on:
+  schedule:
+    # Every day at 05:17 UTC. Not at minute 0: GitHub delays scheduled runs at the top of the hour
+    - cron: '17 5 * * *'
+  # "Run workflow" button in the Actions tab, to test it or run it by hand
+  workflow_dispatch:
+
+# The job only calls the backend, so the GITHUB_TOKEN needs no access to the repository
+permissions: {}
+
+# Never two runs at the same time (e.g. the scheduled one and a manual one)
+concurrency:
+  group: daily-recurring
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    # A hung request must not keep the runner busy for the default 6 hours
+    timeout-minutes: 10
+
+    # Secrets are passed as environment variables instead of writing ${{ secrets.X }} inside the
+    # script: the shell reads them as plain values and they never become part of the script itself
+    env:
+      BACKEND_URL: ${{ secrets.BACKEND_URL }}
+
+    steps:
+      - name: Wake up the backend
+        # Render's free plan sleeps after 15 minutes and takes about a minute to start.
+        # --retry-all-errors also retries refused connections and 5xx responses while it boots
+        run: |
+          curl --fail --silent --show-error \
+            --retry 5 --retry-delay 20 --retry-all-errors --max-time 120 \
+            "${BACKEND_URL%/}/api/health"
+
+      - name: Generate recurring transactions
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        # The endpoint answers 200 if everything went well, 401 if the secret is wrong and 500 if
+        # any recurring transaction failed. Anything but 200 fails the workflow, and GitHub sends an email
+        run: |
+          status=$(curl --silent --show-error --max-time 120 \
+            --request POST \
+            --header "x-cron-secret: $CRON_SECRET" \
+            --output response.json --write-out '%{http_code}' \
+            "${BACKEND_URL%/}/api/jobs/recurring")
+
+          echo "HTTP $status"
+          cat response.json
+          echo
+
+          if [ "$status" != "200" ]; then
+            echo "::error::The recurring transactions endpoint answered HTTP $status"
+            exit 1
+          fi
