@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { z } from 'zod'
 import { ApiError } from '../../api/client'
+import PasswordField from '../../components/PasswordField'
 import TextField from '../../components/TextField'
 import { useLogin } from '../../hooks/useAuth'
 import { getErrorMessage } from '../../utils/errorMessage'
@@ -61,9 +62,8 @@ function LoginPage() {
           error={errors.email?.message}
           {...register('email')}
         />
-        <TextField
+        <PasswordField
           label="Contraseña"
-          type="password"
           autoComplete="current-password"
           error={errors.password?.message}
           {...register('password')}

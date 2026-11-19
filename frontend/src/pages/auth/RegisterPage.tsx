@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { z } from 'zod'
 import { ApiError } from '../../api/client'
+import PasswordField from '../../components/PasswordField'
 import TextField from '../../components/TextField'
 import { useRegister } from '../../hooks/useAuth'
 import { getErrorMessage } from '../../utils/errorMessage'
@@ -78,16 +79,14 @@ function RegisterPage() {
           {...register('email')}
         />
         {/* "new-password" makes password managers offer to generate a strong one */}
-        <TextField
+        <PasswordField
           label="Contraseña"
-          type="password"
           autoComplete="new-password"
           error={errors.password?.message}
           {...register('password')}
         />
-        <TextField
+        <PasswordField
           label="Repite la contraseña"
-          type="password"
           autoComplete="new-password"
           error={errors.confirmPassword?.message}
           {...register('confirmPassword')}
