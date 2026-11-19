@@ -1,7 +1,14 @@
 import type { RequestHandler } from 'express';
 import * as authService from '../services/auth.service.js';
+import { APP_URL } from '../lib/appUrl.js';
+import { clearOAuthCookie, OAUTH_COOKIE_NAME, parseOAuthCookie, setOAuthCookie } from '../lib/oauthCookie.js';
 import { clearSessionCookie, setSessionCookie } from '../lib/sessionCookie.js';
-import type { LoginInput, RegisterInput, UpdateProfileInput } from '../schemas/auth.schema.js';
+import {
+  googleCallbackQuerySchema,
+  type LoginInput,
+  type RegisterInput,
+  type UpdateProfileInput,
+} from '../schemas/auth.schema.js';
 
 type NoParams = Record<string, string>;
 
@@ -23,6 +30,36 @@ export const login: RequestHandler<NoParams, unknown, LoginInput> = async (req, 
 export const logout: RequestHandler = (_req, res) => {
   clearSessionCookie(res);
   res.status(204).end();
+};
+
+// ---- Sign in with Google. These two are browser navigations, not fetch calls: they always answer
+// with a redirect, and errors go to /login?error=<reason> for the frontend to show ----
+
+// GET /auth/google: keeps state and codeVerifier in the temporary cookie and sends the user to Google
+export const startGoogle: RequestHandler = (_req, res) => {
+  const { url, state, codeVerifier } = authService.startGoogleSignIn();
+  setOAuthCookie(res, { state, codeVerifier });
+  res.redirect(url.toString());
+};
+
+// GET /auth/google/callback: Google sends the user back here
+export const googleCallback: RequestHandler = async (req, res) => {
+  const saved = parseOAuthCookie(req.cookies?.[OAUTH_COOKIE_NAME]);
+  // Single use, whatever happens next: a used state must never be accepted again
+  clearOAuthCookie(res);
+
+  // Validated here and not with the validate middleware: that one answers 400 with JSON, and this
+  // request comes from a browser navigation. Unknown or malformed values count as a failed attempt
+  const query = googleCallbackQuerySchema.safeParse(req.query);
+  const result = await authService.finishGoogleSignIn(query.success ? query.data : { error: 'invalid_query' }, saved);
+
+  if (!result.ok) {
+    res.redirect(`${APP_URL}/login?error=${result.reason}`);
+    return;
+  }
+
+  setSessionCookie(res, result.token);
+  res.redirect(`${APP_URL}/dashboard`);
 };
 
 export const me: RequestHandler = async (req, res) => {

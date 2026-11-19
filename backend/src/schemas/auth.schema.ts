@@ -37,6 +37,15 @@ export const updateProfileBodySchema = z.object({
   currency: z.enum(SUPPORTED_CURRENCIES),
 });
 
+// GET /auth/google/callback. Google sends `code` and `state` on success, or `error` (e.g. "access_denied"
+// when the user cancels). All optional here: the service decides what each combination means.
+// The max lengths only reject absurd input; Google's values are far shorter
+export const googleCallbackQuerySchema = z.object({
+  code: z.string().min(1).max(2048).optional(),
+  state: z.string().min(1).max(512).optional(),
+  error: z.string().max(256).optional(),
+});
+
 export type RegisterInput = z.infer<typeof registerBodySchema>;
 export type LoginInput = z.infer<typeof loginBodySchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileBodySchema>;

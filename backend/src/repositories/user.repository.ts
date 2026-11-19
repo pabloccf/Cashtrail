@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import type { DefaultCategory } from '../constants/defaultCategories.js';
+import type { AuthProvider } from '../generated/prisma/enums.js';
 
 // Fields that are safe to send to the client. passwordHash is never among them
 const publicUserSelect = {
@@ -36,16 +37,27 @@ export function updateProfile(userId: string, data: ProfileData) {
 interface NewUserData {
   email: string;
   name: string;
-  passwordHash: string;
+  passwordHash?: string; // Missing when signing up with Google
 }
 
-// Nested write: Prisma runs the user insert and the categories insert in a single
-// database transaction, so a user can never end up without categories
-export function createWithCategories(data: NewUserData, categories: readonly DefaultCategory[]) {
+interface NewAuthAccount {
+  provider: AuthProvider;
+  providerAccountId: string;
+}
+
+// Nested write: Prisma runs the user insert, the categories insert and (when signing up with
+// Google) the AuthAccount insert in a single database transaction, so a user can never end up
+// without categories or a Google user without the link that lets them sign in
+export function createWithCategories(
+  data: NewUserData,
+  categories: readonly DefaultCategory[],
+  authAccount?: NewAuthAccount,
+) {
   return prisma.user.create({
     data: {
       ...data,
       categories: { createMany: { data: [...categories] } },
+      ...(authAccount && { authAccounts: { create: authAccount } }),
     },
     select: publicUserSelect,
   });
