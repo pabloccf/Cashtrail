@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Home screen icon on iOS. Safari does not accept SVG here, so it is a 180x180 PNG.
+         Square and without transparency: iOS rounds the corners itself -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Name under the icon on the home screen (otherwise iOS uses the <title>) -->
+    <meta name="apple-mobile-web-app-title" content="Cashtrail" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Color of the browser bar on mobile (brand-600) -->
     <meta name="theme-color" content="#4f39f6" />
