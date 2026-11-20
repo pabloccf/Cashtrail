@@ -31,6 +31,7 @@ Aplicación web full-stack para registrar ingresos y gastos, organizarlos por ca
 - Prisma como ORM
 - Zod para validar los datos de entrada
 - JWT en cookie httpOnly para la autenticación, contraseñas con bcrypt
+- Inicio de sesión con Google (OAuth 2.0 + OpenID Connect con PKCE) con **Arctic** (`arctic` 3.x), ver "Inicio de sesión con Google"
 - La generación diaria de registros fijos se lanza desde un endpoint protegido, llamado una vez al día por una GitHub Action (ver "Despliegue")
 
 **Base de datos**
@@ -126,8 +127,9 @@ npm run format:check        # Solo comprueba, sin cambiar nada
 
 ## Modelo de datos
 
-- **User**: id, email (único), passwordHash, name, currency (por defecto "EUR"), createdAt
+- **User**: id, email (único), passwordHash (opcional: es `null` si se registró con Google y no ha creado contraseña), name, currency (por defecto "EUR"), createdAt
   - `currency` solo admite las monedas de `src/constants/currencies.ts` (EUR, USD, GBP, CHF): todas con 2 decimales y con un símbolo propio. Solo cambia cómo se **muestran** los importes; nunca se convierte ninguna cantidad. El frontend tiene una copia de la lista en `src/utils/currency.ts` (mantenerlas sincronizadas).
+- **AuthAccount**: id, userId, provider (`AuthProvider`: de momento solo GOOGLE), providerAccountId (el `sub` de Google), createdAt. Único por provider + providerAccountId (una cuenta de Google pertenece a un solo usuario) y por userId + provider (un usuario tiene como mucho una cuenta de Google). Se borra en cascada con el usuario.
 - **Category**: id, userId, name, color, icon, type (EXPENSE | INCOME)
 - **Transaction**: id, userId, categoryId, recurringTransactionId (opcional), amount, description, date, type (EXPENSE | INCOME), status (CONFIRMED | PENDING), createdAt
   - Una "transacción" es solo un **registro o apunte** de un gasto o ingreso, nunca un pago.
@@ -213,6 +215,11 @@ Todas las rutas empiezan por `/api`. Todas salvo las de registro y login requier
 
 - `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
 - `PUT /auth/me`: actualiza el perfil (`{ name, currency }`). El email y la contraseña no se cambian aquí
+- `GET /auth/google` y `GET /auth/google/callback`: inicio de sesión (y alta) con Google. Son **navegaciones del navegador**, no llamadas con `fetch`: siempre responden con una redirección, y los errores van en la URL (`/login?error=google_cancelled | google_failed | email_not_verified | account_exists`)
+- `GET /auth/google/link` (con sesión): el mismo flujo para vincular Google a la cuenta. Vuelve a `/settings?google=linked` o `/settings?google_error=google_cancelled | google_failed | google_in_use | already_linked`
+- `GET /auth/methods`: `{ hasPassword, providers }`, para `/settings`. Es una consulta aparte de `/auth/me` para no cambiar el `User` que devuelven el login y el registro
+- `DELETE /auth/methods/google`: desvincula Google. 409 si es el único método para entrar (no tiene contraseña)
+- `POST /auth/password` (`{ password }`): crea una contraseña a quien no la tiene (mismas reglas que el registro). 409 si ya tiene una; cambiar una contraseña existente no está implementado
 - `GET|POST /transactions`, `PUT|DELETE /transactions/:id`
   - `GET` admite filtros: `from`, `to`, `category`, `type`, `status`, `q` (búsqueda en la descripción, sin distinguir mayúsculas), `page` y `pageSize` (solo 10, 25 o 50; por defecto 25)
 - `GET /transactions/export`: descarga un CSV con los mismos filtros que el listado, sin paginar (ver "Exportar a CSV")
@@ -251,7 +258,8 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 
 ## Pantallas del frontend
 
-- `/login`, `/register`
+- `/login`, `/register`: formulario con email y contraseña y, encima, "Continuar con Google" (`GoogleSignInButton`, un enlace y no un botón). `/login` muestra los errores de Google según `?error=`
+- `/privacy`: política de privacidad. **Pública**, con o sin sesión (fuera de `GuestRoute` y `ProtectedRoute`), porque Google la enlaza desde su pantalla de consentimiento y es obligatoria para publicar la app en Google Cloud. Enlazada al pie de `/login` y `/register`. Si cambia lo que la app guarda o con quién lo comparte, hay que actualizarla (y su fecha)
 - `/dashboard`: saludo con el nombre, resumen del mes (el balance como cifra protagonista en `BalanceHero`, con ingresos y gastos dentro), gráficos, últimas transacciones, registros pendientes de confirmar, próximos gastos fijos y saldo disponible estimado (saldo actual menos los gastos fijos que quedan este mes)
 - `/transactions`: listado con filtros, búsqueda y paginación. Los registros generados a partir de un fijo se marcan con un icono
   - En móvil, las transacciones se agrupan por día con cabeceras fijas al hacer scroll ("Hoy", "Ayer", "Lunes, 16 de noviembre"): `GroupedTransactionList`. En escritorio, tabla.
@@ -265,7 +273,7 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
   - Selector de mes con el mes en la URL (`?month=`), como en el dashboard. Tarjeta "Total del mes" y una tarjeta por presupuesto.
   - Barra verde por debajo del 80 %, ámbar desde el 80 % hasta el límite y roja si se pasa; el rojo siempre va acompañado de texto ("Te has pasado…").
   - Si el mes no tiene presupuestos, se ofrece "Copiar los de <mes anterior>".
-- `/settings`: perfil (nombre y moneda; el email solo se muestra), exportar a CSV (este mes, mes anterior, año actual o todo), enlace a Categorías en móvil y, si no pertenezco a ningún espacio, "Crear espacio compartido" y "Unirme con un código"
+- `/settings`: perfil (nombre y moneda; el email solo se muestra), "Inicio de sesión" (`SignInMethodsSection`: contraseña y Google; vincular, desvincular y crear contraseña), exportar a CSV (este mes, mes anterior, año actual o todo), enlace a Categorías en móvil y, si no pertenezco a ningún espacio, "Crear espacio compartido" y "Unirme con un código"
 - Los importes se formatean siempre con el hook `useMoney()`, que usa la moneda del usuario (de la caché de `/auth/me`) con `currencyDisplay: 'narrowSymbol'` (€, $, £), igual que el CSV. Nunca escribir "€" a mano en los componentes.
 
 **Apartado "Gastos compartidos" (Fase 8)**, visible en la navegación solo si el usuario pertenece a un espacio:
@@ -295,6 +303,20 @@ Formato de error común: `{ "error": { "message": string, "details"?: unknown } 
 - En los espacios compartidos, toda consulta debe comprobar que el usuario autenticado es **miembro** del espacio. Un miembro nunca puede ver los datos personales del otro.
 - Nunca devolver `passwordHash` en las respuestas.
 - Los secretos (JWT_SECRET, DATABASE_URL) van en `.env`, que está en `.gitignore`. Mantener un `.env.example` actualizado.
+
+### Inicio de sesión con Google
+
+- **Flujo:** `GET /auth/google` genera `state` y `codeVerifier` (PKCE), los guarda en la cookie temporal `google_oauth` (httpOnly, `sameSite: "lax"`, 10 minutos, solo en la ruta `/api/auth/google`) y redirige a Google. El callback comprueba que el `state` coincide con el de la cookie (protección CSRF), borra la cookie (un solo uso), cambia el `code` por los tokens enviando el `codeVerifier` y lee el id_token. Al terminar crea la misma cookie de sesión JWT que el login normal.
+- **La redirect URI va al dominio del frontend** (`APP_URL/api/auth/google/callback`, por el proxy de Vite o el rewrite de Vercel), nunca al de Render, para que las cookies sean del mismo sitio y funcionen en Safari. En Google Cloud están registradas las dos: `http://localhost:5173/...` y `https://cashtrail-gilt.vercel.app/...`. Se comparan carácter a carácter.
+- **Identificar siempre por el `sub` de Google** (`providerAccountId`), nunca por email: el email de una cuenta de Google puede cambiar.
+- **Nunca vincular automáticamente por email**, aunque Google lo marque como verificado. El registro de Cashtrail no verifica emails, así que alguien podría registrarse con el email de otra persona y quedarse con su cuenta cuando esta entrara con Google (*pre-account hijacking*). Si el email ya existe, el callback redirige a `/login?error=account_exists` y el dueño vincula Google desde `/settings`, con la sesión iniciada.
+- Solo se crea una cuenta con Google si `email_verified` es `true`. El alta crea el usuario, su `AuthAccount` y las categorías por defecto en un solo *nested write*.
+- **Vincular:** la cookie guarda también `linkUserId`, y el callback exige que el usuario con sesión sea el mismo que empezó. El email de Google no tiene que coincidir con el de la cuenta.
+- **Desvincular** solo si queda otro método para entrar (una contraseña). El frontend deshabilita el botón y el backend responde 409.
+- Un usuario sin contraseña que intenta el login normal recibe el mismo 401 genérico, y bcrypt se ejecuta igual con el hash ficticio: no se revela cómo entra cada cuenta.
+- `decodeIdToken` de Arctic no comprueba la firma del id_token. Es correcto porque llega directamente del endpoint de tokens de Google por HTTPS, en una petición autenticada con el `client_secret`. Los claims se validan con Zod, incluido que `aud` sea nuestro Client ID.
+- Toda la integración con Arctic vive en `src/lib/google.ts`; la cookie temporal, en `src/lib/oauthCookie.ts`.
+- En el frontend, la caché de los métodos usa la clave `['authMethods']` y **no** `['auth', …]`: `setSessionUser` conserva al cerrar sesión las consultas que empiezan por `'auth'`.
 
 ### Repositorio y secretos
 
@@ -401,7 +423,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 
 ### Variables de entorno
 
-**Backend (Render):** `DATABASE_URL` (conexión con pooling de Neon), `DIRECT_URL` (conexión directa de Neon, para las migraciones de Prisma), `JWT_SECRET`, `CRON_SECRET`, `NODE_ENV=production`. `PORT` no se define: la pone Render.
+**Backend (Render):** `DATABASE_URL` (conexión con pooling de Neon), `DIRECT_URL` (conexión directa de Neon, para las migraciones de Prisma), `JWT_SECRET`, `CRON_SECRET`, `APP_URL` (`https://cashtrail-gilt.vercel.app`), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y `NODE_ENV=production`. `PORT` no se define: la pone Render. El servidor no arranca si falta alguna (salvo `DIRECT_URL`, que solo usa la CLI).
 
 - La **app** usa `DATABASE_URL` (en `src/lib/prisma.ts`, a través del adaptador). La **CLI de Prisma** usa `DIRECT_URL` y, si no existe, `DATABASE_URL` (en `prisma.config.ts`). Las migraciones necesitan la conexión directa porque el pooler de Neon (PgBouncer en modo transacción) no mantiene la sesión que usa el motor de migraciones. En local `DIRECT_URL` es opcional.
 - `JWT_SECRET` y `CRON_SECRET` de producción son **distintos** de los de local. El `CRON_SECRET` de Render y el de GitHub tienen que ser el mismo.
@@ -439,14 +461,7 @@ La URL del backend y `CRON_SECRET` se guardan como secrets del repositorio, nunc
 - [x] **Fase 6:** presupuestos y exportar a CSV, más la página `/settings` con perfil y moneda
 - [x] **Rediseño visual** (antes de la Fase 7): tokens de diseño, componentes base, barra lateral plegable, transiciones entre páginas, dashboard con hero, campos unificados, bottom sheets, estados vacíos, agrupación por día, login con panel de marca, toasts, favicon y Prettier (ver "Sistema de diseño")
 - [x] **Fase 7:** despliegue: Neon, Render, Vercel con rewrite y GitHub Action diaria
-- [ ] **Fase 7.5:** registro e inicio de sesión con Google (OAuth 2.0 / OpenID Connect con PKCE). Microsoft, opcional y más adelante. Se descartan Apple (de pago y usa `form_post`, incompatible con la cookie `sameSite: "lax"`), Facebook y X. Dividirla en pasos al planificarla:
-  - Modelo `AuthAccount` (userId, provider, providerAccountId; único por provider + providerAccountId) y `passwordHash` opcional en `User`.
-  - Flujo en el backend: `GET /auth/google` y `GET /auth/google/callback`, con `state` y PKCE en una cookie temporal. Al terminar se crea la misma cookie JWT que en el login normal. El alta con Google crea las categorías por defecto de forma atómica.
-  - Identificar siempre por `providerAccountId`. No vincular automáticamente con una cuenta existente por email, salvo que el proveedor lo marque como verificado. La vinculación manual se hace desde `/settings` con la sesión iniciada.
-  - El callback va al dominio de Vercel (pasando por el rewrite), no al de Render, para que la cookie funcione en Safari.
-  - Frontend: botón "Continuar con Google" en `/login` y `/register`. En `/settings`, mostrar los métodos vinculados y permitir crear una contraseña a quien no la tenga.
-  - Configuración: app en Google Cloud con las redirect URIs de local y de producción. Variables nuevas `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y `APP_URL` en `.env`, `.env.example` y Render.
-  - Librería propuesta: Arctic (pedir confirmación antes de instalarla).
+- [x] **Fase 7.5:** registro e inicio de sesión con Google (OAuth 2.0 / OpenID Connect con PKCE, con Arctic): modelo `AuthAccount`, flujo en el backend, botón en `/login` y `/register`, y métodos de inicio de sesión en `/settings` (vincular, desvincular y crear contraseña). Ver "Inicio de sesión con Google". Microsoft, opcional y más adelante (bastaría con añadirlo al enum `AuthProvider`). Se descartan Apple (de pago y usa `form_post`, incompatible con la cookie `sameSite: "lax"`), Facebook y X.
 - [ ] **Fase 8:** gastos compartidos: espacios compartidos, invitaciones, gastos con reparto y cuenta común, balance y saldos, categorías y gastos fijos compartidos, dashboard compartido y presupuestos compartidos. Dividirla en subfases al planificarla.
 
-Ideas para después: límite de intentos en `/auth/login` y `/auth/register` (ahora el registro está abierto a cualquiera con la URL y no hay protección contra fuerza bruta; necesitaría `app.set('trust proxy', 1)` en Render), dividir el bundle del frontend por rutas con `lazy()`, importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro (los tokens ya lo dejan preparado), PWA (con un `apple-touch-icon` en PNG para iOS), atajos de teclado en escritorio (`N` para nueva transacción, `/` para buscar), categorización automática con IA.
+Ideas para después: cambiar la contraseña y el email desde `/settings` (pidiendo la contraseña actual), límite de intentos en `/auth/login` y `/auth/register` (ahora el registro está abierto a cualquiera con la URL y no hay protección contra fuerza bruta; necesitaría `app.set('trust proxy', 1)` en Render), dividir el bundle del frontend por rutas con `lazy()`, importar extractos bancarios en CSV, tests con Vitest y Playwright, modo oscuro (los tokens ya lo dejan preparado), PWA (con un `apple-touch-icon` en PNG para iOS), atajos de teclado en escritorio (`N` para nueva transacción, `/` para buscar), categorización automática con IA.
